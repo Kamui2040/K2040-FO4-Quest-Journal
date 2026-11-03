@@ -2,7 +2,7 @@
 
 A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (1.10.163)**. Browse your quests, keep track of objectives, and choose what appears on your HUD.
 
-**[Download Quest Journal](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/releases/latest)**
+**[Download on Nexus Mods](https://www.nexusmods.com/fallout4/mods/110911)** · **[Download from GitHub](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/releases/latest)**
 
 ## Features
 
