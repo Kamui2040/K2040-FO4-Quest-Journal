@@ -1,11 +1,13 @@
 # Changelog
 
-## Initial public source snapshot (unreleased)
+## 0.0.2 — First release
 
-- First public-safe independent source history for OG 1.10.163 Journal and compact tracker.
-- Original F4SE/PrismaUI integration with the tested guarded ordinary and Misc quest-wide tracking path.
-- Shift+G Journal, G tracker defaults, K2040 Mods MCM grouping, dark select popups and matched appearance theme labels.
-- Live mini tracker refresh when settings such as maximum visible quests change.
-- GPL-3.0 license, third-party notices, pinned build inputs and reproducible Linux-to-Windows build scripts.
+- Full-screen quest journal with search, categories, favorites and quest objectives.
+- Compact HUD tracker with adjustable position, size and visible quest count.
+- Quest tracking with Pip-Boy synchronization.
+- Separate appearance settings for the Journal and mini tracker, including custom colors.
+- Keyboard and controller support, with **Shift + G** and **G** as the default shortcuts.
+- Journal settings and optional MCM support.
+- Darker, more consistent dropdown menus and instant tracker updates when settings change.
 
-No binary version has been tagged or released from this repository yet.
+Requires Fallout 4 (1.10.163), F4SE, Address Library and PrismaUI for Fallout 4.

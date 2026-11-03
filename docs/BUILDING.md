@@ -1,6 +1,6 @@
 # Reproducible Windows x64 F4SE build from Linux
 
-The project uses Xmake and the same Linux-to-Windows toolchain approach as K2040 Quick Attach Menu. The supplied source does **not** contain Windows SDK libraries, the proprietary game, F4SE binaries or PrismaUI runtime/framework assets.
+The project builds with Xmake and LLVM/clang-cl on Linux, using the Windows SDK and pinned CommonLibF4 and PrismaUI development files.
 
 ## Pinned external source inputs
 
@@ -8,7 +8,7 @@ The project uses Xmake and the same Linux-to-Windows toolchain approach as K2040
 - Its `commonlib-shared` submodule commit `f0b1670ee9caac2e349497f6f3c08a69633a8ea7` (GPLv3 with modding/linking exceptions).
 - Unmodified `PrismaUI_F4_Modern_API.h` from upstream PrismaUI_F4 commit `0daf5e38d3517772c8c28236c8857e5c037fa3bd`, blob `9784daab39bf66bb179e6ef12bba63c75e50d3b7`. License belongs to upstream PrismaUI_F4. **Do not commit the vendor header.**
 
-`scripts/bootstrap-source-deps.sh` can fetch/pin public source dependencies into a chosen directory. Obtain any extracted MSVC headers/libraries and Windows SDK legally and independently; prepare LLVM/clang-cl, xmake 3, Bash, Python 3 and Node.js. The script never downloads or redistributes Microsoft's toolchain.
+`scripts/bootstrap-source-deps.sh` can fetch/pin public source dependencies into a chosen directory. Obtain any extracted MSVC headers/libraries and Windows SDK legally and independently; prepare LLVM/clang-cl, xmake 3, Bash, Python 3 and Node.js. The Windows build tools must be supplied separately.
 
 ## Build
 
@@ -26,11 +26,11 @@ python3 scripts/stage-test-package.py \
 
 The Xmake recipe verifies exact CommonLibF4 and submodule revisions, the PrismaUI API header's checksum and the Windows x64 PE image's F4SE exports and native tracking/readback markers. The standard tracked release flavor is selected explicitly by `build-normal-tracking.sh`. An unflagged `build-linux.sh` remains read-only and is useful as a rollback test; it is not the gameplay-feature build.
 
-The build stage is `dist/Data`. The packaging script includes only the mod's compiled DLL, original authored UI, grouped MCM configuration, license and public installation guidance. It never installs files into Fallout 4, launches the game or creates a GitHub release. Inspect the package and release version before publishing it.
+The compiled files are staged under `dist/Data`. The packaging script creates a ZIP with the mod, license, credits and installation guide. It does not install the mod.
 
 ## Tests and scope
 
-`bash scripts/verify-source.sh` runs Node/JavaScript, Python and synthetic C++ tests. If browser Playwright is unavailable, its smoke test is explicitly reported **SKIPPED**. PE export and source tests are not substitutes for actual Fallout 4 compatibility tests. Never claim an untested runtime PASS.
+`bash scripts/verify-source.sh` runs Node/JavaScript, Python and synthetic C++ tests. If browser Playwright is unavailable, its smoke test is explicitly reported **SKIPPED**. Build tests cannot verify every in-game situation.
 
 ## Dependencies and redistribution
 

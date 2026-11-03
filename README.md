@@ -1,56 +1,49 @@
 # K2040 FO4 Quest Journal
 
-A full-screen quest journal and optional compact HUD tracker for **Fallout 4 original runtime 1.10.163**. Uses F4SE and PrismaUI_F4. No MAP76 dependency or external game assets are bundled.
+A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (1.10.163)**. Browse your quests, keep track of objectives, and choose what appears on your HUD.
 
-**Project status:** public source checkout; a binary release has not yet been published from this repository. The corresponding 1.10.163 implementation was validated in-game before the public-source migration. Only the original Fallout 4 runtime is supported; Anniversary Edition, Creation Club changes and VR are not verified.
+**[Download Quest Journal](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/releases/latest)**
 
 ## Features
 
-- Full-screen quest browser with objectives, search, status/category filters, favorites and manual HUD pins.
-- Quest-wide track/untrack for eligible ordinary and Misc quests, with Pip-Boy and compass synchronization and fail-closed protection for ambiguous cases.
-- Optional miniature tracker with four corners, themes, opacity, size, 1–12 visible quests, completed-objective display and Pip-Boy mirroring.
-- Customizable independent Journal and tracker appearances: Commonwealth Blue, Classic Pip-Boy, High Contrast, Fallout 76 and Custom Colours.
-- Integrated settings and K2040 Mods MCM grouping (when MCM is installed); controller support depends on PrismaUI's available controller features.
-- Default keyboard shortcuts: **Shift+G** for full Journal, **G** to toggle mini tracker. Existing customized mappings are preserved.
-- Per-save history limited to quests observed by the mod; private saves are never part of this repository.
+- Browse your quests and objectives, including completed quests.
+- Find what you're looking for with search, sorting, categories and favorites.
+- Track supported quests from the Journal and keep them in sync with your Pip-Boy.
+- Pin quests to a compact tracker on your HUD. Choose where it appears, how large it is and how many quests it shows.
+- Customize the Journal and tracker separately with five themes or your own colors.
+- Change settings from the Journal or through the optional **K2040 Mods** MCM menu.
+- Keyboard and controller support.
 
 ## Requirements
 
-- Fallout 4 **1.10.163 (original game)**, with matching original-game **F4SE 0.6.23** and Address Library for OG.
-- A compatible **PrismaUI_F4** release exposing its Modern Core/View/Interop API (controller interface optional).
-- **Mod Configuration Menu (MCM)** for the optional native MCM page; the built-in Journal settings remain available without MCM.
+- **Fallout 4 (original version 1.10.163)** — not the next-gen or Anniversary Edition version.
+- [F4SE](https://f4se.silverlock.org/) for Fallout 4 1.10.163.
+- [Address Library for F4SE Plugins](https://www.nexusmods.com/fallout4/mods/47327), original-game version.
+- [PrismaUI for Fallout 4](https://www.nexusmods.com/fallout4/mods/105454).
+- **Mod Configuration Menu (MCM)** is optional.
 
-See [Compatibility](docs/COMPATIBILITY.md) for supported and unsupported cases.
+## Installation
 
-## Installing the game mod
+1. Install the requirements listed above.
+2. Download the latest Quest Journal ZIP from [Releases](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/releases/latest).
+3. Import the ZIP into your mod manager and enable it. If you're updating, replace the older Quest Journal version rather than installing two copies.
+4. Launch Fallout 4 through F4SE.
 
-1. Install the supported original-game F4SE, Address Library and PrismaUI_F4 independently.
-2. Obtain the Quest Journal installer ZIP from an official release **when one is published**. Do not treat a source checkout or experimental QA build as an installer.
-3. Import the ZIP with your Fallout 4 mod manager. It contains `Data/F4SE/Plugins`, `Data/PrismaUI_F4/views` and optional grouped `Data/MCM` configuration. Install only one version of Quest Journal at a time.
-4. Start Fallout 4 through the correct F4SE launcher, then use **Shift+G** for the Journal and **G** for the mini tracker.
+## Controls
 
-The shared `K2040 Mods` MCM parent is identical across the author's compatible mods. Do not install duplicate conflicting copies or mix the grouped and standalone MCM variants.
+| Action | Default shortcut |
+| --- | --- |
+| Open or close the Quest Journal | **Shift + G** |
+| Show or hide the mini tracker | **G** |
 
-## Building from source
+You can change these shortcuts in MCM or the Journal settings. Your custom bindings will be kept when updating.
 
-This repository contains the complete original Quest Journal source and test inputs used for the standard 1.10.163 build, but not proprietary Windows tools, Bethesda files, PrismaUI framework binaries or vendor SDK files. The pinned external inputs can be obtained separately using the documented workflow.
+## Compatibility
 
-See [Building on Linux](docs/BUILDING.md). In short, with the pinned CommonLibF4, official PrismaUI API header and licensed Windows/LLVM toolchain prepared:
+Quest Journal is made for the original Fallout 4 (1.10.163). Some unusual or repeatable quests may have tracking limitations. See [Compatibility](docs/COMPATIBILITY.md) for more information.
 
-```bash
-bash scripts/verify-source.sh
-bash scripts/build-normal-tracking.sh
-python3 scripts/stage-test-package.py --output "$HOME/Downloads/K2040-FO4-Quest-Journal-OG163.zip" --mcm-mode grouped
-```
+## Source code and feedback
 
-`build-normal-tracking.sh` compiles the validated native quest-wide tracking path. `build-linux.sh` **without** the explicit tracking flag intentionally produces a read-only fallback. Neither script deploys a mod or publishes a release.
+The source code is available under the [GPL-3.0 license](LICENSE). See [Building from source](docs/BUILDING.md) and [Third-party notices](THIRD_PARTY_NOTICES.md) for more information.
 
-## Known limitations
-
-Independent tracking of sibling Misc objectives and ambiguous multi-instance/radiant quests is not supported. There is no automatic native quest-stage editing, AE/VR support, or required MAP76 integration. Historical quests unseen by this mod cannot be reconstructed. See [Compatibility](docs/COMPATIBILITY.md).
-
-## Feedback and license
-
-Report bugs via [GitHub Issues](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/issues). Include game, F4SE and PrismaUI versions and clear reproduction steps; remove personal information from any logs.
-
-Project-authored source is licensed under **GPL-3.0**: see [LICENSE](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES.md). The compiled plugin's corresponding source and build steps are available here; upstream libraries are obtained separately at the pinned revisions. No Bethesda, MAP76 or modified PrismaUI assets are redistributed.
+Found a bug or have a suggestion? [Open an issue](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/issues).

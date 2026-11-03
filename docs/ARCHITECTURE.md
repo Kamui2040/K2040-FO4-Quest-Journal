@@ -12,10 +12,8 @@
 
 The normal 1.10.163 binary is compiled through `scripts/build-normal-tracking.sh`. Eligible ordinary and Misc quest-wide requests are validated against native quest instance identity, Pip-Boy feed scope and current session/save. Queued requests are bound to the originating view and may be cancelled only before a native setter call. Independent postwrite readback applies to the originally issued ticket, not a newly highlighted quest; uncertain outcomes block further writes in the current process. Native quest completion/stages are never edited.
 
-The legacy Papyrus `GameVM` dispatch path stays disabled. The normal unflagged `build-linux.sh` compiles a read-only fallback. The separate compiled game functionality does not depend on MAP76. All external SDK and library inputs are pinned to exact upstream revisions.
+The legacy Papyrus `GameVM` dispatch path stays disabled. The normal unflagged `build-linux.sh` compiles a read-only fallback. External SDK and library inputs are pinned to exact upstream revisions.
 
 ## UI behavior
 
 The full-screen Journal and compact tracker have separate saved theme selections. `Commonwealth Blue` is the presentation name for the tracker's `commonwealth` value and the Journal's legacy `dark` value, preserving existing choices. Keyboard factory defaults are Shift+G (Journal) and G (mini tracker), without overwriting prior remaps. MCM keyboard assignments are grouped separately from controller settings. The tracker redraws its already received quest snapshot immediately when the visible-quest cap or mirror/completed objective visibility changes.
-
-This public overview intentionally omits private gameplay traces, device paths, internal project status files and historical user QA records.

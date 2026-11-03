@@ -1,21 +1,19 @@
-# Compatibility and boundaries
+# Compatibility
 
-## Supported configuration
+## Game version
 
-- Fallout 4 original 1.10.163, F4SE 0.6.23 and matching original Address Library.
-- PrismaUI_F4 Modern Core, View and Interop APIs matching the pinned upstream SDK header described in `external/prismaui_f4/README.md`.
-- MCM optional; standard settings and original keyboard shortcuts work without MCM. An optional controller interface is used when PrismaUI supplies it.
-- Ordinary and Misc **quest-wide** tracking with native readback for eligible, unambiguous quests. HUD pinning and Pip-Boy mirroring are independently configurable.
+Quest Journal supports **Fallout 4 (1.10.163)**, the original PC version. It requires the matching F4SE and Address Library, along with PrismaUI for Fallout 4.
 
-## Not supported or not verified
+The next-gen/Anniversary Edition versions and Fallout 4 VR are not supported.
 
-- Anniversary Edition / Creation Club runtime changes, Fallout 4 VR, mismatched F4SE and PrismaUI builds.
-- Independent per-objective marker toggling for separate sibling Misc objectives; ambiguous radiant or multi-instance quest identities fail closed.
-- History for quests never observed by the mod, arbitrary user-created folder names or direct MAP76 map focus.
-- Exhaustive compatibility with every third-party quest mod or very large load order. The model includes synthetic high-volume tests; these do not establish in-game rendering performance.
+## Quest tracking
 
-## Safety properties
+You can track supported quests in the Journal, just as you would in the Pip-Boy. The mini tracker can also show quests tracked through the Pip-Boy or quests you've pinned yourself.
 
-The old Papyrus VM-dispatched tracking path is disabled. Only the separately reviewed OG163 native quest-wide tracking path can request a tracking change, subject to fresh game-thread validation, single-ticket lifecycle handling and independent native/Pip-Boy confirmation. A prewrite rejection cannot mutate quest state; an uncertain postwrite result blocks further writes in that process rather than blindly retrying. Quest stages, quest completion and script-owned objective progress are not edited by the journal.
+Some repeatable quests and quests from other mods handle objectives differently. In those cases, not every tracking option may be available. Quest Journal does not change quest progress or completion.
 
-For bug reports, include the supported runtime and installed mod versions, expected versus observed behavior and anonymized logs. Never attach personal saves or identifiers in public issues unless you explicitly choose to share them.
+## Other mods
+
+MCM is optional, though useful for changing your keyboard shortcuts.
+
+If you run into a problem with another mod, [report it on GitHub](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/issues) and include your game and mod versions and a short description of what happened.
