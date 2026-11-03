@@ -1,0 +1,21 @@
+{
+  "modName": "K2040_Quest_Journal",
+  "keybinds": [
+    {
+      "id": "questJournalToggle",
+      "desc": "Open / close journal",
+      "action": {
+        "type": "RunConsoleCommand",
+        "command": ""
+      }
+    },
+    {
+      "id": "questTrackerToggle",
+      "desc": "Toggle quest tracker",
+      "action": {
+        "type": "RunConsoleCommand",
+        "command": ""
+      }
+    }
+  ]
+}

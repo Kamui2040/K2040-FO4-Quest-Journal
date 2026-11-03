@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K2040 Quest Journal</title><link rel="stylesheet" href="styles.css">
+</head><body class="journal-page">
+<div class="journal-shell" role="application" aria-label="K2040 Quest Journal">
+  <header class="app-header">
+    <div class="identity"><span class="mark">K</span><div><div class="eyebrow">K2040 / FALLOUT 4</div><h1 id="pageTitle">Quest Journal</h1></div></div>
+    <div class="header-actions"><span id="connection" class="connection">Awaiting game data</span><button id="resetFilters" class="ghost-button">Reset filters</button><button id="openSettings" class="ghost-button" type="button">Settings</button><button id="closeJournal" class="close-button" aria-label="Close journal">×</button></div>
+  </header>
+  <div class="workspace" id="journalWorkspace">
+    <aside class="sidebar">
+      <label class="search-label" for="questSearch">Search quests</label>
+      <input id="questSearch" type="search" placeholder="Quest name, description…" autocomplete="off">
+      <div class="group-title">STATUS</div>
+      <nav id="statusFilters" class="status-filters" aria-label="Quest statuses"></nav>
+      <div class="group-title category-heading">CATEGORIES</div>
+      <nav id="categories" class="category-list" aria-label="Quest categories"></nav>
+      <div class="sidebar-foot">Display preferences never alter Fallout 4 quest progression.</div>
+    </aside>
+    <section class="quest-list-column" aria-label="Quests">
+      <div class="panel-head"><div><span class="eyebrow">QUESTS</span><h2 id="listHeading">All quests</h2></div><div class="list-tools"><label for="questSort">Sort</label><select id="questSort" aria-label="Sort quests"><option value="pinned">Pinned first</option><option value="name">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="category">Category</option></select><span id="resultCount" class="count">0</span></div></div>
+      <div id="questList" class="quest-list" role="listbox" aria-label="Quest list"></div>
+    </section>
+    <main class="quest-detail" id="detailPane">
+      <div class="detail-empty"><div class="empty-symbol">✧</div><h2>Select a quest</h2><p>Choose a quest to see its journal entry and objectives.</p></div>
+    </main>
+  </div>
+  <div class="settings-workspace" id="settingsWorkspace" hidden>
+    <nav class="settings-nav" aria-label="Settings categories">
+      <button type="button" data-settings-page="appearance" class="settings-nav-item selected">Tracker appearance</button>
+      <button type="button" data-settings-page="tracker" class="settings-nav-item">Tracker layout</button>
+      <button type="button" data-settings-page="journalAppearance" class="settings-nav-item">Journal appearance</button>
+      <button type="button" data-settings-page="journal" class="settings-nav-item">Journal layout</button>
+      <button type="button" data-settings-page="controls" class="settings-nav-item">Controls</button>
+    </nav>
+    <main class="settings-content" aria-label="Quest journal settings">
+      <div id="settingsAppearance" class="settings-section">
+        <h2>Mini tracker appearance</h2><p class="settings-intro">These colours change only the miniature tracker. The journal and its settings use the separate Journal appearance theme, which defaults to your live Fallout 4 Pip-Boy/HUD palette.</p>
+        <div class="setting-label">Theme</div>
+        <div id="journalThemes" class="settings-choices">
+          <button data-theme="commonwealth" type="button">Commonwealth Blue</button>
+          <button data-theme="pipboy" type="button">Classic Pip-Boy</button>
+          <button data-theme="contrast" type="button">High Contrast</button>
+          <button data-theme="fallout76" type="button">Fallout 76 (MAP76-inspired)</button>
+          <button data-theme="custom" type="button">Custom Colours</button>
+        </div>
+        <div class="setting-label">Custom palette</div>
+        <p class="settings-intro">Choose Custom Colours to edit the tracker palette. Hex and RGB channels are linked; changes save when released.</p>
+        <div class="palette-editors">
+          <section class="palette-editor" data-palette="accent" aria-label="Accent colour">
+            <div class="palette-editor-head"><label for="settingAccentHex">Accent</label>
+              <input id="settingAccent" data-setting="accent" type="color" value="#66c4ff" aria-label="Accent colour picker">
+              <input id="settingAccentHex" data-hex type="text" maxlength="7" spellcheck="false" value="#66c4ff" aria-label="Accent hex colour">
+            </div>
+            <div class="palette-rgb">
+              <label>R<input type="range" data-rgb-channel="0" min="0" max="255" step="1" aria-label="Accent R channel"><output data-rgb-value="0">0</output></label>
+              <label>G<input type="range" data-rgb-channel="1" min="0" max="255" step="1" aria-label="Accent G channel"><output data-rgb-value="1">0</output></label>
+              <label>B<input type="range" data-rgb-channel="2" min="0" max="255" step="1" aria-label="Accent B channel"><output data-rgb-value="2">0</output></label>
+            </div>
+          </section>
+          <section class="palette-editor" data-palette="text" aria-label="Text colour">
+            <div class="palette-editor-head"><label for="settingTextHex">Text</label>
+              <input id="settingText" data-setting="text" type="color" value="#f4faff" aria-label="Text colour picker">
+              <input id="settingTextHex" data-hex type="text" maxlength="7" spellcheck="false" value="#f4faff" aria-label="Text hex colour">
+            </div>
+            <div class="palette-rgb">
+              <label>R<input type="range" data-rgb-channel="0" min="0" max="255" step="1" aria-label="Text R channel"><output data-rgb-value="0">0</output></label>
+              <label>G<input type="range" data-rgb-channel="1" min="0" max="255" step="1" aria-label="Text G channel"><output data-rgb-value="1">0</output></label>
+              <label>B<input type="range" data-rgb-channel="2" min="0" max="255" step="1" aria-label="Text B channel"><output data-rgb-value="2">0</output></label>
+            </div>
+          </section>
+          <section class="palette-editor" data-palette="panel" aria-label="Panel background colour">
+            <div class="palette-editor-head"><label for="settingPanelHex">Panel background</label>
+              <input id="settingPanel" data-setting="panel" type="color" value="#0b1218" aria-label="Panel background colour picker">
+              <input id="settingPanelHex" data-hex type="text" maxlength="7" spellcheck="false" value="#0b1218" aria-label="Panel background hex colour">
+            </div>
+            <div class="palette-rgb">
+              <label>R<input type="range" data-rgb-channel="0" min="0" max="255" step="1" aria-label="Panel background R channel"><output data-rgb-value="0">0</output></label>
+              <label>G<input type="range" data-rgb-channel="1" min="0" max="255" step="1" aria-label="Panel background G channel"><output data-rgb-value="1">0</output></label>
+              <label>B<input type="range" data-rgb-channel="2" min="0" max="255" step="1" aria-label="Panel background B channel"><output data-rgb-value="2">0</output></label>
+            </div>
+          </section>
+          <section class="palette-editor" data-palette="completed" aria-label="Completed objectives colour">
+            <div class="palette-editor-head"><label for="settingCompletedHex">Completed objectives</label>
+              <input id="settingCompleted" data-setting="completed" type="color" value="#74e398" aria-label="Completed objectives colour picker">
+              <input id="settingCompletedHex" data-hex type="text" maxlength="7" spellcheck="false" value="#74e398" aria-label="Completed objectives hex colour">
+            </div>
+            <div class="palette-rgb">
+              <label>R<input type="range" data-rgb-channel="0" min="0" max="255" step="1" aria-label="Completed objectives R channel"><output data-rgb-value="0">0</output></label>
+              <label>G<input type="range" data-rgb-channel="1" min="0" max="255" step="1" aria-label="Completed objectives G channel"><output data-rgb-value="1">0</output></label>
+              <label>B<input type="range" data-rgb-channel="2" min="0" max="255" step="1" aria-label="Completed objectives B channel"><output data-rgb-value="2">0</output></label>
+            </div>
+          </section>
+        </div>
+        <div class="setting-label">Mini tracker preview</div>
+        <p class="settings-intro">Shows the miniature tracker colours only. This sample is noninteractive and uses no game data.</p>
+        <div class="appearance-sample tracker-sample" role="img" aria-label="Noninteractive preview of the miniature tracker">
+          <div class="sample-tracker-header"><span class="sample-active-symbol">◇</span> TRACKED QUESTS <span>1</span></div>
+          <div class="sample-tracked-entry"><strong>A Sample Quest</strong>
+            <span class="sample-objective"><span class="sample-active-symbol">◇</span> Reach the settlement</span>
+            <span class="sample-objective sample-done"><span class="sample-completed-symbol">✓</span> Find the route</span>
+          </div>
+        </div>
+        <label class="setting-row" for="settingOpacity"><span>Tracker background opacity</span><input id="settingOpacity" data-setting="trackerOpacity" type="range" min="25" max="100" step="1"><output id="settingOpacityValue">88%</output></label>
+        <label class="setting-row" for="settingFontSize"><span>Tracker text scale</span><input id="settingFontSize" data-setting="trackerScale" type="range" min="75" max="150" step="5"><output id="settingFontSizeValue">100%</output></label>
+      </div>
+      <div id="settingsTracker" class="settings-section" hidden>
+        <h2>Compact tracker</h2><p class="settings-intro">Choose fixed screen anchors to avoid manual positioning conflicting with bottom placements.</p>
+        <label class="setting-row" for="settingTrackerEnabled"><span>Show tracker</span><input id="settingTrackerEnabled" data-setting="trackerEnabled" type="checkbox"></label>
+        <label class="setting-row" for="settingTrackerAnchor"><span>Screen position</span><select id="settingTrackerAnchor" data-setting="trackerAnchor"><option value="top-right">Top right</option><option value="top-left">Top left</option><option value="bottom-right">Bottom right</option><option value="bottom-left">Bottom left</option></select></label>
+        <label class="setting-row" for="settingTrackerWidth"><span>Tracker width</span><input id="settingTrackerWidth" data-setting="trackerWidth" type="range" min="260" max="520" step="10"><output id="settingTrackerWidthValue">340 px</output></label>
+        <label class="setting-row" for="settingTrackerMaxQuests"><span>Maximum visible quests</span><input id="settingTrackerMaxQuests" data-setting="trackerMaxQuests" type="range" min="1" max="12" step="1"><output id="settingTrackerMaxQuestsValue">6</output></label>
+        <label class="setting-row" for="settingTrackerShowCompleted"><span>Show completed objectives in active quests</span><input id="settingTrackerShowCompleted" data-setting="trackerShowCompleted" type="checkbox"></label>
+        <label class="setting-row" for="settingTrackerAutoPinNew"><span>Automatically pin new quests</span><input id="settingTrackerAutoPinNew" data-setting="trackerAutoPinNew" type="checkbox"></label>
+        <p class="settings-intro">Only quests received after the current save's initial quest scan are automatically pinned. Existing quests stay unchanged.</p>
+        <label class="setting-row" for="settingTrackerSyncPipboy"><span>Mirror Pip-Boy tracked quests</span><input id="settingTrackerSyncPipboy" data-setting="trackerSyncPipboy" type="checkbox"></label>
+        <p class="settings-intro">The miniature tracker displays quests selected for tracking in the Pip-Boy instead of your custom pins. This is one-way: no game tracking flags are changed.</p>
+      </div>
+      <div id="settingsJournalAppearance" class="settings-section" hidden>
+        <h2>Journal appearance</h2>
+        <p class="settings-intro">Choose one theme for both the full-screen quest journal and its settings pages. Classic Pip-Boy is the default and follows your game-derived HUD colours. The compact tracker keeps its own theme.</p>
+        <div class="setting-label">Theme</div>
+        <div class="settings-choices">
+          <button data-journal-theme="dark" type="button">Commonwealth Blue</button>
+          <button data-journal-theme="pipboy" type="button">Classic Pip-Boy</button>
+          <button data-journal-theme="contrast" type="button">High Contrast</button>
+          <button data-journal-theme="fallout76" type="button">Fallout 76 (MAP76-inspired)</button>
+          <button data-journal-theme="custom" type="button">Custom Colours</button>
+        </div>
+        <div class="setting-label">Custom journal palette</div>
+        <p class="settings-intro">Select Custom Colours to edit the journal's accent, text, panel and completed-objective colors. These values do not change the compact tracker.</p>
+        <div class="palette-editors">
+          <section class="palette-editor" data-palette="journalAccent" aria-label="Journal accent colour">
+            <div class="palette-editor-head">
+              <label for="settingJournalAccentHex">Accent</label>
+              <input id="settingJournalAccent" data-setting="journalAccent" type="color" value="#66c4ff" aria-label="Journal accent picker">
+              <input id="settingJournalAccentHex" data-hex type="text" maxlength="7" spellcheck="false" value="#66c4ff" aria-label="Journal accent hex colour">
+            </div>
+            <div class="palette-rgb">
+              <label>R<input type="range" data-rgb-channel="0" min="0" max="255" step="1" aria-label="Journal accent R channel"><output data-rgb-value="0">0</output></label>
+              <label>G<input type="range" data-rgb-channel="1" min="0" max="255" step="1" aria-label="Journal accent G channel"><output data-rgb-value="1">0</output></label>
+              <label>B<input type="range" data-rgb-channel="2" min="0" max="255" step="1" aria-label="Journal accent B channel"><output data-rgb-value="2">0</output></label>
+            </div>
+          </section>
+          <section class="palette-editor" data-palette="journalText" aria-label="Journal text colour">
+            <div class="palette-editor-head">
+              <label for="settingJournalTextHex">Text</label>
+              <input id="settingJournalText" data-setting="journalText" type="color" value="#f4faff" aria-label="Journal text picker">
+              <input id="settingJournalTextHex" data-hex type="text" maxlength="7" spellcheck="false" value="#f4faff" aria-label="Journal text hex colour">
+            </div>
+            <div class="palette-rgb">
+              <label>R<input type="range" data-rgb-channel="0" min="0" max="255" step="1" aria-label="Journal text R channel"><output data-rgb-value="0">0</output></label>
+              <label>G<input type="range" data-rgb-channel="1" min="0" max="255" step="1" aria-label="Journal text G channel"><output data-rgb-value="1">0</output></label>
+              <label>B<input type="range" data-rgb-channel="2" min="0" max="255" step="1" aria-label="Journal text B channel"><output data-rgb-value="2">0</output></label>
+            </div>
+          </section>
+          <section class="palette-editor" data-palette="journalPanel" aria-label="Journal panel background colour">
+            <div class="palette-editor-head">
+              <label for="settingJournalPanelHex">Panel background</label>
+              <input id="settingJournalPanel" data-setting="journalPanel" type="color" value="#0b1218" aria-label="Journal panel background picker">
+              <input id="settingJournalPanelHex" data-hex type="text" maxlength="7" spellcheck="false" value="#0b1218" aria-label="Journal panel background hex colour">
+            </div>
+            <div class="palette-rgb">
+              <label>R<input type="range" data-rgb-channel="0" min="0" max="255" step="1" aria-label="Journal panel background R channel"><output data-rgb-value="0">0</output></label>
+              <label>G<input type="range" data-rgb-channel="1" min="0" max="255" step="1" aria-label="Journal panel background G channel"><output data-rgb-value="1">0</output></label>
+              <label>B<input type="range" data-rgb-channel="2" min="0" max="255" step="1" aria-label="Journal panel background B channel"><output data-rgb-value="2">0</output></label>
+            </div>
+          </section>
+          <section class="palette-editor" data-palette="journalCompleted" aria-label="Journal completed objectives colour">
+            <div class="palette-editor-head">
+              <label for="settingJournalCompletedHex">Completed objectives</label>
+              <input id="settingJournalCompleted" data-setting="journalCompleted" type="color" value="#74e398" aria-label="Journal completed objectives picker">
+              <input id="settingJournalCompletedHex" data-hex type="text" maxlength="7" spellcheck="false" value="#74e398" aria-label="Journal completed objectives hex colour">
+            </div>
+            <div class="palette-rgb">
+              <label>R<input type="range" data-rgb-channel="0" min="0" max="255" step="1" aria-label="Journal completed objectives R channel"><output data-rgb-value="0">0</output></label>
+              <label>G<input type="range" data-rgb-channel="1" min="0" max="255" step="1" aria-label="Journal completed objectives G channel"><output data-rgb-value="1">0</output></label>
+              <label>B<input type="range" data-rgb-channel="2" min="0" max="255" step="1" aria-label="Journal completed objectives B channel"><output data-rgb-value="2">0</output></label>
+            </div>
+          </section>
+        </div>
+        <label class="setting-row" for="settingJournalOpacity"><span>Journal background opacity</span><input id="settingJournalOpacity" data-setting="journalOpacity" type="range" min="25" max="100" step="1"><output id="settingJournalOpacityValue">98%</output></label>
+        <label class="setting-row" for="settingJournalFontSize"><span>Journal text scale</span><input id="settingJournalFontSize" data-setting="journalFontSize" type="range" min="75" max="150" step="5"><output id="settingJournalFontSizeValue">100%</output></label>
+      </div>
+      <div id="settingsJournal" class="settings-section" hidden>
+        <h2>Journal layout</h2><p class="settings-intro">Adjust list density and column widths independently of journal appearance and tracker settings.</p>
+        <label class="setting-row" for="settingDensity"><span>Quest list density</span><select id="settingDensity" data-setting="density"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
+        <label class="setting-row" for="settingSidebarWidth"><span>Category column width</span><input id="settingSidebarWidth" data-setting="sidebarWidth" type="range" min="160" max="380" step="10"><output id="settingSidebarWidthValue">240 px</output></label>
+        <label class="setting-row" for="settingQuestListWidth"><span>Quest list width</span><input id="settingQuestListWidth" data-setting="questListWidth" type="range" min="240" max="560" step="10"><output id="settingQuestListWidthValue">360 px</output></label>
+      </div>
+      <div id="settingsControls" class="settings-section" hidden>
+        <h2>Controls</h2><p class="settings-intro">The journal and tracker have independent shortcuts. Escape returns from settings or closes the journal.</p>
+        <div id="hubControls" hidden>
+ <p class="settings-intro">The K2040 Mods MCM Hub is active. Changes here and in MCM share the same assignments. Unbound disables an MCM shortcut. Ctrl, Shift and Alt combinations can be assigned; game-reserved keys may also trigger vanilla actions. F9 and plain J are reserved.</p>
+ <p class="settings-intro" id="hubBindingStatus" role="status">Loading shared bindings…</p>
+ <div class="hub-binding-section" data-hub-action="journal">
+ <div class="setting-label">Open / close journal</div>
+ <div class="setting-row hub-shortcut-row"><span id="hubLabel_journal">Loading…</span><button type="button" data-hub-capture="journal">Record shortcut</button><button type="button" data-hub-clear="journal">Unbind</button><button type="button" data-hub-reset="journal">Reset Shift+G</button></div>
+ <label class="setting-row hub-pad-row"><span>Controller action</span><select id="hubJournalPrimary" data-hub-pad="hubJournalPrimary" aria-label="hubJournalPrimary"><option value="0">Unbound</option><option value="1">A</option><option value="2">B</option><option value="3">X</option><option value="4">Y</option><option value="5">D-pad Up</option><option value="6">D-pad Down</option><option value="7">D-pad Left</option><option value="8">D-pad Right</option><option value="9">LB</option><option value="10">RB</option><option value="11">LT</option><option value="12">RT</option><option value="13">Start</option><option value="14">Back</option><option value="15">Left Stick</option><option value="16">Right Stick</option></select></label>
+ <label class="setting-row hub-pad-row"><span>Optional held controller button</span><select id="hubJournalHeld" data-hub-pad="hubJournalHeld" aria-label="hubJournalHeld"><option value="0">Unbound</option><option value="1">A</option><option value="2">B</option><option value="3">X</option><option value="4">Y</option><option value="5">D-pad Up</option><option value="6">D-pad Down</option><option value="7">D-pad Left</option><option value="8">D-pad Right</option><option value="9">LB</option><option value="10">RB</option><option value="11">LT</option><option value="12">RT</option><option value="13">Start</option><option value="14">Back</option><option value="15">Left Stick</option><option value="16">Right Stick</option></select></label>
+</div><div class="hub-binding-section" data-hub-action="tracker">
+ <div class="setting-label">Show / hide compact tracker</div>
+ <div class="setting-row hub-shortcut-row"><span id="hubLabel_tracker">Loading…</span><button type="button" data-hub-capture="tracker">Record shortcut</button><button type="button" data-hub-clear="tracker">Unbind</button><button type="button" data-hub-reset="tracker">Reset G</button></div>
+ <label class="setting-row hub-pad-row"><span>Controller action</span><select id="hubTrackerPrimary" data-hub-pad="hubTrackerPrimary" aria-label="hubTrackerPrimary"><option value="0">Unbound</option><option value="1">A</option><option value="2">B</option><option value="3">X</option><option value="4">Y</option><option value="5">D-pad Up</option><option value="6">D-pad Down</option><option value="7">D-pad Left</option><option value="8">D-pad Right</option><option value="9">LB</option><option value="10">RB</option><option value="11">LT</option><option value="12">RT</option><option value="13">Start</option><option value="14">Back</option><option value="15">Left Stick</option><option value="16">Right Stick</option></select></label>
+ <label class="setting-row hub-pad-row"><span>Optional held controller button</span><select id="hubTrackerHeld" data-hub-pad="hubTrackerHeld" aria-label="hubTrackerHeld"><option value="0">Unbound</option><option value="1">A</option><option value="2">B</option><option value="3">X</option><option value="4">Y</option><option value="5">D-pad Up</option><option value="6">D-pad Down</option><option value="7">D-pad Left</option><option value="8">D-pad Right</option><option value="9">LB</option><option value="10">RB</option><option value="11">LT</option><option value="12">RT</option><option value="13">Start</option><option value="14">Back</option><option value="15">Left Stick</option><option value="16">Right Stick</option></select></label>
+</div>
+ <p class="settings-intro">Controller shortcuts do not activate while the full-screen journal is focused, preserving its LB/RB and X/Y navigation.</p>
+</div>
+        <div id="standaloneHotkeys"><p class="settings-intro">Standalone shortcuts (used when the Hub is absent or has no binding):</p>
+        <label class="setting-row" for="settingJournalHotkey"><span>Open / close journal</span><select id="settingJournalHotkey" data-setting="journalHotkey"><option>Shift+G</option><option>G</option><option>F6</option><option>F7</option><option>F8</option><option>F10</option><option>F11</option><option>F12</option></select></label>
+        <label class="setting-row" for="settingTrackerHotkey"><span>Show / hide compact tracker</span><select id="settingTrackerHotkey" data-setting="trackerHotkey"><option>Shift+G</option><option>G</option><option>F6</option><option>F7</option><option>F8</option><option>F10</option><option>F11</option><option>F12</option></select></label>
+        <p class="settings-intro">Shift+G and G are the defaults. Legacy F-key assignments remain available, and existing saved bindings are preserved. F9 and J remain reserved. Identical journal and tracker keys are not accepted.</p>
+        </div>
+        <div class="setting-row"><span>Redirect Fallout 4's Quick Data / J key</span><button class="settings-toggle" type="button" disabled aria-disabled="true">Not available yet</button></div>
+        <p class="settings-intro">Fallout 4 normally uses J to open the Pip-Boy Data tab. Replacing that action safely requires a verified engine-level input interception. A second J listener could open both menus, so this option stays off until runtime testing confirms a safe replacement.</p>
+      </div>
+      <div class="settings-foot"><span id="settingsSaveStatus" role="status">Settings</span><button id="resetAppearance" type="button" class="ghost-button">Reset to defaults</button><button id="backToJournal" type="button" class="primary-button">Back to Journal</button></div>
+    </main>
+  </div>
+  <footer><span>QUEST MANAGEMENT · DEVELOPMENT</span><span>Shift+G Journal · G Tracker · Controller X Pin / Y Favorite / LB-RB Status · ESC Back</span></footer>
+</div>
+<script src="quest-model.js"></script><script src="journal-settings.js"></script><script src="demo-data.js"></script><script src="quest-selects.js"></script><script src="app.js"></script>
+</body></html>

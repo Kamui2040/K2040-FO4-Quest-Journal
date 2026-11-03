@@ -1,0 +1,10 @@
+# Only authored source code; exclude old staging and generated artifacts.
+repo/
+graphify-out/
+dist/
+build/
+.xmake/
+.git/
+.external/
+node_modules/
+external/

@@ -1,0 +1,845 @@
+:root{color-scheme:dark;--bg:#101722;--panel:#192332;--panel2:#151e2b;--edge:#34445a;--text:#e7eef7;--muted:#9cabc0;--blue:#72b8ed;--blueDim:#21394e;--gold:#dbbe80;--danger:#d49b9b;font-family:system-ui,"Segoe UI",sans-serif;font-size:14px}*{box-sizing:border-box}html,body{padding:0;margin:0;height:100%;width:100%}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px}.eyebrow,.group-title,.section-caption{font-size:.7rem;font-weight:750;letter-spacing:.14em;color:var(--blue)}h1,h2,h3,p{margin:0}.journal-page{background:rgba(6,10,15,.60);display:grid;place-items:center;color:var(--text);padding:clamp(8px,3vw,28px)}.journal-shell{width:min(1450px,96vw);height:min(850px,94vh);min-height:480px;display:flex;flex-direction:column;border:1px solid #455971;border-radius:11px;background:var(--bg);box-shadow:0 20px 80px #000b;overflow:hidden}.app-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 28px;background:linear-gradient(110deg,#263d55,#182637 56%,#131c27);border-bottom:1px solid var(--edge)}.identity{display:flex;align-items:center;gap:15px}.mark{height:49px;width:49px;border:1px solid #719fc2;border-radius:9px;color:#b1d8f4;display:grid;place-items:center;font-size:26px;font-weight:800;font-family:Georgia,serif;background:#101a28;box-shadow:inset 0 0 18px #2c506a}h1{font-size:1.65rem;letter-spacing:.015em;line-height:1.3}h2{font-size:1.28rem;font-weight:650}.header-actions{display:flex;align-items:center;gap:14px}.connection{font-size:.78rem;color:var(--muted);white-space:nowrap}.connection::before{content:'';display:inline-block;vertical-align:middle;width:7px;height:7px;border-radius:50%;margin-right:7px;background:#b8a166}.connection.connected::before{background:#8ed4b7}.ghost-button,.close-button{border:1px solid var(--edge);background:transparent;color:#c9d6e6;border-radius:6px;padding:9px 13px}.ghost-button:hover,.close-button:hover{background:#2c3b4c}.close-button{font-size:23px;line-height:18px;padding:9px 13px}.workspace{display:grid;grid-template-columns:240px minmax(220px,360px) minmax(360px,1fr);min-height:0;flex:1}.sidebar{display:flex;flex-direction:column;padding:22px 15px;background:#161f2b;border-right:1px solid var(--edge);overflow-y:auto}.search-label{display:block;font-size:.83rem;font-weight:600;margin-bottom:9px;color:#c6d5e3}.sidebar input{width:100%;border:1px solid #41536c;background:#0e1722;color:var(--text);padding:11px 12px;border-radius:6px;outline:none}.sidebar input:focus{border-color:var(--blue)}.group-title{padding:22px 10px 10px}.category-heading{padding-top:25px}.status-filters,.category-list{display:grid;gap:3px}.filter-button{border:none;border-radius:5px;background:transparent;color:#cbd4e0;min-height:36px;display:flex;align-items:center;justify-content:space-between;text-align:left;padding:9px 10px;gap:4px}.filter-button:hover{background:#253344}.filter-button.selected{background:var(--blueDim);color:#cae9ff;box-shadow:inset 3px 0 #6aafd9}.count{font-size:.76rem;font-variant-numeric:tabular-nums;color:#95a8bf}.sidebar-foot{border-top:1px solid #314254;font-size:.73rem;line-height:1.6;color:#8195ab;margin-top:auto;padding:16px 10px 2px}.quest-list-column{overflow-y:auto;min-width:0;border-right:1px solid var(--edge);background:#141e2a}.panel-head{padding:23px 20px 17px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid #2a394c}.panel-head h2{margin-top:5px}.quest-list{padding:11px}.quest-row{display:flex;flex-direction:column;gap:8px;width:100%;padding:15px 14px;text-align:left;color:#e0e9f4;background:transparent;border:1px solid transparent;border-radius:7px;margin-bottom:5px}.quest-row:hover{background:#233143}.quest-row.current{background:#25384d;border-color:#46627c}.quest-row-title{font-size:1rem;line-height:1.3;font-weight:650}.quest-row-sub{font-size:.75rem;color:#91a6bc}.quest-row-sub span{margin:0 3px}.pin-indicator{color:#9ac7e9;font-size:.72rem}.vanilla-indicator{color:#bda980}.empty-list{padding:32px 15px;color:var(--muted);line-height:1.5}.quest-detail{min-width:0;overflow-y:auto;background:#111b27}.quest-details{max-width:760px;padding:31px 36px 30px}.detail-top{display:flex;justify-content:space-between;align-items:center;gap:10px}.quest-id{font-size:.68rem;color:#8194aa;white-space:nowrap;font-family:ui-monospace,monospace}.quest-details h2{font-size:2.1rem;font-weight:680;line-height:1.2;margin-top:13px;letter-spacing:-.02em}.detail-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:23px}.primary-button{background:#2c5676;color:#e3f2ff;border:1px solid #5985a6;border-radius:6px;padding:10px 14px;font-weight:700}.primary-button:hover{background:#3c6c8e}.detail-section{margin-top:36px;border-top:1px solid #2e3f52;padding-top:24px}.section-caption{display:flex;justify-content:space-between}.journal-text{line-height:1.8;color:#c6d1dd;margin-top:14px;white-space:pre-wrap}.objective-list{margin-top:15px;display:grid;gap:7px}.objective{display:flex;align-items:flex-start;gap:10px;background:#192633;border:1px solid #293c4e;padding:13px 12px;border-radius:6px;color:#d2dfeb}.objective-glyph{color:var(--blue);font-weight:800;flex:0 0 20px}.objective.completed{color:#8799a9}.objective.completed .objective-text{text-decoration:line-through;text-decoration-color:#647f91}.objective.completed .objective-glyph{color:#8bd2ac}.objective.failed .objective-glyph{color:var(--danger)}.objective-text{flex:1;line-height:1.4}.objective-status{font-size:.73rem;color:#91a5b9;white-space:nowrap}.detail-notice{font-size:.75rem;line-height:1.65;color:#7f92a9;margin-top:32px}.detail-empty{height:100%;min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--muted);gap:14px;padding:20px}.detail-empty h2{color:#bdc9d7}.empty-symbol{font-size:64px;color:#5a84a2}.muted{color:var(--muted)}footer{padding:11px 25px;border-top:1px solid #2e4154;display:flex;justify-content:space-between;background:#131d29;color:#7b8da1;letter-spacing:.1em;font-size:.65rem}
+/* Unfocused HUD widget: game input passes through. HUD placement is fixed in prototype. */
+.tracker-page{background:transparent;color:var(--text);pointer-events:none;overflow:hidden}.tracker-panel{position:absolute;top:13%;right:3.2%;width:min(340px,29vw);max-height:74vh;overflow:hidden;padding:0 0 8px;border-radius:6px;background:linear-gradient(115deg,#0a1219dc,#111e2bd3);border:1px solid #54708977;box-shadow:0 5px 28px #0008;text-shadow:0 1px 3px #000}.tracker-heading{padding:12px 13px 10px;color:#d1e8f6;font-size:.74rem;font-weight:800;letter-spacing:.13em;border-bottom:1px solid #6c8ba147;display:flex;gap:9px;align-items:center}.tracker-diamond{font-size:1.1rem;color:#7ec2ed}.tracker-count{margin-left:auto;font-variant-numeric:tabular-nums;color:#a7c7d9}.tracked-entry{padding:12px 13px 14px;border-bottom:1px solid #5c76812b}.tracked-title{font-weight:700;font-size:.94rem;color:#dbedf8;line-height:1.4}.tracked-objective{display:flex;gap:9px;font-size:.86rem;color:#c1d1df;line-height:1.45;margin-top:7px}.tracker-bullet{color:#79bde9;flex:0 0 12px}.tracker-hint{padding:13px;color:#b6c2ce;font-size:.8rem;line-height:1.55}@media(max-width:930px){.workspace{grid-template-columns:180px minmax(175px,300px) 1fr}.sidebar{padding:15px 8px}.quest-details{padding:22px}.quest-details h2{font-size:1.55rem}.app-header{padding:15px}.sidebar-foot{display:none}}@media(max-width:650px){.journal-page{padding:3px}.journal-shell{width:100vw;height:100vh;border-radius:0}.workspace{grid-template-columns:140px 1fr;grid-template-rows:42% 58%}.sidebar{grid-row:1 / 3}.quest-list-column{grid-column:2}.quest-detail{grid-column:2}.app-header .ghost-button{display:none}.connection{font-size:0}.connection::before{margin-right:0}.quest-details{padding:16px}.quest-details h2{font-size:1.2rem}footer{display:none}.tracker-panel{width:280px;right:1%;top:9%}}
+
+/* Full-screen journal, with in-place settings: no second focused Prisma view. */
+[hidden]{display:none!important}
+.journal-page{padding:0;background:transparent}
+.journal-shell{width:100vw;height:100vh;min-height:0;max-width:none;border-radius:0;border:0;box-shadow:none}
+.tracker-panel{font-size:calc(14px * var(--tracker-scale,1))}
+.journal-shell{background:var(--ui-panel-background,#101722);color:var(--ui-text,#f4faff)}
+.app-header,.sidebar,.quest-list-column,.quest-detail,footer{background-color:transparent}
+.eyebrow,.group-title,.section-caption,.mark,.pin-indicator,.tracker-diamond{color:var(--ui-accent,#66c4ff)}
+.primary-button{background:var(--ui-accent,#66c4ff);border-color:var(--ui-accent,#66c4ff);color:#07131c}
+.filter-button.selected,.quest-row.current{box-shadow:inset 3px 0 var(--ui-accent,#66c4ff)}
+.journal-shell.compact .quest-row{padding:8px 12px;gap:3px}
+.journal-shell.compact .objective{padding:8px 10px}
+.settings-workspace{display:grid;grid-template-columns:200px minmax(0,1fr);flex:1;min-height:0}
+.settings-nav{padding:20px 12px;background:rgba(0,0,0,.12);border-right:1px solid var(--edge);display:flex;flex-direction:column;gap:8px}
+.settings-nav-item{cursor:pointer;text-align:left;padding:13px 14px;color:var(--ui-text,#f4faff);background:rgba(255,255,255,.045);border:1px solid var(--edge);border-radius:5px}
+.settings-nav-item:hover,.settings-nav-item.selected{color:var(--ui-accent,#66c4ff);border-color:var(--ui-accent,#66c4ff)}
+.settings-content{min-height:0;overflow:auto;padding:32px;max-width:1100px;width:100%}
+.settings-section h2{font-size:1.55rem;color:var(--ui-accent,#66c4ff)}
+.settings-intro{color:var(--muted);font-size:.87rem;line-height:1.65;margin:9px 0 23px}
+.setting-label{font-size:.85rem;font-weight:700;color:var(--ui-accent,#66c4ff);margin:24px 0 12px}
+.settings-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.settings-choices button{padding:13px;min-height:55px;text-align:left;background:rgba(255,255,255,.045);border:1px solid var(--edge);color:var(--ui-text,#f4faff);cursor:pointer;border-radius:5px}
+.settings-choices button:hover,.settings-choices button.selected{border-color:var(--ui-accent,#66c4ff);color:var(--ui-accent,#66c4ff)}
+.settings-colors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.settings-colors label{display:flex;justify-content:space-between;align-items:center;gap:6px;background:rgba(255,255,255,.04);padding:12px;border:1px solid var(--edge)}
+.settings-colors input{background:transparent;border:0;width:55px;height:36px;cursor:pointer}
+.setting-row{display:grid;grid-template-columns:minmax(180px,1fr) minmax(120px,240px) 62px;align-items:center;gap:12px;background:rgba(255,255,255,.04);padding:14px;margin:8px 0;border:1px solid var(--edge);border-radius:4px}
+.setting-row input[type=range]{accent-color:var(--ui-accent,#66c4ff);width:100%}
+.setting-row select{background:#14202a;border:1px solid var(--edge);padding:7px 9px;color:var(--ui-text,#f4faff);width:100%}
+.setting-row output{color:var(--ui-accent,#66c4ff);text-align:right;font-size:.85rem}
+.setting-row input[type=checkbox]{width:20px;height:20px;accent-color:var(--ui-accent,#66c4ff)}
+.settings-toggle{background:transparent;color:var(--muted);padding:7px;border:1px solid var(--edge)}
+.settings-foot{display:flex;gap:14px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin-top:35px;padding-top:20px;border-top:1px solid var(--edge)}
+.settings-foot span{margin-right:auto;color:var(--muted);font-size:.82rem}
+.tracker-panel{--tracker-edge:3%;top:auto;bottom:auto;left:auto;right:auto;width:min(var(--tracker-width,340px),90vw);font-size:calc(14px * var(--tracker-scale,1));background:var(--tracker-background,rgba(11,18,27,.88))}
+.tracker-page.anchor-top-right .tracker-panel{top:5%;right:var(--tracker-edge)}
+.tracker-page.anchor-top-left .tracker-panel{top:5%;left:var(--tracker-edge)}
+.tracker-page.anchor-bottom-right .tracker-panel{bottom:5%;right:var(--tracker-edge)}
+.tracker-page.anchor-bottom-left .tracker-panel{bottom:5%;left:var(--tracker-edge)}
+.tracker-page .tracker-heading{color:var(--ui-accent,#66c4ff)}
+@media(max-width:750px){.settings-workspace{grid-template-columns:135px 1fr}.settings-content{padding:18px}.settings-colors{grid-template-columns:1fr}.settings-choices{grid-template-columns:1fr}.setting-row{grid-template-columns:1fr}.settings-foot{justify-content:start}}
+
+.quest-row,.filter-button,.quest-details,.objective,.tracked-title,.tracked-objective,.settings-nav-item,.setting-row{color:var(--ui-text,#f4faff)}
+
+/* Per-save presentation category, not a change to Fallout quest records. */
+.quest-category-edit{display:flex;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap;color:var(--ui-text,#f4faff)}
+.quest-category-edit label{font-weight:600}
+.quest-category-edit select{min-width:175px;padding:8px;background:#132537;color:var(--ui-text,#f4faff);border:1px solid var(--edge);border-radius:5px}
+.quest-category-edit select:focus-visible{outline:2px solid var(--ui-accent,#66c4ff)}
+.quest-category-edit .muted{font-size:.78rem}
+
+/* Sorting stays in the full-screen quest list, never a second Prisma view. */
+.list-tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.list-tools label{font-size:.75rem;color:var(--muted)}
+.list-tools select{max-width:170px;background:#14202a;color:var(--ui-text,#f4faff);border:1px solid var(--edge);padding:6px;border-radius:4px}
+.list-tools select:focus-visible{outline:2px solid var(--ui-accent,#66c4ff)}
+
+.tracked-objective.completed{color:var(--muted)}
+.tracked-objective.completed span:last-child{text-decoration:line-through;text-decoration-color:var(--muted)}
+
+/* Shared Quick Attach-style palettes with accessible channel editors. */
+.palette-editors{display:grid;grid-template-columns:repeat(2,minmax(240px,1fr));gap:12px}
+.palette-editor{min-width:0;padding:13px;background:rgba(255,255,255,.035);border:1px solid var(--edge);border-radius:6px}
+.palette-editor.inactive{opacity:.54}
+.palette-editor-head{display:grid;grid-template-columns:minmax(0,1fr) 38px 95px;align-items:center;gap:8px;margin-bottom:11px}
+.palette-editor-head label{color:var(--ui-text);font-weight:650}
+.palette-editor-head input[type=color]{width:36px;height:31px;background:transparent;border:1px solid var(--edge);cursor:pointer}
+.palette-editor-head input[data-hex]{width:95px;min-width:0;padding:7px;background:rgba(0,0,0,.3);border:1px solid var(--edge);border-radius:3px;color:var(--ui-text);font-family:ui-monospace,monospace}
+.palette-rgb{display:grid;gap:7px}
+.palette-rgb label{display:grid;grid-template-columns:15px minmax(0,1fr) 30px;gap:9px;align-items:center;color:var(--muted);font-size:.83rem}
+.palette-rgb input{width:100%;min-width:0;accent-color:var(--ui-accent)}
+.palette-rgb output{text-align:right;font-variant-numeric:tabular-nums}
+.palette-editor input:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
+/* The full-screen journal never uses a draggable/second settings window. */
+.journal-shell .workspace{grid-template-columns:minmax(160px,min(var(--journal-sidebar-width,240px),29vw)) minmax(220px,min(var(--journal-list-width,360px),38vw)) minmax(0,1fr)}
+.journal-shell .app-header,.journal-shell .sidebar,.journal-shell .quest-list-column,.journal-shell .quest-detail,.journal-shell footer{background:transparent}
+.journal-shell .objective.completed .objective-glyph,.tracker-panel .tracked-objective.completed .tracker-bullet{color:var(--ui-completed,#74e398)}
+.tracker-panel{background:var(--tracker-background,rgba(11,18,27,.88));border-color:var(--ui-accent,#66c4ff)}
+.tracker-bullet{color:var(--ui-accent,#66c4ff)}
+@media(max-width:930px){.journal-shell .workspace{grid-template-columns:minmax(145px,25vw) minmax(175px,35vw) minmax(0,1fr)}.palette-editors{grid-template-columns:1fr}}
+@media(max-width:650px){.journal-shell .workspace{grid-template-columns:minmax(140px,28vw) minmax(0,1fr);grid-template-rows:42% 58%}}
+
+/* Self-contained passive sample, not another focusable/dragged Prisma view. */
+.appearance-sample{display:grid;grid-template-columns:minmax(140px,.8fr) minmax(200px,1.2fr);border:1px solid var(--ui-accent,#66c4ff);background:var(--ui-panel-background,rgba(11,18,24,.94));color:var(--ui-text,#f4faff);border-radius:6px;overflow:hidden;pointer-events:none;user-select:none}
+.appearance-sample-list{padding:14px;border-right:1px solid var(--edge);min-width:0}
+.sample-category{display:block;color:var(--ui-accent);font-size:.7rem;letter-spacing:.09em;font-weight:700}
+.sample-active{margin-top:10px;padding:11px 10px;border-left:3px solid var(--ui-accent);background:rgba(120,140,170,.12);display:grid;gap:6px}
+.sample-active strong{font-size:.95rem}
+.sample-active small{color:var(--ui-text);opacity:.8}
+.appearance-sample-detail{display:flex;flex-direction:column;gap:10px;padding:15px 18px;min-width:0}
+.appearance-sample-detail>strong{font-size:.95rem}
+.sample-objective{display:flex;align-items:baseline;gap:9px;color:var(--ui-text);font-size:.85rem}
+.sample-active-symbol{color:var(--ui-accent)}
+.sample-completed-symbol{color:var(--ui-completed,#74e398);font-weight:800}
+.sample-done{text-decoration:line-through;text-decoration-color:var(--ui-completed,#74e398)}
+@media(max-width:650px){.appearance-sample{grid-template-columns:1fr}.appearance-sample-list{border-right:0;border-bottom:1px solid var(--edge)}}
+
+/* In-game WebKit control skins. Keep selects native for keyboard/controller access. */
+.journal-page select {
+  -webkit-appearance:none;
+  appearance:none;
+  color:var(--ui-text,#f4faff);
+  background-color:#142330;
+  background-image:
+    linear-gradient(45deg,transparent 50%,var(--ui-accent,#66c4ff) 50%),
+    linear-gradient(135deg,var(--ui-accent,#66c4ff) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 50%,calc(100% - 10px) 50%;
+  background-size:6px 6px,6px 6px;
+  background-repeat:no-repeat;
+  border:1px solid var(--edge);
+  border-radius:5px;
+  padding:8px 35px 8px 11px;
+  min-height:36px;
+  cursor:pointer;
+}
+.journal-page select option,.journal-page select optgroup {
+  background-color:#142330;
+  color:var(--ui-text,#f4faff);
+}
+.journal-page select:focus,.journal-page select:focus-visible {
+  border-color:var(--ui-accent,#66c4ff);
+  outline:2px solid var(--ui-accent,#66c4ff);
+  outline-offset:1px;
+}
+.journal-page select:disabled {
+  opacity:.55;
+  cursor:not-allowed;
+}
+.journal-page .settings-workspace input[type=range] {
+  -webkit-appearance:none;
+  appearance:none;
+  background:transparent;
+  min-width:0;
+  width:100%;
+  height:26px;
+  cursor:pointer;
+}
+.journal-page .settings-workspace input[type=range]::-webkit-slider-runnable-track {
+  height:6px;
+  background:rgba(122,157,184,.40);
+  border:1px solid var(--edge);
+  border-radius:999px;
+}
+.journal-page .settings-workspace input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none;
+  appearance:none;
+  width:17px;
+  height:17px;
+  border:2px solid #12202e;
+  border-radius:50%;
+  background:var(--ui-accent,#66c4ff);
+  margin-top:-7px;
+  box-shadow:0 0 0 1px var(--ui-accent,#66c4ff);
+}
+.journal-page .settings-workspace input[type=range]::-moz-range-track {
+  height:6px;
+  background:rgba(122,157,184,.40);
+  border:1px solid var(--edge);
+  border-radius:999px;
+}
+.journal-page .settings-workspace input[type=range]::-moz-range-thumb {
+  width:16px;
+  height:16px;
+  background:var(--ui-accent,#66c4ff);
+  border:2px solid #12202e;
+  border-radius:50%;
+}
+.journal-page .settings-workspace input[type=checkbox] {
+  -webkit-appearance:none;
+  appearance:none;
+  display:grid;
+  place-items:center;
+  width:20px;
+  height:20px;
+  margin:0;
+  background:#142330;
+  border:1px solid #6887a1;
+  border-radius:4px;
+  cursor:pointer;
+}
+.journal-page .settings-workspace input[type=checkbox]:checked {
+  background:var(--ui-accent,#66c4ff);
+  border-color:var(--ui-accent,#66c4ff);
+}
+.journal-page .settings-workspace input[type=checkbox]:checked::after {
+  content:"✓";
+  color:#09141d;
+  font-size:15px;
+  font-weight:800;
+}
+.journal-page .settings-workspace input[type=checkbox]:focus-visible {
+  outline:2px solid var(--ui-accent,#66c4ff);
+  outline-offset:2px;
+}
+.journal-page .palette-editor input[type=color] {
+  -webkit-appearance:none;
+  appearance:none;
+  padding:3px;
+  background:#142330;
+  border:1px solid var(--edge);
+  border-radius:4px;
+}
+.journal-page .palette-editor input[type=color]::-webkit-color-swatch-wrapper {padding:0}
+.journal-page .palette-editor input[type=color]::-webkit-color-swatch {
+  border:1px solid rgba(255,255,255,.35);
+  border-radius:2px;
+}
+.journal-page .settings-toggle:disabled {opacity:.58;cursor:not-allowed}
+
+/* Classic Pip-Boy: use Fallout's live gameplay HUD colors, never fixed green.
+   Scope visual chrome to the selected theme so other themes stay unchanged. */
+.journal-page.theme-pipboy,
+.tracker-page.theme-pipboy {
+  --bg:var(--ui-panel-background,rgba(0,20,7,.9));
+  --text:var(--ui-text,#20ff48);
+  --blue:var(--ui-accent,#20ff48);
+  --edge:rgba(var(--ui-accent-rgb,32,255,72),.35);
+}
+.journal-page.theme-pipboy .app-header,
+.journal-page.theme-pipboy .journal-shell,
+.journal-page.theme-pipboy .sidebar,
+.journal-page.theme-pipboy .quest-list-column,
+.journal-page.theme-pipboy .quest-detail,
+.journal-page.theme-pipboy footer {
+  background:var(--ui-panel-background,rgba(0,20,7,.9));
+  border-color:var(--edge);
+}
+.journal-page.theme-pipboy .mark,
+.journal-page.theme-pipboy .quest-row.current,
+.journal-page.theme-pipboy .filter-button.selected,
+.journal-page.theme-pipboy .objective,
+.journal-page.theme-pipboy .settings-nav-item.selected {
+  background:rgba(var(--ui-accent-rgb,32,255,72),.10);
+  border-color:var(--edge);
+  color:var(--ui-text,#20ff48);
+}
+.journal-page.theme-pipboy .mark,
+.journal-page.theme-pipboy .quest-row.current,
+.journal-page.theme-pipboy .filter-button.selected,
+.journal-page.theme-pipboy .objective-glyph,
+.journal-page.theme-pipboy .objective.completed .objective-glyph,
+.tracker-page.theme-pipboy .tracker-heading,
+.tracker-page.theme-pipboy .tracker-diamond,
+.tracker-page.theme-pipboy .tracker-bullet {
+  color:var(--ui-accent,#20ff48);
+}
+.tracker-page.theme-pipboy .tracker-heading,
+.tracker-page.theme-pipboy .tracked-entry {
+  border-color:rgba(var(--ui-accent-rgb,32,255,72),.35);
+}
+
+/* The full-screen journal/settings shell uses one stable palette, based on
+   Quick Attach Menu's Settings UI. Tracker appearance never changes it. */
+.journal-page {
+  --bg:#0b1218;
+  --panel:#0b1218;
+  --panel2:#101b23;
+  --edge:rgba(205,230,245,.18);
+  --text:#f4faff;
+  --muted:#9fb1bb;
+  --blue:#66c4ff;
+  --blueDim:#162c3a;
+  --gold:#dbbe80;
+  font-family:"Segoe UI",Arial,sans-serif;
+  color:#f4faff;
+}
+.journal-page .journal-shell {
+  background:rgba(11,18,24,.98);
+  color:#f4faff;
+}
+.journal-page .app-header {
+  background:rgba(7,13,18,.98);
+  border-color:rgba(205,230,245,.18);
+}
+.journal-page .sidebar,
+.journal-page .quest-list-column,
+.journal-page .quest-detail,
+.journal-page footer {
+  background:transparent;
+  border-color:rgba(205,230,245,.18);
+}
+.journal-page .mark,
+.journal-page .settings-nav-item.selected,
+.journal-page .filter-button.selected,
+.journal-page .quest-row.current {
+  border-color:#66c4ff;
+}
+.journal-page .primary-button {
+  color:#061014;
+}
+.journal-page .settings-choices button.selected,
+.journal-page .settings-nav-item.selected {
+  background:rgba(102,196,255,.12);
+}
+.journal-page .settings-nav {
+  background:rgba(7,13,18,.35);
+  border-color:rgba(205,230,245,.18);
+}
+.journal-page .setting-row,
+.journal-page .palette-editor,
+.journal-page .settings-choices button {
+  background:rgba(255,255,255,.045);
+  border-color:rgba(205,230,245,.18);
+}
+/* The tracker-only sample carries its own palette and opacity rather than
+   mutating any root CSS variables used by the full-screen journal. */
+.journal-page .appearance-sample.tracker-sample {
+  display:block;
+  width:min(100%,440px);
+  border:1px solid var(--sample-accent,#66c4ff);
+  background:var(--sample-background,rgba(11,18,24,.88));
+  color:var(--sample-text,#f4faff);
+  font-size:calc(14px * var(--sample-font-scale,1));
+  text-shadow:0 1px 2px rgba(0,0,0,.35);
+}
+.tracker-sample .sample-tracker-header {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:12px 13px;
+  color:var(--sample-accent,#66c4ff);
+  font-size:.8em;
+  font-weight:800;
+  letter-spacing:.10em;
+  border-bottom:1px solid var(--sample-accent,#66c4ff);
+}
+.tracker-sample .sample-tracker-header span:last-child {
+  margin-left:auto;
+}
+.tracker-sample .sample-tracked-entry {
+  display:grid;
+  gap:8px;
+  padding:12px 13px 16px;
+  line-height:1.4;
+}
+.tracker-sample .sample-tracked-entry strong {
+  color:var(--sample-text,#f4faff);
+}
+.tracker-sample .sample-objective {
+  display:flex;
+  gap:9px;
+  color:var(--sample-text,#f4faff);
+  font-size:.9em;
+}
+.tracker-sample .sample-active-symbol {
+  color:var(--sample-accent,#66c4ff);
+}
+.tracker-sample .sample-completed-symbol,
+.tracker-sample .sample-done {
+  color:var(--sample-completed,#74e398);
+}
+.tracker-sample .sample-done {
+  text-decoration:line-through;
+  text-decoration-color:var(--sample-completed,#74e398);
+}
+
+/* Independent journal palette. These variables exist only inside the
+   fullscreen journal view; tracker CSS remains unaffected. */
+.journal-page {
+  --blue:var(--ui-accent,#66c4ff);
+  --text:var(--ui-text,#f4faff);
+  --edge:rgba(var(--ui-accent-rgb,102,196,255),.22);
+  color:var(--ui-text,#f4faff);
+}
+.journal-page .journal-shell {
+  background:var(--ui-panel-background,rgba(11,18,24,.98));
+  color:var(--ui-text,#f4faff);
+}
+.journal-page .app-header {
+  background:var(--ui-panel-background,rgba(11,18,24,.98));
+  border-color:var(--edge);
+}
+.journal-page .mark,
+.journal-page .settings-nav-item.selected,
+.journal-page .filter-button.selected,
+.journal-page .quest-row.current,
+.journal-page .settings-choices button.selected {
+  border-color:var(--ui-accent,#66c4ff);
+}
+.journal-page .settings-choices button.selected,
+.journal-page .settings-nav-item.selected {
+  background:rgba(var(--ui-accent-rgb,102,196,255),.12);
+}
+.journal-page .settings-workspace .palette-editor:focus-within {
+  border-color:var(--ui-accent,#66c4ff);
+}
+/* Vanilla/FallUI-inspired HUD treatment. Fallout 4 UI normally uses
+   Roboto Condensed (often embedded in SWF); prefer that installed family,
+   then freely available narrow system fallbacks, without bundling fonts. */
+.tracker-page.theme-pipboy .tracker-panel,
+.journal-page .tracker-sample.theme-pipboy {
+  font-family:"Roboto Condensed","Arial Narrow","Noto Sans Condensed","Liberation Sans Narrow","Arial",sans-serif;
+  font-stretch:condensed;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  text-shadow:0 0 5px rgba(var(--ui-accent-rgb,32,255,72),.24);
+  overflow:hidden;
+  position:relative;
+}
+.tracker-page.theme-pipboy .tracker-panel {
+  /* Preserve absolute positioning for the four configured HUD anchors. */
+  position:absolute;
+  padding:6px 8px 8px;
+  background:var(--tracker-background,rgba(0,20,7,.65));
+}
+/* Corners resemble Fallout's translucent HUD brackets; do not reproduce
+   proprietary FallUI SVGs, SWFs, texture or scaleform assets. */
+.tracker-page.theme-pipboy .tracker-panel::before,
+.journal-page .tracker-sample.theme-pipboy::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+  opacity:.83;
+  background:
+    linear-gradient(var(--ui-accent),var(--ui-accent)) top left / 22px 1px no-repeat,
+    linear-gradient(var(--ui-accent),var(--ui-accent)) top left / 1px 16px no-repeat,
+    linear-gradient(var(--ui-accent),var(--ui-accent)) top right / 22px 1px no-repeat,
+    linear-gradient(var(--ui-accent),var(--ui-accent)) top right / 1px 16px no-repeat,
+    linear-gradient(var(--ui-accent),var(--ui-accent)) bottom left / 22px 1px no-repeat,
+    linear-gradient(var(--ui-accent),var(--ui-accent)) bottom left / 1px 16px no-repeat,
+    linear-gradient(var(--ui-accent),var(--ui-accent)) bottom right / 22px 1px no-repeat,
+    linear-gradient(var(--ui-accent),var(--ui-accent)) bottom right / 1px 16px no-repeat;
+}
+.tracker-page.theme-pipboy .tracker-heading {
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-size:.83em;
+  font-weight:700;
+  padding:9px 12px 8px;
+  border-bottom:1px solid rgba(var(--ui-accent-rgb,32,255,72),.35);
+}
+.tracker-page.theme-pipboy .tracked-entry {
+  padding:10px 12px 12px;
+  border-bottom:1px solid rgba(var(--ui-accent-rgb,32,255,72),.22);
+}
+.tracker-page.theme-pipboy .tracked-title {
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.035em;
+  color:var(--ui-text,#20ff48);
+}
+.tracker-page.theme-pipboy .tracked-objective,
+.tracker-page.theme-pipboy .tracker-hint,
+.tracker-page.theme-pipboy .tracker-count {
+  font-size:.92em;
+  color:var(--ui-text,#20ff48);
+}
+.tracker-page.theme-pipboy .tracked-objective .tracker-bullet {
+  flex-basis:10px;
+}
+/* Preview: use its own color variables, never the journal's live palette. */
+.journal-page .tracker-sample.theme-pipboy {
+  --ui-accent:var(--sample-accent,#20ff48);
+  --ui-accent-rgb:var(--sample-accent-rgb,32,255,72);
+  font-size:calc(14px * var(--sample-font-scale,1));
+  border-radius:0;
+  border:0;
+}
+.journal-page .tracker-sample.theme-pipboy .sample-tracker-header {
+  border-bottom:1px solid rgba(var(--sample-accent-rgb,32,255,72),.35);
+  font-weight:700;
+  letter-spacing:.08em;
+}
+.journal-page .tracker-sample.theme-pipboy .sample-tracked-entry strong {
+  text-transform:uppercase;
+  letter-spacing:.035em;
+}
+
+/* K2040 common preset treatments: color tokens come from the shared palette
+   definitions in journal-settings.js, matching Quick Attach's High Contrast
+   and MAP76's Fallout 76 reference palette. No MAP76 assets are imported. */
+
+/* QAM High Contrast: bright cyan emphasis, pure black backgrounds,
+   white text, and green completed/installed-style highlights. */
+.tracker-page.theme-contrast .tracker-panel {
+  border:1px solid var(--ui-accent,#00e5ff);
+  border-radius:0;
+  box-shadow:inset 0 0 0 1px rgba(var(--ui-accent-rgb,0,229,255),.30);
+  background:var(--tracker-background,rgba(0,0,0,.88));
+}
+.tracker-page.theme-contrast .tracker-heading,
+.tracker-page.theme-contrast .tracked-entry {
+  border-bottom-color:rgba(var(--ui-accent-rgb,0,229,255),.50);
+}
+.journal-page .tracker-sample.theme-contrast {
+  border:2px solid var(--sample-accent,#00e5ff);
+  border-radius:0;
+}
+.journal-page .tracker-sample.theme-contrast .sample-tracker-header {
+  border-bottom-color:var(--sample-accent,#00e5ff);
+}
+.journal-page.journal-theme-contrast {
+  --edge:rgba(0,229,255,.65);
+  --muted:#fff;
+}
+.journal-page.journal-theme-contrast .journal-shell,
+.journal-page.journal-theme-contrast .app-header,
+.journal-page.journal-theme-contrast .settings-nav,
+.journal-page.journal-theme-contrast .settings-content {
+  background:var(--ui-panel-background,rgba(0,0,0,.98));
+  border-color:var(--edge);
+}
+.journal-page.journal-theme-contrast .quest-row.current,
+.journal-page.journal-theme-contrast .settings-nav-item.selected,
+.journal-page.journal-theme-contrast .settings-choices button.selected {
+  border-color:var(--ui-accent,#00e5ff);
+  box-shadow:inset 3px 0 0 var(--ui-accent,#00e5ff);
+}
+
+/* Fallout 76: warm MAP76-inspired yellow/ivory text, matte charcoal panels,
+   condensed lettering and angular dividers, independently authored. */
+.tracker-page.theme-fallout76 .tracker-panel,
+.journal-page .tracker-sample.theme-fallout76 {
+  font-family:"PibotoCondensed","Roboto Condensed","Arial Narrow",
+    "Noto Sans Condensed","Arial",sans-serif;
+  border-radius:0;
+  border:1px solid var(--ui-accent,#f5cb5b);
+  box-shadow:0 3px 18px rgba(0,0,0,.35);
+  text-shadow:1px 1px 1px #000;
+}
+.tracker-page.theme-fallout76 .tracker-panel {
+  background:var(--tracker-background,rgba(24,28,29,.88));
+}
+.tracker-page.theme-fallout76 .tracker-heading,
+.journal-page .tracker-sample.theme-fallout76 .sample-tracker-header {
+  background:rgba(0,0,0,.52);
+  color:var(--ui-accent,#f5cb5b);
+  border-bottom:1px solid rgba(var(--ui-accent-rgb,245,203,91),.55);
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.tracker-page.theme-fallout76 .tracked-entry {
+  border-bottom-color:rgba(var(--ui-accent-rgb,245,203,91),.25);
+}
+.tracker-page.theme-fallout76 .tracked-title {
+  color:var(--ui-text,#ffffcb);
+  font-weight:700;
+  text-transform:uppercase;
+}
+.tracker-page.theme-fallout76 .tracked-objective,
+.tracker-page.theme-fallout76 .tracker-count,
+.tracker-page.theme-fallout76 .tracker-hint {
+  color:var(--ui-text,#ffffcb);
+}
+.journal-page .tracker-sample.theme-fallout76 {
+  --ui-accent:var(--sample-accent,#f5cb5b);
+  --ui-accent-rgb:var(--sample-accent-rgb,245,203,91);
+  border-color:var(--sample-accent,#f5cb5b);
+  font-size:calc(14px * var(--sample-font-scale,1));
+}
+.journal-page .tracker-sample.theme-fallout76 .sample-tracker-header {
+  color:var(--sample-accent,#f5cb5b);
+  border-bottom-color:var(--sample-accent,#f5cb5b);
+}
+.journal-page .tracker-sample.theme-fallout76 .sample-tracked-entry strong {
+  text-transform:uppercase;
+}
+.journal-page.journal-theme-fallout76 {
+  --bg:#181c1d;
+  --text:var(--ui-text,#ffffcb);
+  --blue:var(--ui-accent,#f5cb5b);
+  --edge:rgba(245,203,91,.48);
+  --muted:#e0c870;
+  --gold:#f5cb5b;
+  font-family:"PibotoCondensed","Roboto Condensed","Arial Narrow",
+    "Noto Sans Condensed","Arial",sans-serif;
+}
+.journal-page.journal-theme-fallout76 .journal-shell {
+  background:var(--ui-panel-background,rgba(24,28,29,.98));
+  border-color:var(--edge);
+  border-radius:0;
+}
+.journal-page.journal-theme-fallout76 .app-header,
+.journal-page.journal-theme-fallout76 .settings-nav {
+  background:rgba(0,0,0,.42);
+  border-color:var(--edge);
+}
+.journal-page.journal-theme-fallout76 .settings-content,
+.journal-page.journal-theme-fallout76 .sidebar,
+.journal-page.journal-theme-fallout76 .quest-list-column,
+.journal-page.journal-theme-fallout76 .quest-detail {
+  border-color:var(--edge);
+}
+.journal-page.journal-theme-fallout76 .setting-row,
+.journal-page.journal-theme-fallout76 .settings-choices button,
+.journal-page.journal-theme-fallout76 .palette-editor {
+  border-color:rgba(245,203,91,.26);
+  border-radius:0;
+  background:rgba(0,0,0,.22);
+}
+.journal-page.journal-theme-fallout76 .settings-nav-item.selected,
+.journal-page.journal-theme-fallout76 .settings-choices button.selected,
+.journal-page.journal-theme-fallout76 .filter-button.selected,
+.journal-page.journal-theme-fallout76 .quest-row.current {
+  border-color:var(--ui-accent,#f5cb5b);
+  background:rgba(var(--ui-accent-rgb,245,203,91),.14);
+  box-shadow:inset 3px 0 0 var(--ui-accent,#f5cb5b);
+}
+.journal-page.journal-theme-fallout76 .group-title,
+.journal-page.journal-theme-fallout76 .section-caption,
+.journal-page.journal-theme-fallout76 .eyebrow,
+.journal-page.journal-theme-fallout76 h1 {
+  color:var(--ui-accent,#f5cb5b);
+  text-transform:uppercase;
+  letter-spacing:.055em;
+}
+
+/* K2040 journal/settings unified theme + native WebKit controls.
+   Keep all styling within the interactive journal, never the HUD tracker. */
+.journal-page [hidden] {display:none !important}
+.journal-page .settings-workspace {
+  background:var(--ui-panel-background,rgba(11,18,24,.98));
+  color:var(--ui-text,#f4faff);
+  min-width:0;
+}
+.journal-page .settings-content,
+.journal-page .settings-nav,
+.journal-page .settings-section,
+.journal-page .settings-section p,
+.journal-page .setting-row,
+.journal-page .settings-choices button {
+  color:var(--ui-text,#f4faff);
+}
+.journal-page .settings-content {font-family:inherit}
+.journal-page button,
+.journal-page input,
+.journal-page select,
+.journal-page textarea {
+  font-family:inherit;
+  font-size:inherit;
+}
+.journal-page button {
+  -webkit-appearance:none;
+  appearance:none;
+  line-height:1.35;
+}
+.journal-page .hub-binding-section {
+  border-top:1px solid var(--edge);
+  padding-top:8px;
+  margin:18px 0 22px;
+  min-width:0;
+}
+.journal-page .hub-binding-section .setting-label {
+  margin-top:14px;
+  letter-spacing:.04em;
+}
+.journal-page .hub-binding-section .setting-row {
+  min-width:0;
+  background:rgba(var(--ui-accent-rgb,102,196,255),.035);
+  border:1px solid var(--edge);
+  border-radius:5px;
+}
+.journal-page .hub-shortcut-row {
+  grid-template-columns:minmax(150px,1fr) minmax(140px,240px) minmax(76px,100px);
+}
+.journal-page .hub-pad-row {
+  grid-template-columns:minmax(190px,1fr) minmax(140px,240px);
+}
+.journal-page .hub-shortcut-row span {
+  font-variant-numeric:tabular-nums;
+  font-weight:650;
+  overflow-wrap:anywhere;
+}
+.journal-page .hub-shortcut-row button,
+.journal-page .settings-toggle {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  min-height:36px;
+  padding:8px 12px;
+  border-radius:5px;
+  border:1px solid var(--ui-accent,#66c4ff);
+  color:var(--ui-text,#f4faff);
+  background:rgba(var(--ui-accent-rgb,102,196,255),.10);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.07);
+  cursor:pointer;
+  text-align:center;
+  white-space:normal;
+}
+.journal-page .hub-shortcut-row button:hover:not(:disabled),
+.journal-page .settings-toggle:hover:not(:disabled) {
+  background:rgba(var(--ui-accent-rgb,102,196,255),.22);
+}
+.journal-page .hub-shortcut-row button:focus-visible,
+.journal-page .settings-toggle:focus-visible {
+  outline:2px solid var(--ui-accent,#66c4ff);
+  outline-offset:2px;
+}
+.journal-page .hub-shortcut-row [data-hub-clear] {
+  border-color:var(--edge);
+  background:rgba(0,0,0,.16);
+}
+.journal-page .settings-toggle:disabled {
+  opacity:.55;
+  cursor:not-allowed;
+  border-color:var(--edge);
+}
+.journal-page .hub-pad-row select {
+  width:100%;
+  color:var(--ui-text,#f4faff);
+  background-color:rgba(8,17,22,.94);
+}
+.journal-page.theme-pipboy {
+  --muted:var(--ui-accent,#20ff48);
+  --gold:var(--ui-accent,#20ff48);
+  --blueDim:rgba(var(--ui-accent-rgb,32,255,72),.12);
+  font-family:"Roboto Condensed","Arial Narrow","Noto Sans Condensed",Arial,sans-serif;
+}
+.journal-page.theme-pipboy .settings-nav,
+.journal-page.theme-pipboy .settings-content,
+.journal-page.theme-pipboy .settings-workspace,
+.journal-page.theme-pipboy .sidebar,
+.journal-page.theme-pipboy .quest-list-column,
+.journal-page.theme-pipboy .quest-detail {
+  border-color:var(--edge);
+}
+.journal-page.theme-pipboy .settings-intro,
+.journal-page.theme-pipboy .muted,
+.journal-page.theme-pipboy .quest-row-sub {
+  color:var(--ui-text,#20ff48);
+  opacity:.78;
+}
+.journal-page.theme-pipboy .settings-nav-item:hover,
+.journal-page.theme-pipboy .settings-choices button:hover {
+  background:rgba(var(--ui-accent-rgb,32,255,72),.14);
+}
+.journal-page.theme-pipboy .ghost-button,
+.journal-page.theme-pipboy .close-button {
+  color:var(--ui-text,#20ff48);
+  border-color:var(--edge);
+}
+.journal-page.theme-pipboy .primary-button {
+  background:var(--ui-accent,#20ff48);
+  color:#061308;
+}
+.journal-page.journal-theme-dark {
+  font-family:"Segoe UI",Arial,sans-serif;
+}
+@media(max-width:760px) {
+  .journal-page .hub-shortcut-row {
+    grid-template-columns:minmax(0,1fr) minmax(100px,1fr);
+  }
+  .journal-page .hub-shortcut-row [data-hub-clear] {
+    grid-column:2;
+  }
+  .journal-page .hub-pad-row {grid-template-columns:1fr}
+}
+
+/* Ultralight's system <select> popup ignores CSS option colors. The JS
+   trigger/listbox uses the same K2040 theme variables across every page.
+   Native select remains the data model, not a separate state store. */
+.journal-page select.k2040-select-source {
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+}
+.journal-page .k2040-select-trigger {
+  min-height:36px;
+  width:100%;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  text-align:left;
+  color:var(--ui-text,#f4faff);
+  background-color:var(--ui-popup-background,#142330);
+  border:1px solid var(--edge,#34445a);
+  border-radius:5px;
+  padding:8px 35px 8px 11px;
+  position:relative;
+  cursor:pointer;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.journal-page .k2040-select-trigger::after {
+  content:'';
+  position:absolute;
+  right:12px;
+  top:45%;
+  border:5px solid transparent;
+  border-top-color:var(--ui-accent,#66c4ff);
+}
+.journal-page .k2040-select-trigger:hover,
+.journal-page .k2040-select-trigger[aria-expanded=true] {
+  border-color:var(--ui-accent,#66c4ff);
+  background-color:rgba(var(--ui-accent-rgb,102,196,255),.16);
+}
+.journal-page .k2040-select-trigger:focus-visible {
+  outline:2px solid var(--ui-accent,#66c4ff);
+  outline-offset:2px;
+}
+.journal-page .list-tools .k2040-select-trigger {min-width:130px;max-width:175px}
+.journal-page .quest-category-edit .k2040-select-trigger {min-width:175px}
+.journal-page .hub-pad-row .k2040-select-trigger {width:100%}
+.journal-page .k2040-select-menu {
+  position:fixed;
+  z-index:99999;
+  box-sizing:border-box;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  border:1px solid var(--ui-accent,#66c4ff);
+  border-radius:5px;
+  background:var(--ui-popup-background,#101d2b);
+  color:var(--ui-text,#f4faff);
+  box-shadow:0 12px 28px rgba(0,0,0,.7);
+  padding:4px;
+}
+.journal-page .k2040-select-option {
+  display:block;
+  width:100%;
+  min-height:30px;
+  text-align:left;
+  color:var(--ui-text,#f4faff);
+  background:transparent;
+  border:0;
+  border-radius:3px;
+  padding:6px 10px;
+  cursor:pointer;
+  line-height:1.35;
+}
+.journal-page .k2040-select-option:hover,
+.journal-page .k2040-select-option:focus,
+.journal-page .k2040-select-option[aria-selected=true] {
+  color:var(--ui-text,#f4faff);
+  background:rgba(var(--ui-accent-rgb,102,196,255),.22);
+  outline:0;
+}
+.journal-page .k2040-select-option[aria-selected=true] {
+  box-shadow:inset 3px 0 var(--ui-accent,#66c4ff);
+}
+.journal-page .k2040-select-option:disabled {opacity:.45;cursor:not-allowed}

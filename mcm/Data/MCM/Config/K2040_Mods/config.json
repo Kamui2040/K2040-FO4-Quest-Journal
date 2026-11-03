@@ -1,0 +1,17 @@
+{
+  "modName": "K2040_Mods",
+  "displayName": "K2040 Mods",
+  "minMcmVersion": 1,
+  "pluginRequirements": [],
+  "content": [
+    {
+      "type": "section",
+      "text": "K2040 Mods"
+    },
+    {
+      "type": "text",
+      "text": "Installed K2040 mods add their own settings pages here. Each mod owns its bindings and settings."
+    }
+  ],
+  "pages": []
+}

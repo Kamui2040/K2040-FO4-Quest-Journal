@@ -1,0 +1,31 @@
+/build/
+/dist/
+/.xmake/
+.vscode/
+*.dll
+*.pdb
+*.obj
+*.lib
+*.ilk
+*.exe
+*.zip
+*.log
+*.dmp
+*~
+.external/
+external/prismaui_f4/*.h
+!external/prismaui_f4/README.md
+node_modules/
+__pycache__/
+.DS_Store
+
+# Generated code-map artifacts and legacy nested staging; neither is source.
+/graphify-out/
+/repo/
+
+# Project-internal instructions, local QA evidence and private state are never public.
+/AGENTS.md
+/PROJECT_CONTEXT.md
+/docs/private/
+/private/
+/ProjectRecovery/

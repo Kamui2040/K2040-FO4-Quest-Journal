@@ -1,0 +1,160 @@
+{
+  "modName": "K2040_Quest_Journal",
+  "displayName": "K2040 Quest Journal",
+  "minMcmVersion": 1,
+  "pluginRequirements": [],
+  "content": [],
+  "pages": [
+    {
+      "pageDisplayName": "Quest Journal",
+      "content": [
+        {
+          "type": "section",
+          "text": "Quest Journal \u2014 shortcuts"
+        },
+        {
+          "type": "text",
+          "text": "Keyboard assignments share this mod's MCM keybind registry with the PrismaUI Controls page. Shift+G and G are standalone defaults when unassigned."
+        },
+        {
+          "id": "questJournalToggle",
+          "type": "hotkey",
+          "text": "Open / close full-screen quest journal",
+          "valueOptions": {
+            "allowModifierKeys": 1
+          },
+          "help": "Ctrl/Shift/Alt combinations supported. Shift+G and G are the respective defaults. F9 quickload and plain J are reserved."
+        },
+        {
+          "id": "questTrackerToggle",
+          "type": "hotkey",
+          "text": "Toggle miniature quest tracker",
+          "valueOptions": {
+            "allowModifierKeys": 1
+          },
+          "help": "Ctrl/Shift/Alt combinations supported. Shift+G and G are the respective defaults. F9 quickload and plain J are reserved."
+        },
+        {
+          "type": "section",
+          "text": "Open / close full-screen quest journal \u2014 controller"
+        },
+        {
+          "id": "iQuestJournalPadPrimary:Controller",
+          "type": "dropdown",
+          "text": "Action button",
+          "help": "Unbound by default. Select optional held before the action button.",
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "options": [
+              "Unbound",
+              "A",
+              "B",
+              "X",
+              "Y",
+              "D-pad Up",
+              "D-pad Down",
+              "D-pad Left",
+              "D-pad Right",
+              "LB",
+              "RB",
+              "LT",
+              "RT",
+              "Start",
+              "Back",
+              "Left Stick",
+              "Right Stick"
+            ]
+          }
+        },
+        {
+          "id": "iQuestJournalPadModifier:Controller",
+          "type": "dropdown",
+          "text": "Optional held button",
+          "help": "Unbound by default. Select optional held before the action button.",
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "options": [
+              "Unbound",
+              "A",
+              "B",
+              "X",
+              "Y",
+              "D-pad Up",
+              "D-pad Down",
+              "D-pad Left",
+              "D-pad Right",
+              "LB",
+              "RB",
+              "LT",
+              "RT",
+              "Start",
+              "Back",
+              "Left Stick",
+              "Right Stick"
+            ]
+          }
+        },
+        {
+          "type": "section",
+          "text": "Toggle miniature quest tracker \u2014 controller"
+        },
+        {
+          "id": "iQuestTrackerPadPrimary:Controller",
+          "type": "dropdown",
+          "text": "Action button",
+          "help": "Unbound by default. Select optional held before the action button.",
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "options": [
+              "Unbound",
+              "A",
+              "B",
+              "X",
+              "Y",
+              "D-pad Up",
+              "D-pad Down",
+              "D-pad Left",
+              "D-pad Right",
+              "LB",
+              "RB",
+              "LT",
+              "RT",
+              "Start",
+              "Back",
+              "Left Stick",
+              "Right Stick"
+            ]
+          }
+        },
+        {
+          "id": "iQuestTrackerPadModifier:Controller",
+          "type": "dropdown",
+          "text": "Optional held button",
+          "help": "Unbound by default. Select optional held before the action button.",
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "options": [
+              "Unbound",
+              "A",
+              "B",
+              "X",
+              "Y",
+              "D-pad Up",
+              "D-pad Down",
+              "D-pad Left",
+              "D-pad Right",
+              "LB",
+              "RB",
+              "LT",
+              "RT",
+              "Start",
+              "Back",
+              "Left Stick",
+              "Right Stick"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

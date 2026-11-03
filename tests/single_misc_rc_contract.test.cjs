@@ -1,0 +1,48 @@
+'use strict';
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const native=fs.readFileSync('src/main.cpp','utf8');
+const gate=fs.readFileSync('research/native_one_shot/SingleMiscWriteGate.h','utf8');
+const collector=fs.readFileSync('src/QuestCollector.cpp','utf8');
+const build=fs.readFileSync('xmake.lua','utf8');
+const script=fs.readFileSync('scripts/build-integrated-tracking-qa.sh','utf8');
+const ui=fs.readFileSync('view/app.js','utf8');
+const prod=fs.readFileSync('src/QuestTrackingPolicy.h','utf8');
+test('RC build is explicitly selected and cannot enable writer without QA',()=>{
+ assert.match(build,/option\("quest_single_misc_rc"\)\s+set_default\(false\)/);
+ assert.match(build,/has_config\("quest_single_misc_rc"\)/);
+ assert.match(build,/has_config\("quest_single_misc_write_qa"\)/);
+ assert.match(build,/K2040_SINGLE_MISC_RC=1/);
+ assert.match(script,/--quest_single_misc_rc=/);
+ assert.match(script,/BLOCKED: RC requires/);
+ assert.match(prod,/kVerifiedBackend = WriteBackend::kNone/);
+});
+test('only DogmeatQuest is allowed; duplicate-shaped misc quest is rejected',()=>{
+ assert.match(gate,/kVerifiedQuestFormID = 0x0006DFAFu/);
+ assert.match(gate,/o\.formID!=kVerifiedQuestFormID/);
+ assert.match(collector,/o\.formID=quest->GetFormID\(\)/);
+ assert.match(native,/candidate->formId!=\s*K2040::SingleMiscQA::kVerifiedQuestFormID/);
+ assert.match(gate,/o\.nativeIndex!=kObservedIndex/);
+ assert.match(gate,/o\.currentInstance!=kObservedInstance/);
+ assert.match(gate,/!o\.exactlyOneNativeDisplayed/);
+});
+test('RC has one click and one native attempt; no ARM, generic writer or retry',()=>{
+ assert.match(native,/#ifdef K2040_SINGLE_MISC_RC[\s\S]*requestMiscSingleTrackingRC/);
+ assert.match(native,/InteropCall\(view,"enableMiscSingleTrackingRC"/);
+ assert.match(native,/#ifndef K2040_SINGLE_MISC_RC\s*interop.BindUIEvent\(view,"setIntegratedTrackingConsent"/);
+ assert.match(native,/singleMiscAttempted.exchange\(true,std::memory_order_acq_rel\)/);
+ assert.match(native,/trackingSaveEpoch.IsCurrent\(save\)/);
+ assert.match(native,/uiEpoch.IsCurrent\(view\)/);
+ assert.match(native,/SingleMiscQA::Review\(again,desired\)/);
+ assert.match(native,/CaptureRuntimeCode\(\)/);
+ assert.match(native,/toggle\(id,K2040::SingleMiscQA::kObservedInstance,6u\)/);
+ assert.match(ui,/selected\.id==='0006DFAF'/);
+ assert.match(ui,/data-action="rc-single-track"/);
+ assert.match(ui,/id!=='0006DFAF'/);
+ assert.match(ui,/state\.singleRcUsed=true; \/\/ fail closed immediately/);
+ assert.match(ui,/'requestMiscSingleTrackingRC'/);
+ assert.match(ui,/state.dogmeatProdAvailable\?'requestDogmeatTracking'/);
+ assert.match(ui,/window.enableMiscSingleTrackingRC/);
+ assert.match(ui,/window.receiveMiscSingleResult/);
+});

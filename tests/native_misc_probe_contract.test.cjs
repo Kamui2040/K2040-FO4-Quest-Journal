@@ -1,0 +1,72 @@
+'use strict';
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const collector=fs.readFileSync('src/QuestCollector.cpp','utf8');
+const main=fs.readFileSync('src/main.cpp','utf8');
+const view=fs.readFileSync('view/app.js','utf8');
+const api=fs.readFileSync('src/QuestCollector.h','utf8');
+const native=fs.readFileSync('research/native_one_shot/OneShotOgIntegratedQA.cpp','utf8');
+
+test('Misc probe only compiled in integrated QA; never writes engine state',()=>{
+ assert.match(api,/#ifdef K2040_TRACKING_INTEGRATED_QA[\s\S]*CaptureMiscTrackingProbe/);
+ assert.match(collector,/#ifdef K2040_TRACKING_INTEGRATED_QA[\s\S]*std::string CaptureMiscTrackingProbe/);
+ assert.match(collector,/if\(\+\+traversed>512u\)/);
+ assert.match(collector,/if\(\+\+walked>128u\)/);
+ assert.match(collector,/if\(nestedCount>12u\)/);
+ assert.match(collector,/MiscObjectiveIndex\(nestedRow\)/);
+ assert.match(collector,/ProbePrimitiveSchema\(nestedRow\)/);
+ assert.match(collector,/displayedObjectiveCandidates/);
+ assert.match(collector,/RE::BSAutoLock guard\{player->questTargetLock\}/);
+ assert.match(collector,/obj->ownerQuest!=quest/);
+ assert.match(collector,/instance.enstanceState.underlying\(\)/);
+ assert.match(collector,/instance.instanceID/);
+ assert.match(collector,/nativeObjectiveCollectionComplete/);
+ assert.match(collector,/nativeObjectiveInstances/);
+ assert.match(collector,/nativeCandidateStatus/);
+ assert.match(collector,/GenericQuestRowIdentity::Resolve/);
+ assert.match(collector,/genericCandidateStatuses/);
+ assert.match(view,/locked native objective\/instance candidates/);
+ assert.match(collector,/fields.size\(\)>24u/);
+ assert.match(view,/Pip-Boy fields:/);
+ assert.match(view,/NOT verified row mapping/);
+ assert.match(view,/data.genericCandidateStatuses/);
+ assert.match(view,/NOT write permission/);
+ assert.match(collector,/rootTracked/);
+ assert.match(collector,/nestedActive/);
+ assert.doesNotMatch(collector,/SetActive\s*\(|SetStage\s*\(|WriteProcessMemory\s*\(/);
+ assert.match(native,/setter\(quest,requested.desiredTracked\)/);
+ assert.match(fs.readFileSync('research/native_one_shot/OneShotIntent.h','utf8'),/o\.questType == kMisc/);
+});
+
+test('probe is one read-only F4SE game task and fails closed on stale quest/save/view',()=>{
+ assert.match(main,/void QueueMiscTrackingProbe\(const char\* raw\)/);
+ assert.match(main,/strnlen_s\(raw,9\)/);
+ assert.match(main,/tasks->AddTask\(\[id,save,view,probe\]/);
+ assert.match(main,/trackingSaveEpoch\.IsCurrent\(save\)/);
+ assert.match(main,/uiEpoch\.IsCurrent\(view\)/);
+ assert.match(main,/dryRunSelectedFormId\.load\(std::memory_order_acquire\)!=id/);
+ assert.match(main,/QuestViewState::Observed\(\)\.contains\(id\)/);
+ assert.match(main,/requestMiscTrackingProbe/);
+ assert.match(main,/receiveMiscTrackingProbe/);
+ assert.match(main,/AnonymousMiscProbeJson\(response\)/);
+ assert.match(main,/MiscTrackingQA: probe=\{\} SNAPSHOT=\{\}/);
+ assert.match(main,/miscProbeSequence\.fetch_add/);
+ const privacy=fs.readFileSync('src/MiscProbeLogSanitizer.h','utf8');
+ assert.match(privacy,/AnonymousMiscProbeJson/);
+ assert.match(privacy,/raw\.starts_with\(prefix\)/);
+ assert.match(privacy,/remainder\.starts_with\(afterId\)/);
+ assert.doesNotMatch(main.split('void QueueMiscTrackingProbe(')[1].split('void SetIntegratedQAConsent(')[0],/SetActive\(|AddTaskPermanent\(/);
+});
+
+test('Misc probe UI button performs a real read-only action and shows objective details',()=>{
+ assert.match(view,/data-action="qa-misc-inspect"/);
+ assert.match(view,/emit\('requestMiscTrackingProbe',id\)/);
+ assert.match(view,/window.receiveMiscTrackingProbe=function\(raw\)/);
+ assert.match(view,/JSON\.parse\(String\(raw\|\|''\)\)/);
+ assert.match(view,/data\.id!==state\.qaMiscPending/);
+ assert.match(view,/state\.qaMiscSummary/);
+ assert.match(view,/nativeTracking\.reason==='misc-objective'/);
+ assert.match(view,/QA test: /);
+ assert.match(view,/qaMiscPending=null/);
+});

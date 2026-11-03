@@ -1,0 +1,83 @@
+'use strict';
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const read=f=>fs.readFileSync(f,'utf8');
+const code=read('research/native_one_shot/OneShotOgWriteQA.cpp');
+const main=read('src/main.cpp');
+const view=read('view/app.js');
+const build=read('xmake.lua');
+const ini=read('research/native_one_shot/K2040_Quest_Journal_Write_QA.ini');
+const script=read('scripts/build-native-write-once-qa.sh');
+const prod=read('scripts/build-linux.sh');
+const dry=read('scripts/build-one-shot-qa.sh');
+const policy=read('src/QuestTrackingPolicy.h');
+
+test('build flavor defaults OFF; shipping and dry-run builds forcibly disable writer',()=>{
+ assert.match(build,/option\("quest_native_write_qa"\)/);
+ assert.match(build,/set_default\(false\)/);
+ assert.match(build,/if has_config\("quest_native_write_qa"\) and not has_config\("quest_dryrun_qa"\)/);
+ assert.match(build,/add_defines\("K2040_TRACKING_NATIVE_WRITE_QA=1"\)/);
+ assert.match(build,/add_files\("research\/native_one_shot\/OneShotOgWriteQA\.cpp"\)/);
+ assert.match(build,/K2040_Quest_Journal_Write_QA\.ini/);
+ assert.match(prod,/--quest_native_write_qa=n/);
+ assert.match(dry,/--quest_native_write_qa=n/);
+ assert.match(prod,/--quest_repeatable_misc_qa=n/);
+ assert.match(dry,/--quest_repeatable_misc_qa=n/);
+ assert.match(script,/--quest_native_write_qa=/);
+ assert.match(script,/repeatable_flag=n/);
+ assert.match(script,/echo n \|\| echo y/); // original one-shot defaults on, repeatable build excludes it
+ assert.match(policy,/kVerifiedBackend\s*=\s*WriteBackend::kNone/);
+});
+test('separate default-NO INI requires two exact YES values, plus game load consent',()=>{
+ assert.match(ini,/IHaveBackedUpTestSave=NO/);
+ assert.match(ini,/PermitOneNativeSetActiveCall=NO/);
+ assert.match(code,/permitted\(L"IHaveBackedUpTestSave"\)/);
+ assert.match(code,/permitted\(L"PermitOneNativeSetActiveCall"\)/);
+ assert.match(code,/std::wcscmp\(value,L"YES"\)==0/);
+ assert.match(code,/GetPrivateProfileStringW/);
+ assert.match(main,/writeQaConsentAtLaunch\.store/);
+ assert.match(main,/readable-none-does-not-matter|ReadExplicitWriteTestConsent\(\)/);
+ assert.match(main,/writeQaConsentAtLaunch\.load\(std::memory_order_acquire\)/);
+});
+test('write only after explicit one-action token and fresh dry-run preflight',()=>{
+ assert.match(code,/processAttempted\.exchange\(true,std::memory_order_acq_rel\)/);
+ assert.match(code,/gate->Offer\(/);
+ assert.match(code,/tasks->AddTask\(/);
+ assert.match(code,/gate->Current\(request\)/);
+ assert.match(code,/ObserveOnTask\(request,context\)/);
+ assert.match(code,/ReviewOnGameTask\(request,before\)/);
+ assert.match(code,/decision==Result::kWouldWrite/);
+ assert.match(code,/native\.address\(\)==base\+kSetterRva/);
+ assert.match(code,/REL::ID\(kSetterId\)/);
+ assert.match(code,/native\(quest,request.desiredTracked\)/);
+ assert.match(code,/one action consumed|ONE verified native SetActive/);
+ assert.doesNotMatch(code,/AddTaskPermanent\s*\(|SetStage\s*\(|WriteProcessMemory\s*\(|VirtualProtect\s*\(/);
+ assert.doesNotMatch(code,/quest->data.flags\s*(?:=|\|=|&=)/);
+});
+test('UI is hidden without build/consent and requires separate ARM and EXECUTE clicks',()=>{
+ assert.match(view,/qaWriteEnabled:false/);
+ assert.match(view,/qaWriteArmed:false/);
+ assert.match(view,/data-action="pipboy-write-arm"/);
+ assert.match(view,/data-action="pipboy-write-once"/);
+ assert.match(view,/state\.qaWriteAttempted=true/);
+ assert.match(view,/window\.enableNativeTrackingWriteQA/);
+ assert.match(view,/window\.receiveTrackingWriteTestResult/);
+ assert.match(view,/TEST WRITE RETURNED: provisional only/);
+ assert.match(main,/requestPipboyTrackingWriteOnce/);
+ assert.match(main,/writeQaConsentAtLaunch\.load/);
+ assert.match(main,/QueueWriteTestOnce\(/);
+ assert.match(view,/data-action="pipboy-track" disabled/);
+ assert.match(view,/if\(!state\.qaIntegratedAvailable \|\| !state\.qaIntegratedConsent/);
+ assert.match(view,/qaIntegratedAvailable:false/);
+ assert.match(view,/window\.enableIntegratedTrackingQA/);
+});
+test('package built in isolated staging, INI shipped disarmed and never installed automatically',()=>{
+ assert.match(script,/K2040_NATIVE_WRITE_QA_STAGE/);
+ assert.match(script,/--quest_dryrun_qa=y/);
+ assert.match(script,/PermitOneNativeSetActiveCall=NO/);
+ assert.match(script,/IHaveBackedUpTestSave=NO/);
+ assert.match(script,/No game or Amethyst files deployed/);
+ assert.match(main,/#ifdef K2040_TRACKING_NATIVE_WRITE_QA/);
+ assert.match(main,/static_assert\(!K2040::QuestTracking::CanWritePipboy\(\)/);
+});
