@@ -1,7 +1,7 @@
 # Architecture overview
 
 - `src/`: F4SE entry points, game-thread quest observer/collector, read-only data normalization, UI bridge, per-save data, settings, input/MCM integration and defensive tracking policy.
-- `research/production_candidate/`: accepted ordinary/Misc quest-wide F4SE native adapter shared by the opt-in normal-tracking build.
+- `research/production_candidate/`: accepted ordinary/Misc quest-wide F4SE native adapter used by the released normal-tracking build.
 - `research/native_one_shot/`: native quest scope and guarded repeatable ticket state machine, plus synthetic/legacy research inputs. Research/QA variants are disabled in normal builds.
 - `view/`: original PrismaUI_F4 full-screen Journal, miniature tracker, settings model, independent palette presets and themed dropdown controls.
 - `mcm/`: canonical `K2040 Mods` grouped parent and Quest Journal child, including optional standalone MCM layout.
