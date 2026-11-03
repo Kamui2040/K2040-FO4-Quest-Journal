@@ -46,6 +46,7 @@
 #include <cstdio>
 #endif
 #include "JournalSettings.h"
+#include "TrackerCompatibility.h"
 #include "HudColor.h"
 #include <RE/H/HUDMenuUtils.h>
 #include "QuestViewState.h"
@@ -87,6 +88,30 @@ namespace {
     bool trackerDomReady = false;
     std::atomic_bool journalFocused{false};
     bool trackerEnabled = true;
+    // The user's saved preference is not changed by another HUD being loaded.
+    // Phosphor HUD 0.9.24 OG ships PhosphorHUD.dll; bLiveHud is its one
+    // persistent master switch, read by that mod at F4SE kPostLoad.
+    bool PhosphorHudActive() {
+        if (!GetModuleHandleW(L"PhosphorHUD.dll")) return false;
+        // Cache after finding the loaded module, never cache an absent module.
+        // Phosphor likewise reads bLiveHud once per process, not per save.
+        static const bool live = []() {
+            // GetPrivateProfileIntW resolves relative names under Windows,
+            // not the game directory. Resolve exactly the path Phosphor reads.
+            std::array<wchar_t, MAX_PATH> iniPath{};
+            const DWORD count = GetFullPathNameW(
+                L"Data\\F4SE\\Plugins\\PhosphorHUD.ini",
+                static_cast<DWORD>(iniPath.size()), iniPath.data(), nullptr);
+            if (count == 0 || count >= iniPath.size()) return true;
+            return GetPrivateProfileIntW(L"Main", L"bLiveHud", 1,
+                                         iniPath.data()) != 0;
+        }();
+        return live;
+    }
+    bool TrackerMayShow() {
+        return K2040::TrackerCompatibility::ShowMiniTracker(
+            trackerEnabled, PhosphorHudActive());
+    }
     bool cursorFallbackRegistered = false;
     bool apiReady = false;
     bool gameLoaded = false;
@@ -289,7 +314,7 @@ namespace {
             K2040::HudColor::ToCss(background.r,background.g,background.b),
             CurrentPipboyRgb());
         if(Valid(journalView))interop.InteropCall(journalView,"receiveJournalSettings",payload.c_str());
-        if(Valid(trackerView))interop.InteropCall(trackerView,"receiveJournalSettings",payload.c_str());
+        if(TrackerMayShow() && Valid(trackerView))interop.InteropCall(trackerView,"receiveJournalSettings",payload.c_str());
         K2040::Hub::MigrateLegacyIfNeeded();
         if(Valid(journalView)) {
             const auto hub=K2040::Hub::SnapshotJson();
@@ -387,7 +412,7 @@ namespace {
             interop.InteropCall(journalView, "receiveQuestSnapshot", payload.c_str());
             lastPublishedJournal=payload;
         }
-        if (trackerDomReady && Valid(trackerView) && payload != lastPublishedTracker) {
+        if (TrackerMayShow() && trackerDomReady && Valid(trackerView) && payload != lastPublishedTracker) {
             interop.InteropCall(trackerView, "receiveQuestSnapshot", payload.c_str());
             lastPublishedTracker=payload;
         }
@@ -546,11 +571,17 @@ namespace {
         // Focus is deferred until DOM-ready; closing early cancels it.
     }
     void ToggleTracker() {
+        // When Phosphor supplies the quest box, ignore our tracker hotkey
+        // instead of flipping (and permanently saving) the user's preference.
+        if (PhosphorHudActive()) {
+            if (Valid(trackerView)) views.Hide(trackerView);
+            return;
+        }
         const bool desired=!trackerEnabled;
         if(!K2040::Settings::ChangeAndSave(desired?"trackerEnabled:true":"trackerEnabled:false"))return;
         trackerEnabled=desired;
         if (!Valid(trackerView)) return;
-        if (trackerEnabled) { views.Show(trackerView); SyncSnapshots(); }
+        if (TrackerMayShow()) { views.Show(trackerView); SyncSnapshots(); }
         else views.Hide(trackerView);
         SyncSettings();
     }
@@ -585,7 +616,7 @@ namespace {
         }
         trackerEnabled=K2040::Settings::Current().trackerEnabled;
         if(Valid(trackerView)) {
-            if(trackerEnabled)views.Show(trackerView);
+            if(TrackerMayShow())views.Show(trackerView);
             else views.Hide(trackerView);
         }
         SyncSettings();
@@ -596,7 +627,7 @@ namespace {
         const bool saved=K2040::Settings::ResetToDefaults();
         trackerEnabled=K2040::Settings::Current().trackerEnabled;
         if(Valid(trackerView)) {
-            if(trackerEnabled)views.Show(trackerView);
+            if(TrackerMayShow())views.Show(trackerView);
             else views.Hide(trackerView);
         }
         SyncSettings();
@@ -1648,14 +1679,14 @@ namespace {
             if (!journalOpen) views.Hide(view);
         } else if (view == trackerView) {
             interop.BindUIEvent(view, "requestQuestSnapshot", [](const char*) {
-                QueueTrackerAction([](){if(trackerEnabled && trackerDomReady)SyncSnapshots();});
+                QueueTrackerAction([](){if(TrackerMayShow() && trackerDomReady)SyncSnapshots();});
             });
             interop.BindUIEvent(view, "requestJournalSettings", [](const char*) {
-                QueueTrackerAction([](){if(trackerEnabled && trackerDomReady)SyncSettings();});
+                QueueTrackerAction([](){if(TrackerMayShow() && trackerDomReady)SyncSettings();});
             });
             if (controller.SetViewRole) controller.SetViewRole(view, UI::ViewRole::kWidget);
             trackerDomReady=true;
-            if (trackerEnabled) views.Show(view);
+            if (TrackerMayShow()) views.Show(view);
             else views.Hide(view);
         } else return; // Ignore stale callbacks from destroyed views.
         ShowJournalIfReady();
@@ -1727,6 +1758,12 @@ namespace {
     }
     void CreateViews() {
         if (!apiReady) return;
+        // Don't even allocate the mini tracker surface while Phosphor's live
+        // HUD is loaded. The full-screen Journal is created separately.
+        if (PhosphorHudActive()) {
+            if (Valid(trackerView)) views.Hide(trackerView);
+            return;
+        }
         // Journal panel is lazily created for the next open (fresh per open).
         if (!trackerView && gameLoaded) {
             trackerDomReady=false;
