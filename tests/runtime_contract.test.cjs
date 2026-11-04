@@ -15,7 +15,7 @@ test('cross-save and input ownership',()=>{
 });
 test('inactive views reject expensive native polling',()=>{
  assert.match(s,/ValidateJournalOwnership\(\);\s*if\(journalOpen && journalFocused\)SyncSnapshots\(\)/);
- assert.match(s,/if\(trackerEnabled && trackerDomReady\)SyncSnapshots\(\)/);
+ assert.match(s,/if\(TrackerMayShow\(\) && trackerDomReady\)SyncSnapshots\(\)/);
 });
 test('uses the engine input registration API instead of mutating handlers directly',()=>{
  assert.match(s,/menus->RegisterHandler\(&Hotkeys::Get\(\)\)/);
@@ -96,7 +96,7 @@ test('Prisma UI callbacks schedule native work and copy borrowed payloads',()=>{
  assert.match(s,/QueueUIString\(UpdateSetting,cmd\)/);
  assert.match(s,/QueueUIString\(UpdateCategory,choice\)/);
  assert.match(s,/QueueUIAction\(\[\]\(\)\{if\(journalOpen && journalFocused\)CloseJournal\(\);\}\)/);
- assert.match(s,/QueueTrackerAction\(\[\]\(\)\{if\(trackerEnabled && trackerDomReady\)SyncSnapshots\(\);\}\)/);
+ assert.match(s,/QueueTrackerAction\(\[\]\(\)\{if\(TrackerMayShow\(\) && trackerDomReady\)SyncSnapshots\(\);\}\)/);
 });
 
 test('queued Prisma commands are rejected after a view/save transition',()=>{

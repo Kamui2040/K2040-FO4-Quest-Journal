@@ -119,6 +119,8 @@ if command -v clang++ >/dev/null 2>&1; then
   # normalizer; substring assertions alone failed to catch malformed JSON.
   clang++ -std=c++23 -O1 -Wall -Wextra -Itests/stubs -Isrc src/JournalSettings.cpp tests/native_settings_payload.cpp -o "$tmp/payload"
   "$tmp/payload" | node tests/validate-native-settings-payload.cjs
+  clang++ -std=c++23 -O1 -Wall -Wextra -Werror -Isrc tests/native_phosphor_tracker_compat.cpp -o "$tmp/phosphor-tracker-compat"
+  "$tmp/phosphor-tracker-compat"
   clang++ -std=c++23 -O1 -Wall -Wextra -Isrc tests/native_hud_color.cpp -o "$tmp/hud-colors"
   "$tmp/hud-colors"
 else

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — Phosphor HUD compatibility
+
+- Automatically suppress the mini tracker when Phosphor HUD is loaded with its live HUD enabled. The full-screen Journal and saved tracker preference remain available; Phosphor HUD is not modified.
+
 ## 0.0.2 — First release
 
 - Full-screen quest journal with search, categories, favorites and quest objectives.
