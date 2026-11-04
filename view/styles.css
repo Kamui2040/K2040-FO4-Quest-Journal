@@ -843,3 +843,9 @@
   box-shadow:inset 3px 0 var(--ui-accent,#66c4ff);
 }
 .journal-page .k2040-select-option:disabled {opacity:.45;cursor:not-allowed}
+
+.journal-page .controller-focus-visible:focus {
+  outline:3px solid var(--ui-accent,#66c4ff);
+  outline-offset:2px;
+  box-shadow:0 0 0 2px rgba(102,196,255,.22);
+}

@@ -234,7 +234,7 @@
     state.showSettings=show;
     applySettings();
     if(show)document.querySelector(`[data-settings-page="${state.settingsPage}"]`)?.focus();
-    else el('openSettings').focus();
+    else {clearControllerFocus();el('openSettings').focus();}
     if(show&&!state.demo)emit('requestHubBindings');
   }
   // Both a browser key event and the native physical-Escape fallback call
@@ -251,6 +251,90 @@
       emit('requestCloseJournal');
     }
   };
+  let controllerFocused=null;
+  function clearControllerFocus(){
+    controllerFocused?.classList.remove('controller-focus-visible');
+    controllerFocused=null;
+  }
+  function visibleControllerControls(){
+    const panel=state.showSettings?el('settingsWorkspace'):el('journalWorkspace');
+    return Array.from(panel.querySelectorAll('button,input:not([type="hidden"]),select,textarea,[tabindex]'))
+      .filter(node=>!node.disabled&&!node.hidden&&node.tabIndex>=0&&
+        node.getAttribute?.('aria-hidden')!=='true'&&node.getAttribute?.('aria-disabled')!=='true'&&
+        node.getClientRects().length>0);
+  }
+  function moveControllerFocus(direction){
+    const controls=visibleControllerControls();
+    if(!controls.length)return;
+    const current=document.activeElement;
+    if(!controls.includes(current)){
+      focusControllerControl(controls[0]);return;
+    }
+    if(current.type==='range'&&(direction==='left'||direction==='right')){
+      const step=current.step==='any'?1:Number(current.step)||1;
+      const min=current.min===''?-Infinity:Number(current.min);
+      const max=current.max===''?Infinity:Number(current.max);
+      const delta=direction==='right'?step:-step;
+      const next=Math.min(max,Math.max(min,Number(current.value)+delta));
+      if(next!==Number(current.value)){
+        current.value=String(next);
+        current.dispatchEvent(new Event('input',{bubbles:true}));
+        current.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      return;
+    }
+    const origin=current.getBoundingClientRect();
+    const cx=origin.left+origin.width/2,cy=origin.top+origin.height/2;
+    const horizontal=direction==='left'||direction==='right';
+    const sign=direction==='left'||direction==='up'?-1:1;
+    let best=null,bestScore=Infinity;
+    for(const node of controls){
+      if(node===current)continue;
+      const rect=node.getBoundingClientRect();
+      const dx=rect.left+rect.width/2-cx,dy=rect.top+rect.height/2-cy;
+      const primary=(horizontal?dx:dy)*sign;
+      if(primary<=0)continue;
+      const cross=Math.abs(horizontal?dy:dx);
+      const score=primary+cross*1.5;
+      if(score<bestScore){best=node;bestScore=score;}
+    }
+    if(best)focusControllerControl(best);
+  }
+  function focusControllerControl(node){
+    clearControllerFocus();
+    controllerFocused=node;
+    node.classList.add('controller-focus-visible');
+    node.focus();
+    node.scrollIntoView({block:'nearest',inline:'nearest'});
+  }
+  window.receiveJournalControllerAction=function(action){
+    if(isTracker)return;
+    if(action==='back'){
+      if(document.querySelector('.k2040-select-menu')){
+        window.K2040JournalSelects?.close(true);return;
+      }
+      window.handleJournalEscape();return;
+    }
+    if(action==='activate'){
+      const target=document.activeElement;
+      const popup=document.querySelector('.k2040-select-menu');
+      if(target&&((popup&&popup.contains(target)&&!target.disabled)||visibleControllerControls().includes(target)))target.click();
+      return;
+    }
+    if(['up','down','left','right'].includes(action)){
+      if(document.querySelector('.k2040-select-menu')){
+        const key='Arrow'+action[0].toUpperCase()+action.slice(1);
+        document.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true}));
+        return;
+      }
+      moveControllerFocus(action);
+    }
+  };
+  if(!isTracker){
+    document.addEventListener('pointerdown',clearControllerFocus,true);
+    document.addEventListener('pointermove',clearControllerFocus,true);
+    document.addEventListener('keydown',clearControllerFocus,true);
+  }
   window.receiveJournalSettings=receiveJournalSettings;
   window.receiveJournalSettingsStatus=function (value) {
     if(!isTracker && el('settingsSaveStatus')) {

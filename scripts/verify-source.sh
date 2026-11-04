@@ -19,6 +19,8 @@ if command -v clang++ >/dev/null 2>&1; then
   # Non-shipping, engine-independent native quest mutation preflight fixture.
   clang++ -std=c++23 -O1 -Wall -Wextra -Werror tests/native_tracking_preflight.cpp -o "$tmp/native-tracking-preflight"
   "$tmp/native-tracking-preflight"
+  clang++ -std=c++23 -O1 -Wall -Wextra -Werror tests/native_controller_navigation.cpp -o "$tmp/controller-navigation"
+  "$tmp/controller-navigation"
   # Offline-only experimental writer eligibility. No game memory calls.
   clang++ -std=c++23 -O1 -Wall -Wextra -Werror tests/native_write_test_policy.cpp -o "$tmp/native-write-test-policy"
   "$tmp/native-write-test-policy"

@@ -51,6 +51,7 @@
 #include <RE/H/HUDMenuUtils.h>
 #include "QuestViewState.h"
 #include "HubBindings.h"
+#include "ControllerNavigation.h"
 #include <Scaleform/G/GFx_FunctionHandler.h>
 #include <Scaleform/G/GFx_Movie.h>
 #include <Scaleform/G/GFx_Value.h>
@@ -1834,16 +1835,17 @@ namespace {
         if(const auto* scaleform=F4SE::GetScaleformInterface())
             hubScaleformRegistered=scaleform->Register("K2040_Quest_Journal",&RegisterHubMcm);
     }
-    std::uint32_t ReadXInputButtons() {
+    struct XInputSample {std::uint32_t buttons{};std::int16_t leftX{},leftY{};};
+    XInputSample ReadXInputSample() {
         using Reader=DWORD (WINAPI*)(DWORD,XINPUT_STATE*);
         static const Reader read=[](){
             auto mod=LoadLibraryW(L"xinput1_4.dll");
             if(!mod)mod=LoadLibraryW(L"xinput1_3.dll");
             return mod?reinterpret_cast<Reader>(GetProcAddress(mod,"XInputGetState")):nullptr;
         }();
-        if(!read)return 0;
+        if(!read)return {};
         XINPUT_STATE pad{};
-        if(read(0,&pad)!=ERROR_SUCCESS)return 0;
+        if(read(0,&pad)!=ERROR_SUCCESS)return {};
         static bool lt=false,rt=false;
         const auto hysteresis=[](bool& pressed,BYTE value) {
             if(!pressed&&value>=160)pressed=true;
@@ -1854,7 +1856,20 @@ namespace {
         std::uint32_t bits=pad.Gamepad.wButtons;
         if(lt)bits|=1u<<16;
         if(rt)bits|=1u<<17;
-        return bits;
+        return {bits,pad.Gamepad.sThumbLX,pad.Gamepad.sThumbLY};
+    }
+    const char* ControllerActionName(K2040::ControllerNavigation::Action action) {
+        using Action=K2040::ControllerNavigation::Action;
+        switch(action) {
+        case Action::Up:return "up";
+        case Action::Down:return "down";
+        case Action::Left:return "left";
+        case Action::Right:return "right";
+        case Action::Activate:return "activate";
+        case Action::Back:return "back";
+        case Action::None:return nullptr;
+        }
+        return nullptr;
     }
     bool ForegroundGame() {
         auto window=GetForegroundWindow();if(!window)return false;
@@ -1970,6 +1985,7 @@ namespace {
         auto next=std::chrono::steady_clock::time_point{};
         struct KeyboardActive {unsigned key{},mods{};bool wasMatched{};};
         std::array<KeyboardActive,2> keyboard{};
+        K2040::ControllerNavigation::Sampler navigation;
         bool escapeWasDown=false;
         bool journalWasFocused=false;
         bool oldMouse4=false,oldMouse5=false;
@@ -2087,7 +2103,21 @@ namespace {
                     tasks->AddTask([guardKey](){FinishDeferredJournalInputGuard(guardKey);});
                 else deferredJournalReleaseQueued.store(false,std::memory_order_release);
             }
-            const auto buttons=ReadXInputButtons();
+            const auto pad=ReadXInputSample();
+            const auto buttons=pad.buttons;
+            const auto navigationAction=navigation.Update(
+                {static_cast<std::uint16_t>(buttons),pad.leftX,pad.leftY},
+                focused&&ForegroundGame(),now);
+            if(const auto* name=ControllerActionName(navigationAction)) {
+                QueueUIAction([name](){
+                    if(!journalOpen||!journalFocused.load(std::memory_order_acquire)||
+                       !Valid(journalView)||CompetingGameMenuOpen()||
+                       AnotherPrismaViewFocused())return;
+                    if(interop.InteropCall)
+                        interop.InteropCall(journalView,
+                            "receiveJournalControllerAction",name);
+                });
+            }
             if(now>=next) {
                 for(unsigned i=0;i<2;++i) {
                     bindings[i]=K2040::Hub::ReadPad(i?K2040::Hub::Action::Tracker:K2040::Hub::Action::Journal);
@@ -2107,7 +2137,9 @@ namespace {
                 const bool complete=down&&(!held||(buttons&held)==held);
                 const bool rising=down&&!active[i].wasDown;
                 active[i].wasDown=down;
-                if(rising&&complete&&!b.conflict&&ForegroundGame())
+                if(rising&&complete&&!b.conflict&&ForegroundGame()&&
+                   !K2040::ControllerNavigation::ConflictsWithMenuNavigation(
+                       primary,held,focused))
                     QueueInputAction(i?K2040::Hub::Action::Tracker:K2040::Hub::Action::Journal,true);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(35));

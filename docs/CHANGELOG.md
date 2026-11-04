@@ -4,6 +4,7 @@
 
 - Automatically suppress the mini tracker when Phosphor HUD is loaded with its live HUD enabled, unless the user enables **Show Quest Journal tracker with Phosphor HUD** under Compact tracker settings. The override is off by default, persists across restarts and can be changed without reloading; the full Journal stays available and Phosphor HUD is not modified.
 - Improve Settings accessibility with descriptive controller names, current-category announcements, and focus transfer when the panel opens or closes.
+- Add D-pad and left-stick menu navigation, with A to activate and B to back, while preserving cursor and mouse input.
 
 ## 0.0.2 — First release
 
