@@ -28,6 +28,8 @@ namespace K2040::Settings {
         int trackerWidth = 340;
         int trackerOpacity = 88;
         bool trackerEnabled = true;
+        // Explicit opt-in: retain Quest Journal's tracker even alongside Phosphor HUD.
+        bool trackerOverridePhosphor = false;
         int trackerMaxQuests = 6;
         bool trackerShowCompleted = false;
         bool trackerAutoPinNew = false;

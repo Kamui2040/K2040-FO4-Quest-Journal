@@ -12,7 +12,7 @@
     journalPanel:'#0b1218', journalCompleted:'#74e398',
     journalOpacity:98, journalFontSize:100,
     trackerAnchor:'top-right', trackerScale:100, trackerWidth:340, trackerOpacity:88,
-    trackerEnabled:true, trackerMaxQuests:6, trackerShowCompleted:false,
+    trackerEnabled:true, trackerOverridePhosphor:false, trackerMaxQuests:6, trackerShowCompleted:false,
     trackerAutoPinNew:false, trackerSyncPipboy:false,
     journalHotkey:'Shift+G', trackerHotkey:'G', redirectQuestKey:false
   });
@@ -63,6 +63,7 @@
       trackerWidth:number(v.trackerWidth, defaults.trackerWidth, 260, 520),
       trackerOpacity:number(v.trackerOpacity, defaults.trackerOpacity, 25, 100),
       trackerEnabled:v.trackerEnabled === false ? false : true,
+      trackerOverridePhosphor:v.trackerOverridePhosphor === true,
       trackerMaxQuests:number(v.trackerMaxQuests, defaults.trackerMaxQuests, 1, 12),
       trackerShowCompleted:v.trackerShowCompleted === true,
       trackerAutoPinNew:v.trackerAutoPinNew === true,

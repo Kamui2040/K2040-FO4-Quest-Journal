@@ -23,6 +23,7 @@ int main() {
     assert(Current().journalTheme == "pipboy");
     assert(Current().sidebarWidth == 240);
     assert(Current().questListWidth == 360);
+    assert(!Current().trackerOverridePhosphor); // safe default for older INIs
     assert(!Change("completed:bogus"));
     assert(!Change("completed:#12345"));
     assert(!Change("sidebarWidth:159"));
@@ -34,6 +35,9 @@ int main() {
     assert(Change("sidebarWidth:320"));
     assert(Change("questListWidth:470"));
     assert(Change("trackerShowCompleted:true"));
+    assert(!Change("trackerOverridePhosphor:1"));
+    assert(!Change("trackerOverridePhosphor:TRUE"));
+    assert(Change("trackerOverridePhosphor:true"));
     assert(Change("theme:fallout76"));
     assert(Change("journalTheme:fallout76"));
     assert(Change("journalTheme:custom"));
@@ -57,6 +61,7 @@ int main() {
     assert(Current().sidebarWidth == 320);
     assert(Current().questListWidth == 470);
     assert(Current().trackerShowCompleted);
+    assert(Current().trackerOverridePhosphor);
     assert(Current().journalTheme=="custom");
     assert(Current().theme=="fallout76");
     assert(Current().journalAccent=="#aa55cc");
@@ -66,6 +71,7 @@ int main() {
     assert(payload.find("\"completed\":\"#12a3ef\"") != std::string::npos);
     assert(payload.find("\"sidebarWidth\":320") != std::string::npos);
     assert(payload.find("\"questListWidth\":470") != std::string::npos);
+    assert(payload.find("\"trackerOverridePhosphor\":true") != std::string::npos);
     assert(Change("trackerHotkey:F7"));
     assert(Change("journalHotkey:F10"));
     assert(Change("trackerHotkey:F8"));
@@ -75,6 +81,7 @@ int main() {
     assert(Current().journalOpacity==98 && Current().journalFontSize==100);
     assert(Current().sidebarWidth == 240 && Current().questListWidth == 360);
     assert(Current().journalHotkey == "Shift+G" && Current().trackerHotkey == "G");
+    assert(!Current().trackerOverridePhosphor); // reset revokes override
     Load();
     assert(Current().journalHotkey == "Shift+G" && Current().trackerHotkey == "G");
     assert(ChangeAndSave("opacity:81"));
@@ -98,6 +105,7 @@ int main() {
     Load();
     assert(Current().opacity==81);  // migrated from legacy without editing it
     assert(ChangeAndSave("trackerAnchor:bottom-left"));
+    assert(ChangeAndSave("trackerOverridePhosphor:true"));
     assert(ChangeAndSave("theme:pipboy"));
     assert(std::string(LastFailureReason())=="none");
     assert(!ChangeAndSave("theme:invalid"));
@@ -108,6 +116,7 @@ int main() {
     Load();
     assert(Current().theme=="pipboy");
     assert(Current().trackerAnchor=="bottom-left");
+    assert(Current().trackerOverridePhosphor);
 
     // With an existing user config, later native loads must prefer it even
     // when a different legacy Data INI remains installed.
@@ -116,6 +125,9 @@ int main() {
     assert(Current().trackerWidth==410);
     fs::remove(userConfig);
     fs::create_directory(userConfig);
+    assert(!ChangeAndSave("trackerOverridePhosphor:false"));
+    assert(std::string(LastFailureReason())=="storage");
+    assert(Current().trackerOverridePhosphor); // failed writes roll back
     assert(!ChangeAndSave("theme:contrast"));
     assert(std::string(LastFailureReason())=="storage");
     assert(Current().theme=="pipboy");  // failed writes roll back

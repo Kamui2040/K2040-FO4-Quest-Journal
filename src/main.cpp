@@ -110,7 +110,8 @@ namespace {
     }
     bool TrackerMayShow() {
         return K2040::TrackerCompatibility::ShowMiniTracker(
-            trackerEnabled, PhosphorHudActive());
+            trackerEnabled, PhosphorHudActive(),
+            K2040::Settings::Current().trackerOverridePhosphor);
     }
     bool cursorFallbackRegistered = false;
     bool apiReady = false;
@@ -418,6 +419,7 @@ namespace {
         }
     }
     void CreateJournalView();
+    void CreateViews();
     void CloseJournal();
     bool CompetingGameMenuOpen() {
         if(const auto* menus=RE::UI::GetSingleton()) {
@@ -571,15 +573,18 @@ namespace {
         // Focus is deferred until DOM-ready; closing early cancels it.
     }
     void ToggleTracker() {
-        // When Phosphor supplies the quest box, ignore our tracker hotkey
-        // instead of flipping (and permanently saving) the user's preference.
-        if (PhosphorHudActive()) {
+        // Honor the explicit override; otherwise Phosphor owns the quest box
+        // and its presence must not alter the user's saved tracker preference.
+        if (PhosphorHudActive() && !K2040::Settings::Current().trackerOverridePhosphor) {
             if (Valid(trackerView)) views.Hide(trackerView);
             return;
         }
         const bool desired=!trackerEnabled;
         if(!K2040::Settings::ChangeAndSave(desired?"trackerEnabled:true":"trackerEnabled:false"))return;
         trackerEnabled=desired;
+        // The view may not exist if Phosphor was active at startup and the
+        // override was enabled while our own tracker remained switched off.
+        if(TrackerMayShow() && !trackerView)CreateViews();
         if (!Valid(trackerView)) return;
         if (TrackerMayShow()) { views.Show(trackerView); SyncSnapshots(); }
         else views.Hide(trackerView);
@@ -615,6 +620,9 @@ namespace {
             return;
         }
         trackerEnabled=K2040::Settings::Current().trackerEnabled;
+        // Phosphor auto-hide skips creating the mini tracker at startup.
+        // Opting in during gameplay must create it without a save reload.
+        if(TrackerMayShow() && !trackerView)CreateViews();
         if(Valid(trackerView)) {
             if(TrackerMayShow())views.Show(trackerView);
             else views.Hide(trackerView);
@@ -626,6 +634,7 @@ namespace {
         if(!journalOpen || !journalFocused)return;
         const bool saved=K2040::Settings::ResetToDefaults();
         trackerEnabled=K2040::Settings::Current().trackerEnabled;
+        if(TrackerMayShow() && !trackerView)CreateViews();
         if(Valid(trackerView)) {
             if(TrackerMayShow())views.Show(trackerView);
             else views.Hide(trackerView);
@@ -1758,9 +1767,9 @@ namespace {
     }
     void CreateViews() {
         if (!apiReady) return;
-        // Don't even allocate the mini tracker surface while Phosphor's live
-        // HUD is loaded. The full-screen Journal is created separately.
-        if (PhosphorHudActive()) {
+        // Avoid a conflicting mini tracker unless the user opts in.
+        // The full-screen Journal is created separately.
+        if (PhosphorHudActive() && !K2040::Settings::Current().trackerOverridePhosphor) {
             if (Valid(trackerView)) views.Hide(trackerView);
             return;
         }

@@ -90,7 +90,11 @@ namespace {
             if(key=="journalHotkey")out.journalHotkey=val;
             else out.trackerHotkey=val;
         }
-        else if (key=="trackerEnabled") {if(val!="true" && val!="false")return false;out.trackerEnabled=val=="true";}
+        else if (key=="trackerEnabled" || key=="trackerOverridePhosphor") {
+            if(val!="true" && val!="false")return false;
+            if(key=="trackerEnabled")out.trackerEnabled=val=="true";
+            else out.trackerOverridePhosphor=val=="true";
+        }
         else return false; // Especially reject redirectQuestKey until a verified consuming hook exists.
         return true;
     }
@@ -131,6 +135,7 @@ std::string Serialize(std::string_view hudColor, std::string_view hudBackgroundC
         ",\"trackerAnchor\":\""+p.trackerAnchor+"\",\"trackerScale\":"+std::to_string(p.trackerScale)+
         ",\"trackerWidth\":"+std::to_string(p.trackerWidth)+",\"trackerOpacity\":"+std::to_string(p.trackerOpacity)+
         ",\"trackerEnabled\":"+(p.trackerEnabled?"true":"false")+
+        ",\"trackerOverridePhosphor\":"+(p.trackerOverridePhosphor?"true":"false")+
         ",\"trackerMaxQuests\":"+std::to_string(p.trackerMaxQuests)+
         ",\"trackerShowCompleted\":"+(p.trackerShowCompleted?"true":"false")+
         ",\"trackerAutoPinNew\":"+(p.trackerAutoPinNew?"true":"false")+
@@ -174,6 +179,7 @@ bool Save() {
              << "\ntrackerAnchor=" << p.trackerAnchor << "\ntrackerScale=" << p.trackerScale
              << "\ntrackerWidth=" << p.trackerWidth << "\ntrackerOpacity=" << p.trackerOpacity
              << "\ntrackerEnabled=" << (p.trackerEnabled ? "true":"false")
+             << "\ntrackerOverridePhosphor=" << (p.trackerOverridePhosphor ? "true":"false")
              << "\ntrackerMaxQuests=" << p.trackerMaxQuests
              << "\ntrackerShowCompleted=" << (p.trackerShowCompleted ? "true":"false")
              << "\ntrackerAutoPinNew=" << (p.trackerAutoPinNew ? "true":"false")

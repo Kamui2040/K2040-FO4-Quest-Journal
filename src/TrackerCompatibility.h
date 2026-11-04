@@ -4,7 +4,8 @@
 // must never be disabled, modified or queried through unsupported internals.
 namespace K2040::TrackerCompatibility {
     [[nodiscard]] constexpr bool ShowMiniTracker(bool userEnabled,
-                                                 bool conflictingHudActive) noexcept {
-        return userEnabled && !conflictingHudActive;
+                                                 bool conflictingHudActive,
+                                                 bool allowWithConflictingHud) noexcept {
+        return userEnabled && (!conflictingHudActive || allowWithConflictingHud);
     }
 }
