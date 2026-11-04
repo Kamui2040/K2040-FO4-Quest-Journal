@@ -229,6 +229,8 @@
   function showSettings(show) {
     state.showSettings=show;
     applySettings();
+    if(show)document.querySelector(`[data-settings-page="${state.settingsPage}"]`)?.focus();
+    else el('openSettings').focus();
     if(show&&!state.demo)emit('requestHubBindings');
   }
   // Both a browser key event and the native physical-Escape fallback call
