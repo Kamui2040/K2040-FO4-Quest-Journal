@@ -14,7 +14,7 @@ Some repeatable quests and quests from other mods handle objectives differently.
 
 ## Other mods
 
-In the unreleased development source after v0.0.2, Quest Journal detects a loaded [Phosphor HUD](https://www.nexusmods.com/fallout4/mods/109983) with its live HUD enabled and suppresses only its own mini tracker. The full-screen Journal continues to work, and the saved tracker preference returns if Phosphor is later disabled or removed. This is not part of the published v0.0.2 package.
+In the unreleased development source after v0.0.2, Quest Journal detects a loaded [Phosphor HUD](https://www.nexusmods.com/fallout4/mods/109983) with its live HUD enabled and suppresses only its own mini tracker by default. The **Compact tracker** settings include **Show Quest Journal tracker with Phosphor HUD** (off by default), which lets users opt into Quest Journal's tracker even if Phosphor is active. If Phosphor also displays its tracker, both may appear until Phosphor provides and the user enables a separate disable option. The override persists and can be changed immediately without restarting the game. The full-screen Journal is not affected, and neither mod writes to the other mod's settings. This is not part of the published v0.0.2 package.
 
 MCM is optional, though useful for changing your keyboard shortcuts.
 

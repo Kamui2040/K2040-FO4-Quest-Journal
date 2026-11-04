@@ -12,6 +12,7 @@ int main() {
         !Change("trackerWidth:260") ||
         !Change("opacity:71") ||
         !Change("trackerEnabled:false") ||
+        !Change("trackerOverridePhosphor:true") ||
         !Change("trackerShowCompleted:true"))
         return 1;
     std::cout << Serialize() << '\n';
