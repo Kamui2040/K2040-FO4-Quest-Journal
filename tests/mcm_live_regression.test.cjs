@@ -68,3 +68,13 @@ test('explicit Controls reset routes each default through this mod native writer
  assert.match(html,/data-hub-reset="journal">Reset Shift\+G/);
  assert.match(html,/data-hub-reset="tracker">Reset G/);
 });
+
+test('controller selectors expose descriptive accessible names',()=>{
+ const html=fs.readFileSync('view/journal.html','utf8');
+ for(const [id,label] of [
+  ['hubJournalPrimary','Journal primary controller button'],
+  ['hubJournalHeld','Journal held controller button'],
+  ['hubTrackerPrimary','Tracker primary controller button'],
+  ['hubTrackerHeld','Tracker held controller button']
+ ]) assert.match(html,new RegExp(`id="${id}"[^>]*aria-label="${label}"`));
+});

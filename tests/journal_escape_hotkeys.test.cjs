@@ -15,7 +15,7 @@ function start(){
      dataset:{},classList:{contains(){return false},add(){},remove(){},toggle(){}},
      querySelector(){return element('nested')},querySelectorAll(){return []},
      addEventListener(name,handler){const list=listeners.get(name)||[];list.push(handler);listeners.set(name,list)},
-     closest(){return null},focus(){},scrollTop:0,_listeners:listeners};
+     closest(){return null},focus(){doc.activeElement=this},scrollTop:0,_listeners:listeners};
    elements.set(id,e);
   }
   return elements.get(id);
@@ -51,14 +51,16 @@ function start(){
   }
   assert.ok(prevented);
  };
- return {element,win,click,escapeDom,nativeCalls};
+ return {element,win,click,escapeDom,nativeCalls,activeElement:()=>doc.activeElement};
 }
 test('native Escape closes Settings first and Journal on next press',()=>{
  const v=start();
  v.click('openSettings');
  assert.equal(v.element('settingsWorkspace').hidden,false);
+ assert.equal(v.activeElement().id,'[data-settings-page="appearance"]');
  v.win.handleJournalEscape();
  assert.equal(v.element('settingsWorkspace').hidden,true);
+ assert.equal(v.activeElement().id,'openSettings');
  assert.equal(v.nativeCalls.includes('close'),false);
  v.win.handleJournalEscape();
  assert.equal(v.nativeCalls.filter(x=>x==='close').length,1);
