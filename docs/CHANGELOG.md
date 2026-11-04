@@ -3,7 +3,7 @@
 ## Unreleased — v0.0.3
 
 - Automatically suppress the mini tracker when Phosphor HUD is loaded with its live HUD enabled. The full-screen Journal and saved tracker preference remain available; Phosphor HUD is not modified.
-- Improve Settings accessibility with descriptive controller selector names and focus transfer when the panel opens or closes.
+- Improve Settings accessibility with descriptive controller names, current-category announcements, and focus transfer when the panel opens or closes.
 
 ## 0.0.2 — First release
 

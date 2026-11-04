@@ -34,6 +34,10 @@ test('settings and quest journal use one selected theme with independent tracker
  assert.match(native,/val=="default"\?"pipboy":std::string\(val\)/);
 });
 
+test('settings navigation exposes the current category to assistive technology',()=>{
+ assert.match(app,/node\.setAttribute\('aria-current',selected\?'page':'false'\)/);
+});
+
 test('all native WebKit shortcut and controller controls receive themed button skin',()=>{
  assert.equal((html.match(/class="setting-row hub-shortcut-row"/g)||[]).length,2);
  assert.equal((html.match(/class="setting-row hub-pad-row"/g)||[]).length,4);

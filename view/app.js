@@ -153,7 +153,11 @@
     document.getElementById('pageTitle').textContent=state.showSettings?'Quest Journal Settings':'Quest Journal';
     document.getElementById('resetFilters').hidden=state.showSettings;
     document.getElementById('openSettings').hidden=state.showSettings;
-    document.querySelectorAll('[data-settings-page]').forEach(node=>node.classList.toggle('selected',node.dataset.settingsPage===state.settingsPage));
+    document.querySelectorAll('[data-settings-page]').forEach(node=>{
+      const selected=node.dataset.settingsPage===state.settingsPage;
+      node.classList.toggle('selected',selected);
+      node.setAttribute('aria-current',selected?'page':'false');
+    });
     for(const page of ['appearance','tracker','journalAppearance','journal','controls']) {
       document.getElementById('settings'+page[0].toUpperCase()+page.slice(1)).hidden=page!==state.settingsPage;
     }
