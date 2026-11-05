@@ -28,4 +28,4 @@ The UI is a Prisma web view. Existing page code handles keyboard arrows in custo
 Directional movement selects the nearest eligible control in that direction, skipping hidden and disabled controls and bringing the result into view. A uses the control's normal activation behavior. B follows the same layered Escape behavior as keyboard input. Navigation remains within the currently visible Journal or Settings panel; custom select popups keep their existing arrow-key behavior. Pointer input remains usable, and mouse interaction is unchanged.
 
 ## Validation boundary
-Implementation checks should cover directional focus, confirm, layered back behavior, and input gating. Final acceptance requires the user to try the controls in Fallout 4 with a controller; no game launch is part of local development.
+Implementation checks cover directional focus, selection, back behavior, and input gating. The user confirmed the controller-navigation build in Fallout 4 on 5 November 2026. Local development does not launch the game.

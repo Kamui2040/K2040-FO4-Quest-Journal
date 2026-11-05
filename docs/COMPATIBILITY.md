@@ -8,7 +8,7 @@ The next-gen/Anniversary Edition versions and Fallout 4 VR are not supported.
 
 ## Controller menus
 
-The Journal menus support D-pad and left-stick focus navigation, **A** to activate, and **B** to go back. Right-stick cursor navigation remains available. The user confirmed this behavior in-game with the native controller-navigation release candidate on 5 November 2026. Mouse and keyboard input remains supported.
+The upcoming v0.0.3 development build adds menu navigation. Use the **D-pad** or **left stick** to move the selection, **A** to choose, and **B** to go back. The right stick can still move the cursor. Mouse and keyboard still work. This was confirmed in-game on 5 November 2026; the published v0.0.2 package does not include it.
 
 ## Quest tracking
 
@@ -18,7 +18,7 @@ Some repeatable quests and quests from other mods handle objectives differently.
 
 ## Other mods
 
-In the unreleased development source after v0.0.2, Quest Journal detects a loaded [Phosphor HUD](https://www.nexusmods.com/fallout4/mods/109983) with its live HUD enabled and suppresses only its own mini tracker by default. The **Compact tracker** settings include **Show Quest Journal tracker with Phosphor HUD** (off by default), which lets users opt into Quest Journal's tracker even if Phosphor is active. If Phosphor also displays its tracker, both may appear until Phosphor provides and the user enables a separate disable option. The override persists and can be changed immediately without restarting the game. The full-screen Journal is not affected, and neither mod writes to the other mod's settings. This is not part of the published v0.0.2 package.
+When [Phosphor HUD](https://www.nexusmods.com/fallout4/mods/109983) is running with its live HUD on, Quest Journal hides only its own mini tracker. The full Journal remains available. To show the mini tracker too, turn on **Show Quest Journal tracker with Phosphor HUD** under Compact tracker settings. This option is off by default, saves between sessions, and takes effect right away. Quest Journal does not change Phosphor's settings. If both mods show a tracker, you may see two. These changes are in v0.0.3 development and are not part of the published v0.0.2 release.
 
 MCM is optional, though useful for changing your keyboard shortcuts.
 

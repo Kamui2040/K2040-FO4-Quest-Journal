@@ -1,6 +1,6 @@
 # Reproducible Windows x64 F4SE build from Linux
 
-The project builds with Xmake and LLVM/clang-cl on Linux, using the Windows SDK and pinned CommonLibF4 and PrismaUI development files.
+You can build the Fallout 4 Windows x64 plugin on Linux. The build uses Xmake and LLVM/clang-cl, along with the Windows SDK and pinned CommonLibF4 and PrismaUI files.
 
 ## Pinned external source inputs
 
@@ -8,7 +8,7 @@ The project builds with Xmake and LLVM/clang-cl on Linux, using the Windows SDK 
 - Its `commonlib-shared` submodule commit `f0b1670ee9caac2e349497f6f3c08a69633a8ea7` (GPLv3 with modding/linking exceptions).
 - Unmodified `PrismaUI_F4_Modern_API.h` from upstream PrismaUI_F4 commit `0daf5e38d3517772c8c28236c8857e5c037fa3bd`, blob `9784daab39bf66bb179e6ef12bba63c75e50d3b7`. License belongs to upstream PrismaUI_F4. **Do not commit the vendor header.**
 
-`scripts/bootstrap-source-deps.sh` can fetch/pin public source dependencies into a chosen directory. Obtain any extracted MSVC headers/libraries and Windows SDK legally and independently; prepare LLVM/clang-cl, xmake 3, Bash, Python 3 and Node.js. The Windows build tools must be supplied separately.
+Use `scripts/bootstrap-source-deps.sh` to fetch the pinned public source dependencies into a directory you choose. Obtain the MSVC headers and libraries and the Windows SDK independently. You also need LLVM/clang-cl, Xmake 3, Bash, Python 3, and Node.js.
 
 ## Build
 
@@ -24,7 +24,7 @@ python3 scripts/stage-test-package.py \
   --mcm-mode grouped
 ```
 
-The Xmake recipe verifies exact CommonLibF4 and submodule revisions, the PrismaUI API header's checksum and the Windows x64 PE image's F4SE exports and native tracking/readback markers. The standard tracked release flavor is selected explicitly by `build-normal-tracking.sh`. An unflagged `build-linux.sh` remains read-only and is useful as a rollback test; it is not the gameplay-feature build.
+The build checks the pinned CommonLibF4 revisions, the PrismaUI header checksum, and the Windows DLL's F4SE exports and tracking markers. `build-normal-tracking.sh` selects the standard tracking build. Running `build-linux.sh` without a build option creates a read-only fallback; it is not the gameplay build.
 
 The compiled files are staged under `dist/Data`. The packaging script creates a ZIP with the mod, license, credits and installation guide. It does not install the mod.
 
@@ -34,4 +34,4 @@ The compiled files are staged under `dist/Data`. The packaging script creates a 
 
 ## Dependencies and redistribution
 
-See [Third-party notices](../THIRD_PARTY_NOTICES.md). Keep the repository's license and corresponding source publicly available whenever distributing its compiled GPL project code. The original PrismaUI framework, CommonLibF4 source, F4SE and game files are separate dependencies and are not bundled in this repository or installer.
+See [Third-party notices](../THIRD_PARTY_NOTICES.md). When sharing a compiled copy, provide the matching source code, build instructions, project license, and this notice. The PrismaUI framework, CommonLibF4 source, F4SE, and game files are separate requirements; this repository and installer do not include them.

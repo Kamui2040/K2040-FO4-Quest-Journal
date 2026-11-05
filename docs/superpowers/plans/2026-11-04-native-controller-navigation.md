@@ -1,6 +1,6 @@
 # Native Controller Navigation Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+**Status: Complete.** The changes are on public `main`, the source checks passed, and the user confirmed the release candidate in-game on 5 November 2026.
 
 **Goal:** Add predictable D-pad and left-stick focus navigation to the focused Quest Journal, with A to activate and B/Escape to back out, while retaining pointer input.
 
@@ -36,11 +36,11 @@
 
 **Interface:** `window.receiveJournalControllerAction(action)` accepts `up`, `down`, `left`, `right`, `activate`, and `back`. It is a no-op when Settings/Journal is not the active view.
 
-- [ ] Add tests to `tests/journal_escape_hotkeys.test.cjs` for initial focus, nearest directional focus, hidden/disabled skipping, scroll-into-view, activation, Escape/back dispatch, left/right range adjustment, and the Controls-page navigation guidance.
-- [ ] Run `node --test tests/journal_escape_hotkeys.test.cjs`; confirm the new behavior assertions fail for the missing receiver.
-- [ ] Implement the receiver in `view/app.js`. Move focus among visible enabled controls in the active panel; when a custom select popup is open, pass directions through its existing arrow-key handler. Activate with the focused control's normal click behavior; route back through the existing Escape handler.
-- [ ] Add a visible controller-focus outline in `view/styles.css`; clear controller focus styling when pointer or keyboard interaction resumes. Explain the D-pad/left-stick, A, B, and right-stick controls in the Settings Controls page.
-- [ ] Run the focused Node test and `node --check view/app.js`.
+- [x] Add tests to `tests/journal_escape_hotkeys.test.cjs` for initial focus, nearest directional focus, hidden/disabled skipping, scroll-into-view, activation, Escape/back dispatch, left/right range adjustment, and the Controls-page navigation guidance.
+- [x] Run `node --test tests/journal_escape_hotkeys.test.cjs`; confirm the new behavior assertions fail for the missing receiver.
+- [x] Implement the receiver in `view/app.js`. Move focus among visible enabled controls in the active panel; when a custom select popup is open, pass directions through its existing arrow-key handler. Activate with the focused control's normal click behavior; route back through the existing Escape handler.
+- [x] Add a visible controller-focus outline in `view/styles.css`; clear controller focus styling when pointer or keyboard interaction resumes. Explain the D-pad/left-stick, A, B, and right-stick controls in the Settings Controls page.
+- [x] Run the focused Node test and `node --check view/app.js`.
 
 ### Task 2: Sample and forward controller actions safely
 
@@ -53,20 +53,20 @@
 
 **Interface:** `K2040::ControllerNavigation::Sampler::Update(Input, focused, now)` returns one action (`None`, direction, `Activate`, or `Back`). `Input` carries XInput button bits and left-stick axes. Direction repeats after 350 ms and then every 120 ms; use the XInput left-stick dead zone.
 
-- [ ] Write synthetic tests for D-pad priority, dominant-axis handling, dead zone, repeat cadence, A/B rising edges, focus loss, and menu-button hotkey collisions (navigation takes priority only while the Journal is focused).
-- [ ] Compile and run the new native test directly; confirm it fails on the unimplemented sampler behavior.
-- [ ] Implement the sampler in the engine-independent header and add its compile/run command to `scripts/verify-source.sh`.
-- [ ] Extend the existing XInput sample in `src/main.cpp` to include left-stick axes and D-pad/A/B bits.
-- [ ] Feed sampler actions from `PollHubPads`; marshal each action through the existing game-thread task queue, recheck focused Journal ownership in the task, and call `receiveJournalControllerAction` through Prisma interop. Do not call Prisma interop from the polling worker.
-- [ ] Update the Unreleased changelog entry.
-- [ ] Run `bash scripts/verify-source.sh`; build the Windows x64 DLL if the pinned toolchain is available.
+- [x] Write synthetic tests for D-pad priority, dominant-axis handling, dead zone, repeat cadence, A/B rising edges, focus loss, and menu-button hotkey collisions (navigation takes priority only while the Journal is focused).
+- [x] Compile and run the new native test directly; confirm it fails on the unimplemented sampler behavior.
+- [x] Implement the sampler in the engine-independent header and add its compile/run command to `scripts/verify-source.sh`.
+- [x] Extend the existing XInput sample in `src/main.cpp` to include left-stick axes and D-pad/A/B bits.
+- [x] Feed sampler actions from `PollHubPads`; marshal each action through the existing game-thread task queue, recheck focused Journal ownership in the task, and call `receiveJournalControllerAction` through Prisma interop. Do not call Prisma interop from the polling worker.
+- [x] Update the Unreleased changelog entry.
+- [x] Run `bash scripts/verify-source.sh`; build the Windows x64 DLL if the pinned toolchain is available.
 
 ### Task 3: Prepare and manually accept the controller candidate
 
 **Files:** existing test package output and release notes only.
 
-- [ ] Stage a private RC ZIP from the fresh DLL and current UI assets; keep prior accepted ZIPs unchanged.
-- [ ] Verify ZIP contents, DLL x64/F4SE exports, and SHA-256.
-- [ ] Ask the user to check D-pad and left-stick focus movement, A activation, B dismissing a popup then leaving Settings, and continued right-stick/mouse operation in Fallout 4. Do not launch the game in this environment.
+- [x] Stage a private RC ZIP from the fresh DLL and current UI assets; keep prior accepted ZIPs unchanged.
+- [x] Verify ZIP contents, DLL x64/F4SE exports, and SHA-256.
+- [x] Ask the user to check D-pad and left-stick focus movement, A activation, B dismissing a popup then leaving Settings, and continued right-stick/mouse operation in Fallout 4. Do not launch the game in this environment.
 
-**Commit boundary:** keep the design and plan with the implementation branch; commit implementation only after its checks are green.
+**Completed:** The implementation was committed after its checks passed and is now on public `main`.
