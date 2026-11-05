@@ -6,6 +6,10 @@ Quest Journal supports **Fallout 4 (1.10.163)**, the original PC version. It req
 
 The next-gen/Anniversary Edition versions and Fallout 4 VR are not supported.
 
+## Controller menus
+
+The Journal menus support D-pad and left-stick focus navigation, **A** to activate, and **B** to go back. Right-stick cursor navigation remains available. The user confirmed this behavior in-game with the native controller-navigation release candidate on 5 November 2026. Mouse and keyboard input remains supported.
+
 ## Quest tracking
 
 You can track supported quests in the Journal, just as you would in the Pip-Boy. The mini tracker can also show quests tracked through the Pip-Boy or quests you've pinned yourself.

@@ -38,6 +38,8 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 
 You can change these shortcuts in MCM or the Journal settings. Your custom bindings will be kept when updating.
 
+In menus, use the **D-pad** or **left stick** to move between controls, **A** to select, and **B** to go back. The right stick remains available for cursor navigation.
+
 ## Compatibility
 
 Quest Journal is made for the original Fallout 4 (1.10.163). Some unusual or repeatable quests may have tracking limitations. See [Compatibility](docs/COMPATIBILITY.md) for more information.
