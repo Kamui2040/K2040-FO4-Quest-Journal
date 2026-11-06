@@ -2152,11 +2152,24 @@ namespace {
     class Hotkeys final : public RE::BSInputEventUser {
     public:
         bool ShouldHandleEvent(const RE::InputEvent* event) override {
-            return event && event->eventType == RE::INPUT_EVENT_TYPE::kButton &&
-                   event->device == RE::INPUT_DEVICE::kKeyboard;
+            if(!event || event->eventType!=RE::INPUT_EVENT_TYPE::kButton)return false;
+            const auto* button=event->As<RE::ButtonEvent>();
+            return (button && event->device==RE::INPUT_DEVICE::kKeyboard) ||
+                   (K2040::Settings::Current().redirectQuestKey && button &&
+                    event->QUserEvent()=="QuickData");
         }
         void OnButtonEvent(const RE::ButtonEvent* event) override {
             if (!event || !event->QJustPressed() || !apiReady) return;
+            if(event->QUserEvent()=="QuickData") {
+                if(K2040::Settings::Current().redirectQuestKey && gameLoaded &&
+                   !CompetingGameMenuOpen() && !AnotherPrismaViewFocused()) {
+                    // The receiver API exposes events as const; kStop prevents vanilla Quick Data handling.
+                    const_cast<RE::InputEvent*>(static_cast<const RE::InputEvent*>(event))->handled=
+                        RE::InputEvent::HANDLED_RESULT::kStop;
+                    DispatchAction(K2040::Hub::Action::Journal);
+                }
+                return;
+            }
             const auto key = static_cast<std::uint32_t>(event->GetBSButtonCode());
             const auto& preferences=K2040::Settings::Current();
             const bool shift=(GetAsyncKeyState(VK_SHIFT)&0x8000)!=0;

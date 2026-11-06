@@ -23,7 +23,7 @@
           "valueOptions": {
             "allowModifierKeys": 1
           },
-          "help": "Ctrl/Shift/Alt combinations supported. Shift+G and G are the respective defaults. F9 quickload and plain J are reserved."
+          "help": "Ctrl/Shift/Alt combinations supported. Shift+G and G are the respective defaults. F9 is reserved for quickload. J runs Quick Data unless redirection is enabled in Journal Controls."
         },
         {
           "id": "questTrackerToggle",
@@ -32,7 +32,7 @@
           "valueOptions": {
             "allowModifierKeys": 1
           },
-          "help": "Ctrl/Shift/Alt combinations supported. Shift+G and G are the respective defaults. F9 quickload and plain J are reserved."
+          "help": "Ctrl/Shift/Alt combinations supported. Shift+G and G are the respective defaults. F9 is reserved for quickload. J runs Quick Data unless redirection is enabled in Journal Controls."
         },
         {
           "type": "section",

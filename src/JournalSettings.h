@@ -36,6 +36,7 @@ namespace K2040::Settings {
         bool trackerSyncPipboy = false;
         std::string journalHotkey = "Shift+G";
         std::string trackerHotkey = "G";
+        bool redirectQuestKey = false;
     };
     void Load();
     const Preferences& Current();

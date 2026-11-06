@@ -12,6 +12,7 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 - Pin quests to a compact tracker on your HUD. Choose where it appears, how large it is and how many quests it shows.
 - Customize the Journal and tracker separately with five themes or your own colors.
 - Change settings from the Journal or through the optional **K2040 Mods** MCM menu.
+- Optionally use Fallout 4's Quick Data action (usually J) to open Quest Journal, following your current key binding. This is off by default.
 - Keyboard and controller support.
 
 ## Requirements

@@ -40,8 +40,16 @@ test('Pip-Boy mirror is additive to manual pins, still respects hidden and histo
  assert.match(model,/q\.pinned \|\| \(sync && q\.vanillaTracked\)/);
  assert.match(model,/!q\.hidden && !q\.historyOnly/);
 });
-test('unverified Quick Data key replacement stays disabled',()=>{
+test('Quick Data redirect follows and consumes the mapped gameplay action',()=>{
  const settings=fs.readFileSync('src/JournalSettings.cpp','utf8');
- assert.match(settings,/reject redirectQuestKey/);
- assert.match(settings,/redirectQuestKey\\":false/);
+ const input=fs.readFileSync('src/main.cpp','utf8');
+ assert.match(settings,/redirectQuestKey/);
+ assert.match(settings,/redirectQuestKey\\":\"\+\(p\.redirectQuestKey\?"true":"false"\)/);
+ assert.match(input,/QUserEvent\(\)=="QuickData"/);
+ assert.match(input,/handled\s*=\s*RE::InputEvent::HANDLED_RESULT::kStop/);
+ assert.match(input,/DispatchAction\(K2040::Hub::Action::Journal\)/);
+ assert.match(input,/!CompetingGameMenuOpen\(\) && !AnotherPrismaViewFocused\(\)/);
+ const ui=fs.readFileSync('view/journal.html','utf8');
+ assert.match(ui,/id="redirectQuestKey" type="checkbox" data-setting="redirectQuestKey"/);
+ assert.match(ui,/follows your current key binding and is off by default/);
 });

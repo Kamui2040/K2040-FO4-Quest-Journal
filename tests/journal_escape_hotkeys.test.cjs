@@ -187,7 +187,7 @@ test('native controller actions use the focused UI task path and skip colliding 
 });
 test('Controls page explains menu navigation and the shortcut priority',()=>{
  const html=fs.readFileSync('view/journal.html','utf8');
- assert.match(html,/D-pad or left stick to move focus, A to choose, and B to go back/);
- assert.match(html,/right stick still controls the cursor/);
- assert.match(html,/menu navigation takes priority over shortcuts assigned to A, B, or the D-pad/);
+ assert.match(html,/Use the D-pad or left stick to move the selection\. Press A to choose and B to go back/);
+ assert.match(html,/right stick still moves the cursor/);
+ assert.match(html,/these menu controls take priority over custom actions assigned to A, B, or the D-pad/);
 });

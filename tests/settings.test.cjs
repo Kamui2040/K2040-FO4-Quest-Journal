@@ -47,8 +47,10 @@ test('allows bottom and left anchors with no manual placement',()=>{
  for(const value of S.anchors) assert.equal(S.normalize({trackerAnchor:value}).trackerAnchor,value);
  assert.equal(S.normalize({trackerAnchor:'top:0'}).trackerAnchor,'top-right');
 });
-test('redirection stays disabled while no proven vanilla input interceptor exists',()=>{
- assert.equal(S.normalize({redirectQuestKey:true}).redirectQuestKey,false);
+test('Quick Data redirect defaults off and accepts only a boolean opt-in',()=>{
+ assert.equal(S.normalize({}).redirectQuestKey,false);
+ assert.equal(S.normalize({redirectQuestKey:true}).redirectQuestKey,true);
+ assert.equal(S.normalize({redirectQuestKey:'true'}).redirectQuestKey,false);
 });
 test('palette picks custom, pipboy and contrast',()=>{
  assert.equal(S.palette(S.normalize({theme:'custom',accent:'#abcdef'})).accent,'#abcdef');

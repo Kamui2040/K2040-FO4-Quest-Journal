@@ -70,7 +70,7 @@
       trackerSyncPipboy:v.trackerSyncPipboy === true,
       journalHotkey,
       trackerHotkey:choose(v.trackerHotkey,safeKeys,defaults.trackerHotkey)===journalHotkey ? (journalHotkey==='G'?'Shift+G':'G') : choose(v.trackerHotkey,safeKeys,defaults.trackerHotkey),
-      redirectQuestKey:false // Reserved until a verified input interception is available.
+      redirectQuestKey:v.redirectQuestKey===true
     };
   }
   function palette(s) {

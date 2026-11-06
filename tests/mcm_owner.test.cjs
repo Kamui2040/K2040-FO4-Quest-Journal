@@ -48,5 +48,4 @@ test('child-owned native adapter has no parent-owned live action registration',(
  const entry=fs.readFileSync(path.join(root,'src/main.cpp'),'utf8');
  assert.match(entry,/Register\("K2040_Quest_Journal",\s*&RegisterHubMcm\)/);
  assert.match(entry,/DispatchAction/);
- assert.doesNotMatch(entry,/redirectQuestKey:true/);
 });

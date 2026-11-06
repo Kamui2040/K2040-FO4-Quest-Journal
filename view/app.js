@@ -207,7 +207,7 @@
     else window.K2040JournalSelects?.sync();
   }
   function changeSetting(key,value) {
-    if(!Object.prototype.hasOwnProperty.call(S.defaults,key) || key==='redirectQuestKey')return;
+    if(!Object.prototype.hasOwnProperty.call(S.defaults,key))return;
     if((key==='journalHotkey' && value===state.settings.trackerHotkey) ||
        (key==='trackerHotkey' && value===state.settings.journalHotkey)) {
       if(!isTracker)el('settingsSaveStatus').textContent='Use different keys for journal and tracker';

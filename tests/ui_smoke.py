@@ -13,13 +13,13 @@ def html_document(name):
     doc = (view / f"{name}.html").read_text(encoding="utf-8")
     doc = doc.replace('<link rel="stylesheet" href="styles.css">',
                       '<style>' + (view / "styles.css").read_text(encoding="utf-8") + '</style>')
-    for filename in ("quest-model.js", "journal-settings.js", "demo-data.js", "app.js"):
+    for filename in ("quest-model.js", "journal-settings.js", "demo-data.js", "quest-selects.js", "app.js"):
         doc = doc.replace(f'<script src="{filename}"></script>',
                           '<script>' + (view / filename).read_text(encoding="utf-8") + '</script>')
     return doc
 
 with sync_playwright() as p:
-    binary = os.environ.get("CHROMIUM_PATH", "/usr/bin/chromium")
+    binary = os.environ.get("CHROMIUM_PATH", p.chromium.executable_path)
     browser = p.chromium.launch(executable_path=binary, headless=True, args=["--no-sandbox"])
     for name in ("journal", "tracker"):
         page = browser.new_page(viewport={"width": 1440, "height": 900})
@@ -30,6 +30,7 @@ with sync_playwright() as p:
             # Mock game-thread Prisma callbacks: browser check only.
             page.evaluate("""() => {
               // In-game this callback is bound by the native Prisma bridge.
+              window.updateJournalSetting = () => {};
               window.resetJournalAppearance = () => {
                 window.receiveJournalSettings({});
                 window.receiveJournalSettingsStatus('saved');
@@ -54,7 +55,7 @@ with sync_playwright() as p:
             assert page.evaluate("document.activeElement?.dataset.quest") == quest_id
             page.locator('#questCategory').focus()
             page.evaluate("window.receiveQuestSnapshot({...window.K2040DemoData,quests:window.K2040DemoData.quests.map(q=>({...q,description:(q.description||'')+' changed'}))})")
-            assert page.evaluate("document.activeElement?.id") == 'questCategory'
+            assert page.evaluate("document.activeElement?.classList.contains('k2040-select-trigger') && document.activeElement.previousElementSibling?.id==='questCategory'")
             # Arrow keys inside the sort selector must not be hijacked by quest navigation.
             consumed = page.evaluate("""() => {
               const sort = document.getElementById('questSort');
@@ -89,7 +90,7 @@ with sync_playwright() as p:
             page.locator('[data-theme="contrast"]').click()
             assert page.locator('.tracker-sample').evaluate(
                 "node => node.style.getPropertyValue('--sample-accent')") == '#00e5ff'
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#66c4ff'
+            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#20ff48'
             page.locator('[data-theme="fallout76"]').click()
             assert page.locator('.tracker-sample').evaluate(
                 "node => node.style.getPropertyValue('--sample-accent')") == '#f5cb5b'
@@ -114,12 +115,12 @@ with sync_playwright() as p:
             }""")
             assert page.locator('#settingAccentHex').input_value() == '#114433'.upper()
             # Changing the tracker palette must not recolour the journal UI.
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#66c4ff'
+            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#20ff48'
             assert page.locator('.tracker-sample').evaluate(
                 "node => node.style.getPropertyValue('--sample-accent')") == '#114433'
             page.locator('#settingCompletedHex').fill('#88ffaa')
             page.locator('#settingCompletedHex').press('Tab')
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-completed')") == '#74e398'
+            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-completed')") == '#20ff48'
             assert page.locator('.tracker-sample').evaluate(
                 "node => node.style.getPropertyValue('--sample-completed')") == '#88ffaa'
             assert page.locator('.appearance-sample').count() == 1
@@ -148,7 +149,7 @@ with sync_playwright() as p:
             assert page.locator('#settingSidebarWidth').input_value() == '240'
             assert page.locator('#settingQuestListWidth').input_value() == '360'
             assert page.locator('#settingAccentHex').is_disabled()
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-completed')") == '#74e398'
+            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-completed')") == '#20ff48'
             page.locator('[data-settings-page="journalAppearance"]').click()
             assert page.locator('#settingsJournalAppearance').is_visible()
             page.locator('[data-journal-theme="contrast"]').click()
@@ -164,7 +165,7 @@ with sync_playwright() as p:
             page.locator('#settingJournalAccentHex').press('Tab')
             assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#ba5511'
             assert page.locator('.tracker-sample').evaluate(
-                "node => node.style.getPropertyValue('--sample-accent')") == '#66c4ff'
+                "node => node.style.getPropertyValue('--sample-accent')") == '#20ff48'
             page.locator('#settingJournalOpacity').evaluate("""node => {
               node.value='63';
               node.dispatchEvent(new Event('input',{bubbles:true}));
@@ -198,7 +199,7 @@ with sync_playwright() as p:
             page.evaluate('window.receiveJournalSettings({"trackerAnchor":"bottom-right","trackerScale":120,"trackerMaxQuests":1,"trackerShowCompleted":true})')
             assert page.locator('.tracked-entry').count() == 1
             assert 'Finished step' in page.locator('.tracked-entry').inner_text()
-            assert page.locator('body').get_attribute('class') == 'tracker-page anchor-bottom-right'
+            assert page.locator('body').get_attribute('class') == 'tracker-page anchor-bottom-right theme-pipboy'
             # Changing any anchor must clear the opposite edges; unlike a
             # static selector assertion, this tests actual inline placement.
             for anchor, edges in {

@@ -95,7 +95,11 @@ namespace {
             if(key=="trackerEnabled")out.trackerEnabled=val=="true";
             else out.trackerOverridePhosphor=val=="true";
         }
-        else return false; // Especially reject redirectQuestKey until a verified consuming hook exists.
+        else if (key=="redirectQuestKey") {
+            if(val!="true" && val!="false")return false;
+            out.redirectQuestKey=val=="true";
+        }
+        else return false;
         return true;
     }
 }
@@ -141,7 +145,7 @@ std::string Serialize(std::string_view hudColor, std::string_view hudBackgroundC
         ",\"trackerAutoPinNew\":"+(p.trackerAutoPinNew?"true":"false")+
         ",\"trackerSyncPipboy\":"+(p.trackerSyncPipboy?"true":"false")+
         ",\"journalHotkey\":\""+p.journalHotkey+"\",\"trackerHotkey\":\""+p.trackerHotkey+
-        "\",\"hudColor\":\""+std::string(hudColor)+"\",\"hudBackgroundColor\":\""+std::string(hudBackgroundColor)+"\",\"pipboyColor\":\""+std::string(pipboyColor)+"\",\"redirectQuestKey\":false}";
+        "\",\"hudColor\":\""+std::string(hudColor)+"\",\"hudBackgroundColor\":\""+std::string(hudBackgroundColor)+"\",\"pipboyColor\":\""+std::string(pipboyColor)+"\",\"redirectQuestKey\":"+(p.redirectQuestKey?"true":"false")+"}";
 }
 bool Change(std::string_view command) {
     if (command.empty() || command.size()>128) return false;
@@ -185,7 +189,8 @@ bool Save() {
              << "\ntrackerAutoPinNew=" << (p.trackerAutoPinNew ? "true":"false")
              << "\ntrackerSyncPipboy=" << (p.trackerSyncPipboy ? "true":"false")
              << "\njournalHotkey=" << p.journalHotkey
-             << "\ntrackerHotkey=" << p.trackerHotkey << '\n';
+             << "\ntrackerHotkey=" << p.trackerHotkey
+             << "\nredirectQuestKey=" << (p.redirectQuestKey ? "true":"false") << '\n';
         file.flush();if(!file)return false;
     }
     if (!MoveFileExW(staging.wstring().c_str(),dest.wstring().c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH)) {

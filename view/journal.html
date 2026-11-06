@@ -195,7 +195,7 @@
         <h2>Controls</h2><p class="settings-intro">The journal and tracker have independent shortcuts. Escape returns from settings or closes the journal.</p>
         <p class="settings-intro">Use the D-pad or left stick to move the selection. Press A to choose and B to go back. The right stick still moves the cursor. While the Journal is open, these menu controls take priority over custom actions assigned to A, B, or the D-pad.</p>
         <div id="hubControls" hidden>
- <p class="settings-intro">The K2040 Mods MCM Hub is active. Changes here and in MCM share the same assignments. Unbound disables an MCM shortcut. Ctrl, Shift and Alt combinations can be assigned; game-reserved keys may also trigger vanilla actions. F9 and plain J are reserved.</p>
+ <p class="settings-intro">The K2040 Mods MCM Hub is active. Changes here and in MCM share the same assignments. Unbound disables an MCM shortcut. Ctrl, Shift and Alt combinations can be assigned; game-reserved keys may also trigger vanilla actions. F9 and plain J are reserved for game actions.</p>
  <p class="settings-intro" id="hubBindingStatus" role="status">Loading shared bindings…</p>
  <div class="hub-binding-section" data-hub-action="journal">
  <div class="setting-label">Open / close journal</div>
@@ -213,10 +213,10 @@
         <div id="standaloneHotkeys"><p class="settings-intro">Standalone shortcuts (used when the Hub is absent or has no binding):</p>
         <label class="setting-row" for="settingJournalHotkey"><span>Open / close journal</span><select id="settingJournalHotkey" data-setting="journalHotkey"><option>Shift+G</option><option>G</option><option>F6</option><option>F7</option><option>F8</option><option>F10</option><option>F11</option><option>F12</option></select></label>
         <label class="setting-row" for="settingTrackerHotkey"><span>Show / hide compact tracker</span><select id="settingTrackerHotkey" data-setting="trackerHotkey"><option>Shift+G</option><option>G</option><option>F6</option><option>F7</option><option>F8</option><option>F10</option><option>F11</option><option>F12</option></select></label>
-        <p class="settings-intro">Shift+G and G are the defaults. Legacy F-key assignments remain available, and existing saved bindings are preserved. F9 and J remain reserved. Identical journal and tracker keys are not accepted.</p>
+        <p class="settings-intro">Shift+G and G are the defaults. Legacy F-key assignments remain available, and existing saved bindings are preserved. F9 and J are reserved for game actions. Identical journal and tracker keys are not accepted.</p>
         </div>
-        <div class="setting-row"><span>Redirect Fallout 4's Quick Data / J key</span><button class="settings-toggle" type="button" disabled aria-disabled="true">Not available yet</button></div>
-        <p class="settings-intro">Fallout 4 normally uses J to open the Pip-Boy Data tab. Replacing that action safely requires a verified engine-level input interception. A second J listener could open both menus, so this option stays off until runtime testing confirms a safe replacement.</p>
+        <label class="setting-row" for="redirectQuestKey"><span>Use Quick Data to open Quest Journal (usually J)</span><input id="redirectQuestKey" type="checkbox" data-setting="redirectQuestKey"></label>
+        <p class="settings-intro">When enabled, Fallout 4's Quick Data action opens Quest Journal instead. It follows your current key binding and is off by default.</p>
       </div>
       <div class="settings-foot"><span id="settingsSaveStatus" role="status">Settings</span><button id="resetAppearance" type="button" class="ghost-button">Reset to defaults</button><button id="backToJournal" type="button" class="primary-button">Back to Journal</button></div>
     </main>

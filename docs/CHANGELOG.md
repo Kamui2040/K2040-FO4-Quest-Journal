@@ -2,6 +2,7 @@
 
 ## Unreleased — v0.0.3
 
+- Optionally open Quest Journal with Fallout 4's Quick Data action (usually J). The redirect follows your current key binding and is off by default.
 - When Phosphor HUD is active, hide the Quest Journal mini tracker by default. Turn on **Show Quest Journal tracker with Phosphor HUD** in Compact tracker settings to show it anyway. This setting is off by default and saved between sessions. The full Journal stays available, and Quest Journal does not change Phosphor's settings.
 - Make Settings easier to use with a controller: show clear controller names and the current category, and return focus when the panel opens or closes.
 - Use the D-pad or left stick to move through menus. Press A to select and B to go back. Right-stick cursor and mouse input still work.

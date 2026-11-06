@@ -24,11 +24,17 @@ int main() {
     assert(Current().sidebarWidth == 240);
     assert(Current().questListWidth == 360);
     assert(!Current().trackerOverridePhosphor); // safe default for older INIs
+    assert(!Current().redirectQuestKey);
     assert(!Change("completed:bogus"));
     assert(!Change("completed:#12345"));
     assert(!Change("sidebarWidth:159"));
     assert(!Change("questListWidth:561"));
-    assert(!Change("redirectQuestKey:true"));
+    assert(Change("redirectQuestKey:true"));
+    assert(Current().redirectQuestKey);
+    assert(!Change("redirectQuestKey:yes"));
+    assert(Serialize().find("\"redirectQuestKey\":true")!=std::string::npos);
+    assert(Change("redirectQuestKey:false"));
+    assert(!Current().redirectQuestKey);
     assert(Change("theme:custom"));
     assert(Change("accent:#abcdef"));
     assert(Change("completed:#12a3ef"));
@@ -47,6 +53,7 @@ int main() {
     assert(Change("journalCompleted:#44ffaa"));
     assert(Change("journalOpacity:76"));
     assert(Change("journalFontSize:115"));
+    assert(Change("redirectQuestKey:true"));
     assert(!Change("journalTheme:unknown"));
     assert(!Change("journalOpacity:101"));
     assert(!Change("journalAccent:invalid"));
@@ -67,6 +74,7 @@ int main() {
     assert(Current().journalAccent=="#aa55cc");
     assert(Current().journalOpacity==76);
     assert(Current().journalFontSize==115);
+    assert(Current().redirectQuestKey);
     const auto payload = Serialize();
     assert(payload.find("\"completed\":\"#12a3ef\"") != std::string::npos);
     assert(payload.find("\"sidebarWidth\":320") != std::string::npos);
@@ -82,6 +90,7 @@ int main() {
     assert(Current().sidebarWidth == 240 && Current().questListWidth == 360);
     assert(Current().journalHotkey == "Shift+G" && Current().trackerHotkey == "G");
     assert(!Current().trackerOverridePhosphor); // reset revokes override
+    assert(!Current().redirectQuestKey);
     Load();
     assert(Current().journalHotkey == "Shift+G" && Current().trackerHotkey == "G");
     assert(ChangeAndSave("opacity:81"));
