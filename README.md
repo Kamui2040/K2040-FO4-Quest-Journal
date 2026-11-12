@@ -39,7 +39,7 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 
 You can change these shortcuts in MCM or the Journal settings. Your custom bindings will be kept when updating.
 
-The upcoming v0.0.3 development build adds menu navigation: use the **D-pad** or **left stick** to move between controls, **A** to select, and **B** to go back. The right stick remains available for cursor navigation.
+The upcoming v0.0.3 development build adds menu navigation: use the game's mapped menu controls to move, **confirm**, and **go back**. The left stick and right-stick cursor remain available. Physical button labels may differ on Switch controllers or with Steam Input.
 
 ## Compatibility
 

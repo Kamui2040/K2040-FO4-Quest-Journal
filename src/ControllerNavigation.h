@@ -12,10 +12,38 @@ struct Input {
     std::int16_t leftY{};
 };
 
+// Logical XInput button masks sourced from Fallout 4's menu ControlMap.
+// Native menu bindings stay authoritative; these defaults apply only when
+// the game mapping cannot be read or is not an ordinary single button.
+struct MenuBindings {
+    std::uint16_t accept{0x1000u}, cancel{0x2000u};
+    std::uint16_t up{0x0001u}, down{0x0002u};
+    std::uint16_t left{0x0004u}, right{0x0008u};
+
+    [[nodiscard]] static constexpr std::uint16_t SupportedButton(
+        std::uint32_t mapped,std::uint16_t fallback) noexcept {
+        constexpr std::uint32_t gamepadButtons=0xF3FFu;
+        return mapped && mapped<=0xFFFFu &&
+               (mapped & (mapped-1))==0 &&
+               (mapped & gamepadButtons)==mapped
+            ? static_cast<std::uint16_t>(mapped) : fallback;
+    }
+
+    [[nodiscard]] constexpr bool Uses(std::uint16_t button) const noexcept {
+        return button && (accept==button || cancel==button ||
+                          up==button || down==button ||
+                          left==button || right==button);
+    }
+
+    bool operator==(const MenuBindings&) const = default;
+};
+
 inline bool ConflictsWithMenuNavigation(std::uint32_t primaryMask,
                                         std::uint32_t heldMask,
-                                        bool journalFocused) noexcept {
-    constexpr std::uint32_t menuButtons=0x300fu;
+                                        bool journalFocused,
+                                        MenuBindings mapped={}) noexcept {
+    const std::uint32_t menuButtons=static_cast<std::uint32_t>(mapped.accept)|
+        mapped.cancel|mapped.up|mapped.down|mapped.left|mapped.right;
     return journalFocused&&((primaryMask|heldMask)&menuButtons)!=0;
 }
 
@@ -50,10 +78,24 @@ public:
     using Clock=std::chrono::steady_clock;
     using TimePoint=Clock::time_point;
 
-    Action Update(Input input,bool focused,TimePoint now) noexcept {
-        const bool a=(input.buttons&0x1000u)!=0;
-        const bool b=(input.buttons&0x2000u)!=0;
-        const auto heldDirection=ReadDirection(input);
+    Action Update(Input input,bool focused,TimePoint now,
+                  MenuBindings mapped={}) noexcept {
+        // Rebase on the live state when Fallout 4 mappings change: a held
+        // newly assigned button is not a fresh press of the new action.
+        if(mapped!=bindings_) {
+            bindings_=mapped;
+            aWasDown_=Pressed(input.buttons,bindings_.accept);
+            bWasDown_=Pressed(input.buttons,bindings_.cancel);
+            direction_=Action::None;
+            blockedUntilNeutral_=aWasDown_||bWasDown_||
+                                 ReadDirection(input,bindings_)!=Action::None;
+            return Action::None;
+        }
+        const bool a=Pressed(input.buttons,bindings_.accept);
+        const bool b=Pressed(input.buttons,bindings_.cancel);
+        // A remapped confirm/back can share a direction button. It must not
+        // also move focus while the player holds the action button.
+        const auto heldDirection=(a||b)?Action::None:ReadDirection(input,bindings_);
         if(!focused) {
             blockedUntilNeutral_=a||b||heldDirection!=Action::None;
             aWasDown_=a;
@@ -91,12 +133,17 @@ public:
     }
 
 private:
-    static Action ReadDirection(Input input) noexcept {
-        // Prefer the digital pad when it is held, avoiding conflicts with stick drift.
-        if(input.buttons&0x0001u)return Action::Up;
-        if(input.buttons&0x0002u)return Action::Down;
-        if(input.buttons&0x0004u)return Action::Left;
-        if(input.buttons&0x0008u)return Action::Right;
+    static bool Pressed(std::uint16_t buttons,std::uint16_t mask) noexcept {
+        return mask && (buttons&mask)==mask;
+    }
+
+    static Action ReadDirection(Input input,const MenuBindings& mapped) noexcept {
+        // Use Fallout 4's mapped digital navigation before interpreting the
+        // analog left stick; the game still owns Steam Input translation.
+        if(Pressed(input.buttons,mapped.up))return Action::Up;
+        if(Pressed(input.buttons,mapped.down))return Action::Down;
+        if(Pressed(input.buttons,mapped.left))return Action::Left;
+        if(Pressed(input.buttons,mapped.right))return Action::Right;
 
         const auto x=static_cast<std::int32_t>(input.leftX);
         const auto y=static_cast<std::int32_t>(input.leftY);
@@ -111,5 +158,6 @@ private:
     bool bWasDown_{};
     TimePoint nextRepeat_{};
     bool blockedUntilNeutral_{};
+    MenuBindings bindings_{};
 };
 } // namespace K2040::ControllerNavigation

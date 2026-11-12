@@ -8,7 +8,7 @@ The next-gen/Anniversary Edition versions and Fallout 4 VR are not supported.
 
 ## Controller menus
 
-The upcoming v0.0.3 development build adds menu navigation. Use the **D-pad** or **left stick** to move the selection, **A** to choose, and **B** to go back. The right stick can still move the cursor. Mouse and keyboard still work. This was confirmed in-game on 5 November 2026; the published v0.0.2 package does not include it.
+The upcoming v0.0.3 development build adds menu navigation. Use the game's mapped menu controls to navigate, confirm and go back. The left stick and right-stick cursor remain supported. Mouse and keyboard still work. The earlier fixed-button implementation was confirmed in-game on 5 November 2026. The new mapping-aware behavior requires in-game acceptance, and neither change is in the published v0.0.2 package.
 
 ## Quest tracking
 

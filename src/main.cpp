@@ -61,6 +61,7 @@
 #include <array>
 #include <chrono>
 #include <thread>
+#include <mutex>
 #include "UILifecycleEpoch.h"
 #include <RE/M/MenuCursor.h>
 #include <RE/B/BSInputEnableManager.h>
@@ -120,6 +121,42 @@ namespace {
     bool hotkeysRegistered = false;
     bool hubScaleformRegistered = false;
     std::atomic_bool padPolling{false};
+    // Only the game thread reads RE::ControlMap. The input worker consumes a
+    // small synchronized snapshot, never the game's mutable input structures.
+    std::mutex menuBindingsMutex;
+    K2040::ControllerNavigation::MenuBindings menuBindings;
+
+    K2040::ControllerNavigation::MenuBindings CurrentMenuBindings() {
+        std::lock_guard<std::mutex> lock(menuBindingsMutex);
+        return menuBindings;
+    }
+
+    void CaptureMenuBindings() {
+        K2040::ControllerNavigation::MenuBindings next{};
+        if(const auto* map=RE::ControlMap::GetSingleton()) {
+            using Context=RE::UserEvents::INPUT_CONTEXT_ID;
+            const auto key=[map](const char* event,Context context) {
+                return K2040::ControllerNavigation::MenuBindings::SupportedButton(
+                    map->GetMappedKey(event,RE::INPUT_DEVICE::kGamepad,context),0);
+            };
+            // Follow the native Fallout 4 menu, including ControlMap edits.
+            // MainGameplay Activate is a fallback for incomplete menu maps.
+            next.accept=key("Accept",Context::kBasicMenuNav);
+            if(!next.accept)next.accept=key("Activate",Context::kMainGameplay);
+            if(!next.accept)next.accept=0x1000u;
+            if(const auto cancel=key("Cancel",Context::kBasicMenuNav))next.cancel=cancel;
+            if(const auto up=key("Up",Context::kBasicMenuNav))next.up=up;
+            if(const auto down=key("Down",Context::kBasicMenuNav))next.down=down;
+            if(const auto left=key("Left",Context::kBasicMenuNav))next.left=left;
+            if(const auto right=key("Right",Context::kBasicMenuNav))next.right=right;
+        }
+        // An overlapping accept/cancel mapping cannot express two different
+        // actions; preserve a separate back action rather than double firing.
+        if(next.cancel==next.accept)
+            next.cancel=next.accept==0x2000u?0x1000u:0x2000u;
+        std::lock_guard<std::mutex> lock(menuBindingsMutex);
+        menuBindings=next;
+    }
     std::array<std::uint64_t,2> lastToggleTicks{0,0};
     // Shared by browser Escape events and the native physical-key fallback.
     // Only the game thread updates this timestamp.
@@ -535,6 +572,9 @@ namespace {
         if(journalOpen) {CloseJournal();return;}
         // Do not steal focus from a vanilla menu or another Prisma panel.
         if (CompetingGameMenuOpen() || AnotherPrismaViewFocused())return;
+        // Refresh on the game thread whenever the Journal opens. This picks
+        // up remappings made in Fallout 4's own Controls menu.
+        CaptureMenuBindings();
         // Never reuse a closed panel. Quick Attach Menu observed that valid
         // hidden views can retain stale invisible cursor and render state.
         if (Valid(journalView)) {
@@ -1676,10 +1716,14 @@ namespace {
             interop.BindUIEvent(view, "requestQuestCategory", [](const char* choice) {
                 QueueUIString(UpdateCategory,choice);
             });
-            // Keep A/B/D-pad on Prisma's built-in Enter/Escape/Arrow navigation.
+            // Optional Journal shortcuts must never compete with the game's
+            // current menu confirm/back/directional mappings.
             if (controller.BindControllerAction) {
-                controller.BindControllerAction(view, "X", "journal.pin");
-                controller.BindControllerAction(view, "Y", "journal.favorite");
+                const auto mappings=CurrentMenuBindings();
+                if(!mappings.Uses(0x4000u))
+                    controller.BindControllerAction(view, "X", "journal.pin");
+                if(!mappings.Uses(0x8000u))
+                    controller.BindControllerAction(view, "Y", "journal.favorite");
                 controller.BindControllerAction(view, "LB", "journal.status-prev");
                 controller.BindControllerAction(view, "RB", "journal.status-next");
             }
@@ -2105,9 +2149,10 @@ namespace {
             }
             const auto pad=ReadXInputSample();
             const auto buttons=pad.buttons;
+            const auto mappedMenu=CurrentMenuBindings();
             const auto navigationAction=navigation.Update(
                 {static_cast<std::uint16_t>(buttons),pad.leftX,pad.leftY},
-                focused&&ForegroundGame(),now);
+                focused&&ForegroundGame(),now,mappedMenu);
             if(const auto* name=ControllerActionName(navigationAction)) {
                 QueueUIAction([name](){
                     if(!journalOpen||!journalFocused.load(std::memory_order_acquire)||
@@ -2138,7 +2183,7 @@ namespace {
                 const bool rising=active[i].chord.Update(buttons,primary,held);
                 if(rising&&!b.conflict&&ForegroundGame()&&
                    !K2040::ControllerNavigation::ConflictsWithMenuNavigation(
-                       primary,held,focused))
+                       primary,held,focused,mappedMenu))
                     QueueInputAction(i?K2040::Hub::Action::Tracker:K2040::Hub::Action::Journal,true);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(35));
