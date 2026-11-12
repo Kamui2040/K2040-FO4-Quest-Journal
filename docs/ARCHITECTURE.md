@@ -1,5 +1,16 @@
 # Architecture overview
 
+## Optional unified settings entry point
+
+The versioned `K2040_GetSettingsAdapterV1` export offers an optional
+settings-only entry point. It opens a new journal panel on the F4SE game
+thread, remembers that Settings was requested, and waits for the matching
+Prisma DOM-ready generation before switching to the existing Settings tab.
+It keeps the current quest/settings ownership, input and cursor protection,
+and ordinary Journal and Tracker shortcuts. A missing hub has no effect.
+These source changes remain unmerged and untested in-game.
+
+
 - `src/`: F4SE entry points, game-thread quest observer/collector, read-only data normalization, UI bridge, per-save data, settings, input/MCM integration and defensive tracking policy.
 - `research/production_candidate/`: accepted ordinary/Misc quest-wide F4SE native adapter used by the released normal-tracking build.
 - `research/native_one_shot/`: native quest scope and guarded repeatable ticket state machine, plus synthetic/legacy research inputs. Research/QA variants are disabled in normal builds.

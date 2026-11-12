@@ -4,6 +4,7 @@
 #include <F4SE/F4SE.h>
 #include "PrismaUI_F4_Modern_API.h"
 #include "QuestCollector.h"
+#include "K2040SettingsAdapter.h"
 #include "QuestTrackingPolicy.h"
 #ifdef K2040_PIPBOY_SELECTION_READONLY_QA
 #include "../research/native_pipboy_selection/ReadOnlySelectedEntry.h"
@@ -85,6 +86,7 @@ namespace {
     PrismaView journalView = 0;
     PrismaView trackerView = 0;
     bool journalOpen = false;
+    bool openSettingsFromUnifiedHub = false;
     bool journalDomReady = false;
     bool trackerDomReady = false;
     std::atomic_bool journalFocused{false};
@@ -474,6 +476,7 @@ namespace {
         SyncSnapshots();
     }
     void CloseJournal() {
+        openSettingsFromUnifiedHub = false;
         // Read the physical shortcut before releasing Prisma focus.
         const std::uint32_t heldKey=journalInputGuard?HeldJournalShortcutKey():0;
         uiEpoch.Invalidate();
@@ -1702,6 +1705,11 @@ namespace {
         ShowJournalIfReady();
         SyncSettings();
         SyncSnapshots();
+        if (view == journalView && openSettingsFromUnifiedHub && journalOpen &&
+            journalDomReady && Valid(journalView) && interop.InteropCall) {
+            openSettingsFromUnifiedHub = false;
+            interop.InteropCall(view, "k2040OpenJournalSettingsFromHub", "");
+        }
     }
     void OnDomReady(PrismaView view) {
         // Never dereference RE/Prisma data, bind JS callbacks, or touch native
@@ -1726,6 +1734,7 @@ namespace {
             });
     }
     void DestroyViews() {
+        openSettingsFromUnifiedHub = false;
         uiEpoch.Invalidate();
         trackerEpoch.Invalidate();
 #ifdef K2040_SELECTOR_READONLY_QA
@@ -2414,4 +2423,30 @@ F4SE_PLUGIN_LOAD(const F4SE::LoadInterface* load) {
     K2040::Hub::SeedDefaultKeyboardBindings();
     K2040::QuestViewState::RegisterSerialization();
     return messaging->RegisterListener(Messages);
+}
+
+namespace {
+    bool K2040_SETTINGS_CALL UnifiedSettingsAvailable() noexcept
+    {
+        return gameLoaded && apiReady;
+    }
+    bool K2040_SETTINGS_CALL OpenUnifiedJournalSettings() noexcept
+    {
+        if (!gameLoaded || !apiReady || journalOpen ||
+            CompetingGameMenuOpen() || AnotherPrismaViewFocused()) return false;
+        openSettingsFromUnifiedHub = true;
+        OpenJournal();
+        if (!journalOpen) openSettingsFromUnifiedHub = false;
+        return journalOpen;
+    }
+}
+
+extern "C" __declspec(dllexport)
+const K2040SettingsAdapterV1* K2040_SETTINGS_CALL K2040_GetSettingsAdapterV1() noexcept
+{
+    static const K2040SettingsAdapterV1 adapter{
+        sizeof(K2040SettingsAdapterV1), K2040_SETTINGS_ADAPTER_ABI,
+        "quest-journal", UnifiedSettingsAvailable, OpenUnifiedJournalSettings
+    };
+    return &adapter;
 }
