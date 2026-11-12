@@ -69,6 +69,13 @@ with sync_playwright() as p:
             assert page.locator("[data-quest]").count() == 1
             page.locator("#resetFilters").click()
             assert page.locator("[data-quest]").count() == 5
+            # Explicit view resets must clear the visible search input, not just the filter.
+            page.locator("#questSearch").fill("Signals")
+            page.evaluate("window.resetQuestView()")
+            assert page.locator("#questSearch").input_value() == ""
+            assert page.locator("#questSort").input_value() == "pinned"
+            page.evaluate("window.receiveQuestSnapshot(window.K2040DemoData)")
+            assert page.locator("[data-quest]").count() == 5
             page.locator('[data-action="pin"]').click()
             page.locator('#questCategory').select_option('Modded')
             assert page.locator('#questCategory').input_value() == 'Modded'
