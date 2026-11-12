@@ -237,6 +237,12 @@
     else {clearControllerFocus();el('openSettings').focus();}
     if(show&&!state.demo)emit('requestHubBindings');
   }
+  // Optional unified settings hub enters the existing settings workspace.
+  // This does not bypass the journal's own native settings writer or create
+  // another focused Prisma panel.
+  window.k2040OpenJournalSettingsFromHub=function(){
+    if(!isTracker)showSettings(true);
+  };
   // Both a browser key event and the native physical-Escape fallback call
   // this one handler. Settings is dismissed before the journal itself.
   window.handleJournalEscape=function(){
