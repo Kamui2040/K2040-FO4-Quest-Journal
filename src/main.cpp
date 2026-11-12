@@ -1979,7 +1979,7 @@ namespace {
     }
 #endif
     void PollHubPads() {
-        struct Active {unsigned primary{},held{};bool wasDown{};};
+        struct Active {unsigned primary{},held{};K2040::ControllerNavigation::ChordLatch chord;};
         std::array<Active,2> active{};
         std::array<K2040::Hub::Pad,2> bindings{};
         auto next=std::chrono::steady_clock::time_point{};
@@ -2124,7 +2124,9 @@ namespace {
                     if(bindings[i].primary!=active[i].primary || bindings[i].held!=active[i].held) {
                         active[i].primary=bindings[i].primary;
                         active[i].held=bindings[i].held;
-                        active[i].wasDown=(buttons & K2040::Hub::PadMask(active[i].primary))!=0;
+                        active[i].chord.Reset(buttons,
+                            K2040::Hub::PadMask(active[i].primary),
+                            K2040::Hub::PadMask(active[i].held));
                     }
                 }
                 next=now+std::chrono::seconds(1);
@@ -2133,11 +2135,8 @@ namespace {
                 const auto& b=bindings[i];
                 const auto primary=K2040::Hub::PadMask(b.primary);
                 const auto held=K2040::Hub::PadMask(b.held);
-                const bool down=primary&&(buttons&primary)==primary;
-                const bool complete=down&&(!held||(buttons&held)==held);
-                const bool rising=down&&!active[i].wasDown;
-                active[i].wasDown=down;
-                if(rising&&complete&&!b.conflict&&ForegroundGame()&&
+                const bool rising=active[i].chord.Update(buttons,primary,held);
+                if(rising&&!b.conflict&&ForegroundGame()&&
                    !K2040::ControllerNavigation::ConflictsWithMenuNavigation(
                        primary,held,focused))
                     QueueInputAction(i?K2040::Hub::Action::Tracker:K2040::Hub::Action::Journal,true);

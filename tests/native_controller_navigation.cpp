@@ -4,6 +4,7 @@
 #include <chrono>
 
 using K2040::ControllerNavigation::Action;
+using K2040::ControllerNavigation::ChordLatch;
 using K2040::ControllerNavigation::ConflictsWithMenuNavigation;
 using K2040::ControllerNavigation::Input;
 using K2040::ControllerNavigation::Sampler;
@@ -15,6 +16,43 @@ int main() {
     assert(ConflictsWithMenuNavigation(0x1000,0,true));
     assert(ConflictsWithMenuNavigation(0x0100,0x0004,true));
     assert(!ConflictsWithMenuNavigation(0x0100,0,true));
+
+    // A gamepad chord must fire exactly once when its last button is pressed,
+    // irrespective of whether the modifier or the primary button came first.
+    constexpr std::uint32_t primary=0x4000u, held=0x0100u;
+    ChordLatch primaryFirst;
+    assert(!primaryFirst.Update(primary,primary,held));
+    assert(primaryFirst.Update(primary|held,primary,held));
+    assert(!primaryFirst.Update(primary|held,primary,held));
+    assert(!primaryFirst.Update(primary,primary,held));
+    assert(primaryFirst.Update(primary|held,primary,held));
+    assert(!primaryFirst.Update(held,primary,held));
+    assert(primaryFirst.Update(primary|held,primary,held));
+
+    ChordLatch modifierFirst;
+    assert(!modifierFirst.Update(held,primary,held));
+    assert(modifierFirst.Update(primary|held,primary,held));
+    assert(!modifierFirst.Update(primary|held,primary,held));
+    assert(!modifierFirst.Update(0,primary,held));
+
+    ChordLatch rebound;
+    rebound.Reset(primary|held,primary,held);
+    assert(!rebound.Update(primary|held,primary,held));
+    assert(!rebound.Update(0,primary,held));
+    assert(rebound.Update(primary|held,primary,held));
+    assert(!rebound.Update(primary|held,0,held));
+    assert(!rebound.Update(0,0,held));
+
+    ChordLatch singleButton;
+    assert(singleButton.Update(primary,primary,0));
+    assert(!singleButton.Update(primary,primary,0));
+    assert(!singleButton.Update(0,primary,0));
+    assert(singleButton.Update(primary,primary,0));
+
+    // Triggers occupy additional bits beyond XInput's 16 digital buttons.
+    ChordLatch trigger;
+    assert(!trigger.Update(1u<<16,1u<<17,1u<<16));
+    assert(trigger.Update((1u<<16)|(1u<<17),1u<<17,1u<<16));
 
     Sampler sampler;
     const auto t=Clock::time_point{};

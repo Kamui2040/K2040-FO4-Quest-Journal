@@ -19,6 +19,32 @@ inline bool ConflictsWithMenuNavigation(std::uint32_t primaryMask,
     return journalFocused&&((primaryMask|heldMask)&menuButtons)!=0;
 }
 
+// Detect a transition into the complete chord, regardless of button order.
+// Reset from the live state when a binding changes to prevent a phantom press.
+class ChordLatch {
+public:
+    void Reset(std::uint32_t buttons,std::uint32_t primary,
+               std::uint32_t held) noexcept {
+        wasMatched_=Matches(buttons,primary,held);
+    }
+
+    bool Update(std::uint32_t buttons,std::uint32_t primary,
+                std::uint32_t held) noexcept {
+        const bool matched=Matches(buttons,primary,held);
+        const bool pressed=matched&&!wasMatched_;
+        wasMatched_=matched;
+        return pressed;
+    }
+
+private:
+    static bool Matches(std::uint32_t buttons,std::uint32_t primary,
+                        std::uint32_t held) noexcept {
+        return primary&&(buttons&primary)==primary&&
+               (!held||(buttons&held)==held);
+    }
+    bool wasMatched_{};
+};
+
 class Sampler {
 public:
     using Clock=std::chrono::steady_clock;
