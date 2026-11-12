@@ -69,7 +69,7 @@ with sync_playwright() as p:
             assert page.locator("[data-quest]").count() == 1
             page.locator("#resetFilters").click()
             assert page.locator("[data-quest]").count() == 5
-            # Resetting the view on save/load must also clear the visible search field.
+            # Explicit view resets must clear the visible search input, not just the filter.
             page.locator("#questSearch").fill("Signals")
             page.evaluate("window.resetQuestView()")
             assert page.locator("#questSearch").input_value() == ""
