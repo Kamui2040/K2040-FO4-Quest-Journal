@@ -4,6 +4,7 @@
 - `research/production_candidate/`: accepted ordinary/Misc quest-wide F4SE native adapter used by the released normal-tracking build.
 - `research/native_one_shot/`: native quest scope and guarded repeatable ticket state machine, plus synthetic/legacy research inputs. Research/QA variants are disabled in normal builds.
 - `view/`: original PrismaUI_F4 full-screen Journal, miniature tracker, settings model, independent palette presets and themed dropdown controls.
+- `view/settings-v1-manifest.json`: validated, source-only K2040 Settings Schema V1 metadata for the future shared renderer; not loaded by the current UI and not an independent settings store.
 - `mcm/`: canonical `K2040 Mods` grouped parent and Quest Journal child, including optional standalone MCM layout.
 - `tests/`: pure C++/Python/JavaScript regressions and synthetic game-state fixtures. Tests never constitute game runtime evidence.
 - `scripts/`: pinned dependency staging, cross-build, independent PE export checks, source verification and isolated installation package creation.

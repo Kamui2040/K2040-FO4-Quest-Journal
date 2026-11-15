@@ -10,6 +10,23 @@ You can build the Fallout 4 Windows x64 plugin on Linux. The build uses Xmake an
 
 Use `scripts/bootstrap-source-deps.sh` to fetch the pinned public source dependencies into a directory you choose. Obtain the MSVC headers and libraries and the Windows SDK independently. You also need LLVM/clang-cl, Xmake 3, Bash, Python 3, and Node.js.
 
+## Settings V1 source catalog gate
+
+Before running source tests or making a build, install the pinned
+development-only schema validator from this repository's lockfile:
+
+```bash
+npm ci --ignore-scripts --no-audit --no-fund
+npm run validate:settings
+```
+
+`bash scripts/verify-source.sh` also validates the Quest Journal manifest
+and tests it against native settings definitions. The canonical schema and
+validator are copied byte-for-byte into this repo; the shared hub is not
+required to build or test. This is metadata validation only, not deployment
+or approval to replace the existing settings UI. See
+[the inventory](SETTINGS_CATALOG_V1.md).
+
 ## Build
 
 ```bash

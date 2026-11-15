@@ -1,0 +1,435 @@
+{
+  "manifestVersion": 1,
+  "moduleId": "quest-journal",
+  "title": "Quest Journal",
+  "nativeSettingsSchemaVersion": 1,
+  "categories": [
+    {
+      "id": "general",
+      "title": "General",
+      "groups": [
+        {
+          "id": "tracker-availability",
+          "title": "Compact tracker",
+          "fields": [
+            {
+              "id": "trackerEnabled",
+              "label": "Show compact tracker",
+              "type": "toggle"
+            },
+            {
+              "id": "trackerOverridePhosphor",
+              "label": "Allow compact tracker with Phosphor HUD",
+              "type": "toggle",
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              },
+              "help": "Quest Journal only controls its own tracker. Phosphor HUD's tracker may still be visible."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tracker-layout",
+      "title": "Tracker layout",
+      "groups": [
+        {
+          "id": "placement",
+          "title": "Placement and size",
+          "fields": [
+            {
+              "id": "trackerAnchor",
+              "label": "Screen position",
+              "type": "select",
+              "options": [
+                {
+                  "value": "top-right",
+                  "label": "Top right"
+                },
+                {
+                  "value": "top-left",
+                  "label": "Top left"
+                },
+                {
+                  "value": "bottom-right",
+                  "label": "Bottom right"
+                },
+                {
+                  "value": "bottom-left",
+                  "label": "Bottom left"
+                }
+              ],
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              }
+            },
+            {
+              "id": "trackerWidth",
+              "label": "Tracker width",
+              "type": "integer",
+              "min": 260,
+              "max": 520,
+              "step": 10,
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              }
+            },
+            {
+              "id": "trackerMaxQuests",
+              "label": "Maximum visible quests",
+              "type": "integer",
+              "min": 1,
+              "max": 12,
+              "step": 1,
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "quest-selection",
+          "title": "Displayed quests",
+          "fields": [
+            {
+              "id": "trackerShowCompleted",
+              "label": "Show completed objectives",
+              "type": "toggle",
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              }
+            },
+            {
+              "id": "trackerAutoPinNew",
+              "label": "Automatically pin newly received quests",
+              "type": "toggle",
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              },
+              "help": "Does not pin quests present during the save's initial scan."
+            },
+            {
+              "id": "trackerSyncPipboy",
+              "label": "Mirror Pip-Boy tracked quests",
+              "type": "toggle",
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              },
+              "help": "One-way display selection. Does not change Fallout 4 tracking flags."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tracker-appearance",
+      "title": "Tracker appearance",
+      "groups": [
+        {
+          "id": "preset",
+          "title": "Theme and scale",
+          "fields": [
+            {
+              "id": "theme",
+              "label": "Tracker theme",
+              "type": "select",
+              "options": [
+                {
+                  "value": "commonwealth",
+                  "label": "Commonwealth Blue"
+                },
+                {
+                  "value": "pipboy",
+                  "label": "Classic Pip-Boy"
+                },
+                {
+                  "value": "contrast",
+                  "label": "High Contrast"
+                },
+                {
+                  "value": "fallout76",
+                  "label": "Fallout 76"
+                },
+                {
+                  "value": "custom",
+                  "label": "Custom Colors"
+                }
+              ],
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              }
+            },
+            {
+              "id": "trackerOpacity",
+              "label": "Background opacity",
+              "type": "integer",
+              "min": 25,
+              "max": 100,
+              "step": 1,
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              }
+            },
+            {
+              "id": "trackerScale",
+              "label": "Text scale",
+              "type": "integer",
+              "min": 75,
+              "max": 150,
+              "step": 5,
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "custom-palette",
+          "title": "Custom palette",
+          "fields": [
+            {
+              "id": "accent",
+              "label": "Accent color",
+              "type": "color",
+              "advanced": true,
+              "help": "Used when the tracker theme is Custom Colors; changing themes preserves this value.",
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              }
+            },
+            {
+              "id": "text",
+              "label": "Text color",
+              "type": "color",
+              "advanced": true,
+              "help": "Used when the tracker theme is Custom Colors; changing themes preserves this value.",
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              }
+            },
+            {
+              "id": "panel",
+              "label": "Panel background",
+              "type": "color",
+              "advanced": true,
+              "help": "Used when the tracker theme is Custom Colors; changing themes preserves this value.",
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              }
+            },
+            {
+              "id": "completed",
+              "label": "Completed objectives",
+              "type": "color",
+              "advanced": true,
+              "help": "Used when the tracker theme is Custom Colors; changing themes preserves this value.",
+              "visibleWhen": {
+                "all": [
+                  "trackerEnabled"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "journal-appearance",
+      "title": "Journal appearance",
+      "groups": [
+        {
+          "id": "preset",
+          "title": "Theme and scale",
+          "fields": [
+            {
+              "id": "journalTheme",
+              "label": "Journal theme",
+              "type": "select",
+              "options": [
+                {
+                  "value": "dark",
+                  "label": "Commonwealth Blue"
+                },
+                {
+                  "value": "pipboy",
+                  "label": "Classic Pip-Boy"
+                },
+                {
+                  "value": "contrast",
+                  "label": "High Contrast"
+                },
+                {
+                  "value": "fallout76",
+                  "label": "Fallout 76"
+                },
+                {
+                  "value": "custom",
+                  "label": "Custom Colors"
+                }
+              ]
+            },
+            {
+              "id": "journalOpacity",
+              "label": "Background opacity",
+              "type": "integer",
+              "min": 25,
+              "max": 100,
+              "step": 1
+            },
+            {
+              "id": "journalFontSize",
+              "label": "Text scale",
+              "type": "integer",
+              "min": 75,
+              "max": 150,
+              "step": 5
+            }
+          ]
+        },
+        {
+          "id": "custom-palette",
+          "title": "Custom palette",
+          "fields": [
+            {
+              "id": "journalAccent",
+              "label": "Accent color",
+              "type": "color",
+              "advanced": true,
+              "help": "Used when the journal theme is Custom Colors; changing themes preserves this value."
+            },
+            {
+              "id": "journalText",
+              "label": "Text color",
+              "type": "color",
+              "advanced": true,
+              "help": "Used when the journal theme is Custom Colors; changing themes preserves this value."
+            },
+            {
+              "id": "journalPanel",
+              "label": "Panel background",
+              "type": "color",
+              "advanced": true,
+              "help": "Used when the journal theme is Custom Colors; changing themes preserves this value."
+            },
+            {
+              "id": "journalCompleted",
+              "label": "Completed objectives",
+              "type": "color",
+              "advanced": true,
+              "help": "Used when the journal theme is Custom Colors; changing themes preserves this value."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "journal-layout",
+      "title": "Journal layout",
+      "groups": [
+        {
+          "id": "columns",
+          "title": "Quest list",
+          "fields": [
+            {
+              "id": "density",
+              "label": "Quest list density",
+              "type": "select",
+              "options": [
+                {
+                  "value": "comfortable",
+                  "label": "Comfortable"
+                },
+                {
+                  "value": "compact",
+                  "label": "Compact"
+                }
+              ]
+            },
+            {
+              "id": "sidebarWidth",
+              "label": "Category column width",
+              "type": "integer",
+              "min": 160,
+              "max": 380,
+              "step": 10
+            },
+            {
+              "id": "questListWidth",
+              "label": "Quest list width",
+              "type": "integer",
+              "min": 240,
+              "max": 560,
+              "step": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "controls",
+      "title": "Controls and maintenance",
+      "groups": [
+        {
+          "id": "game-controls",
+          "title": "Game integration",
+          "fields": [
+            {
+              "id": "redirectQuestKey",
+              "label": "Open Quest Journal with Quick Data",
+              "type": "toggle",
+              "help": "Uses Fallout 4's current Quick Data binding; existing Journal and tracker shortcuts remain independent."
+            }
+          ]
+        },
+        {
+          "id": "maintenance",
+          "title": "Preferences",
+          "fields": [
+            {
+              "id": "resetPreferences",
+              "label": "Reset Quest Journal preferences",
+              "type": "action",
+              "actionId": "resetToDefaults",
+              "owner": "module",
+              "advanced": true,
+              "help": "Resets native Quest Journal preferences, including its standalone fallback shortcuts. It does not modify the MCM keybind registry or saves."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "internalKeys": [
+    "opacity",
+    "fontSize",
+    "journalHotkey",
+    "trackerHotkey"
+  ]
+}

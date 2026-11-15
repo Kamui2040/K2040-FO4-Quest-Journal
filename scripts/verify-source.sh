@@ -3,6 +3,12 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 for p in view/quest-model.js view/journal-settings.js view/demo-data.js view/quest-selects.js view/app.js; do node --check "$p"; done
+# Pinned, source-only V1 catalog requires AJV. Fail instead of silently skipping metadata validation.
+if ! node -e 'require("ajv/dist/2020")' >/dev/null 2>&1; then
+  echo 'FAIL: missing pinned schema validator dependency; run npm ci --ignore-scripts --no-audit --no-fund' >&2
+  exit 1
+fi
+node scripts/validate-settings-manifest.cjs view/settings-v1-manifest.json
 node --test tests/*.test.cjs
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 if command -v clang++ >/dev/null 2>&1; then

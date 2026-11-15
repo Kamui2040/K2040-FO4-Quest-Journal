@@ -1,0 +1,13 @@
+{
+  "name": "k2040-fo4-quest-journal-settings-dev",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Source-only Quest Journal metadata validation; no game runtime dependency",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "validate:settings": "node scripts/validate-settings-manifest.cjs view/settings-v1-manifest.json"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0"
+  }
+}
