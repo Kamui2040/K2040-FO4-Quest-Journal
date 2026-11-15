@@ -22,39 +22,19 @@ test('Quest Journal bundles exact canonical K2040 parent without centralized act
  for(const id of ['questJournalToggle','questTrackerToggle','minimapSettingsToggle','openQuickMenu'])
   assert.doesNotMatch(data[0].toString(),new RegExp(id));
 });
-test('build stages both MCM directories as part of the mod package',()=>{
+test('build stages only canonical shared MCM parent, leaving hub as sole keybind owner',()=>{
  const xmake=fs.readFileSync(path.join(root,'xmake.lua'),'utf8');
- assert.match(xmake,/\{"K2040_Mods","K2040_Quest_Journal"\}/);
- assert.match(xmake,/os\.cp\(path\.join\(source,"\*"\),target\)/);
- const native=fs.readFileSync(path.join(root,'src/HubBindings.cpp'),'utf8');
- assert.ok(native.includes('GetModuleHandleW(L"mcm.dll")'));
- assert.ok(native.includes('GetModuleHandleW(L"F4SEMenuFramework.dll")'));
- assert.ok(native.includes('iQuickAttachPadPrimary'));
- assert.ok(native.includes('K2040_Quick_Attach_Menu.ini'));
+ assert.match(xmake,/parentdest/);
+ assert.doesNotMatch(xmake,/for _,name in ipairs\(\{"K2040_Mods","K2040_Quest_Journal"\}/);
  const stage=fs.readFileSync(path.join(root,'scripts/stage-test-package.py'),'utf8');
  assert.match(stage,/CANONICAL_PARENT_SHA256/);
  assert.match(stage,/result\[PARENT_PATH\]=raw/);
+ assert.doesNotMatch(stage,/keybinds\.json/);
 });
-
-test('MCM fallback survives unbound but live registration does not rewrite disk at loader entry',()=>{
- const bindings=fs.readFileSync(path.join(root,'src/HubBindings.cpp'),'utf8');
+test('MCM is never used to register Journal gameplay shortcuts',()=>{
  const entry=fs.readFileSync(path.join(root,'src/main.cpp'),'utf8');
- assert.match(entry,/K2040::Hub::SeedDefaultKeyboardBindings\(\);/);
- assert.match(entry,/const auto virtualKey=/);
- assert.match(bindings,/void SeedDefaultKeyboardBindings\(\) noexcept/);
- assert.match(bindings,/unsigned key='G'/);
- assert.match(bindings,/hotkeys-initialized/);
- assert.match(bindings,/if\(found\)continue/);
- assert.match(bindings,/if\(NativeMcmOwnsRegistry\(\)\)return;/);
- assert.match(bindings,/if\(initialized\)return;/);
- assert.match(bindings,/unsigned modifiers=action==Action::Journal\?1u:0u/);
- assert.match(bindings,/if\(!key\)continue;/);
- assert.doesNotMatch(bindings,/unsigned key=initialized\?0:/);
- assert.match(bindings,/if\(!k\.registered && everInitialized\)k\.registered=true;/);
- assert.match(bindings,/SeedDefaultKeyboardBindings\(\);/);
- // A registered-but-empty hotkey must NOT reactivate the standalone defaults.
- assert.match(entry,/!K2040::Hub::ReadKeyboard\(K2040::Hub::Action::Journal\)\.registered/);
- assert.match(entry,/!K2040::Hub::ReadKeyboard\(K2040::Hub::Action::Tracker\)\.registered/);
- const ui=fs.readFileSync(path.join(root,'view/app.js'),'utf8');
- assert.match(ui,/!hubControls\.journal\?\.registered/);
+ assert.match(entry,/PublishGameplayBindings\(\)/);
+ assert.doesNotMatch(entry,/SeedDefaultKeyboardBindings|RefreshNativeMcm|RegisterHubMcm/);
+ assert.match(entry,/gameplayKeyboard\[0\]\.store/);
+ assert.match(entry,/gameplayController\[0\]\.store/);
 });

@@ -5,7 +5,10 @@
 - `research/native_one_shot/`: native quest scope and guarded repeatable ticket state machine, plus synthetic/legacy research inputs. Research/QA variants are disabled in normal builds.
 - `view/`: original PrismaUI_F4 full-screen Journal and passive tracker, independent legacy appearance normalization and gamepad menu controls. The former per-mod settings editor UI has been retired; the shared K2040 hub owns the only editor surface.
 - `view/settings-v1-manifest.json`: validated K2040 Settings Schema V1 metadata used by the **shared V2 renderer** through this mod's `K2040_GetSettingsAdapterV2` native export. The hub does not directly own or overwrite native preference storage. V2 adapter and query ABI headers must match the hub's checked-in originals byte-for-byte.
-- `mcm/`: canonical `K2040 Mods` grouped parent and Quest Journal child, including optional standalone MCM layout.
+- MCM staging includes only the canonical K2040 Mods parent.
+  Quest Journal has no child MCM entry or gameplay keybind registry.
+  The Unified Settings hub owns the single configurable MCM shortcut.
+  Owner-local Journal/tracker shortcuts are edited through the hub.
 - `tests/`: pure C++/Python/JavaScript regressions and synthetic game-state fixtures. Tests never constitute game runtime evidence.
 - `scripts/`: pinned dependency staging, cross-build, independent PE export checks, source verification and isolated installation package creation.
 

@@ -114,36 +114,22 @@ def gather(dll, view):
 
 
 def with_mcm(files, mode, base=ROOT/"mcm"):
-    """Add exactly one child MCM layout. Never ship grouped+standalone at once."""
-    if mode=="none":
-        return dict(files)
-    if mode not in ("grouped","standalone"):
+    """No Quest Journal MCM child; the hub alone owns settings hotkeys."""
+    if mode not in ("grouped","standalone","none"):
         raise ValueError("unknown MCM package variant")
-    base=base if mode=="grouped" else base/"standalone"
-    prefix="Data/MCM/Config/K2040_Quest_Journal/"
+    if mode in ("standalone","none"):
+        return dict(files)
     result=dict(files)
-    for name in ("config.json","keybinds.json","settings.ini"):
-        file=base/prefix/name
-        if not file.is_file() or file.is_symlink():
-            raise ValueError("missing child MCM asset: "+str(file))
-        result[prefix+name]=file.read_bytes()
-    if mode=="grouped":
-        parent=base/PARENT_PATH
-        if not parent.is_file() or parent.is_symlink():
-            raise ValueError("missing canonical K2040 Mods parent MCM file")
-        raw=parent.read_bytes()
-        if hashlib.sha256(raw).hexdigest()!=CANONICAL_PARENT_SHA256:
-            raise ValueError("parent MCM content differs from the canonical K2040 template")
-        if json.loads(raw).get("pages")!=[]:
-            raise ValueError("parent must not contain child pages")
-        result[PARENT_PATH]=raw
-    config=json.loads(result[prefix+"config.json"])
-    if config.get("modName")!="K2040_Quest_Journal":
-        raise ValueError("child MCM identity mismatch")
-    if (config.get("ownerModName")=="K2040_Mods") != (mode=="grouped"):
-        raise ValueError("MCM owner mismatch for packaging variant")
+    parent=base/PARENT_PATH
+    if not parent.is_file() or parent.is_symlink():
+        raise ValueError("missing canonical K2040 Mods parent MCM file")
+    raw=parent.read_bytes()
+    if hashlib.sha256(raw).hexdigest()!=CANONICAL_PARENT_SHA256:
+        raise ValueError("parent MCM content differs from canonical template")
+    if json.loads(raw).get("pages")!=[]:
+        raise ValueError("shared parent must contain no standalone hotkeys")
+    result[PARENT_PATH]=raw
     return result
-
 
 
 def build_zip(files, output):

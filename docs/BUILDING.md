@@ -64,4 +64,6 @@ build the Journal OG163 DLL, then stage it with a validated core from
 the official Unified Settings development branch. See
 [Unified Settings VNext QA](UNIFIED_SETTINGS_VNEXT_QA.md) for the
 combined packaging command and runtime acceptance checklist.
-The archive does not contain user preferences or an MCM Settings registry.
+The archive does not contain user preferences, a Quest Journal MCM child
+or a user MCM Settings registry. The single included MCM shortcut belongs
+to the shared Unified Settings core.

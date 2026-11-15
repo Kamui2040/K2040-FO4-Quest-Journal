@@ -29,19 +29,18 @@ test('V2 native owner reads packaged manifest and validates/saves native prefere
   assert.match(native,/K2040::Settings::ChangeAndSave\(std::string\(id\)/);
   assert.match(native,/K2040::Settings::ResetToDefaults\(\)/);
   assert.match(native,/if\(TrackerMayShow\(\)\&\&!trackerView\)CreateViews\(\)/);
-  for(const key of ['opacity','fontSize','journalHotkey','trackerHotkey'])
+  for(const key of ['opacity','fontSize','trackerSyncPipboy'])
     assert.ok(native.includes('"'+key+'"'),key);
 });
 
 test('V2 metadata excludes obsolete settings-only shortcuts and retains gameplay input',()=>{
   const fields=manifest.categories.flatMap(c=>c.groups.flatMap(g=>g.fields));
   assert.equal(fields.filter(f=>f.type==='action').length,1);
-  assert.equal(fields.filter(f=>f.type!=='action').length,26);
-  assert.deepEqual(manifest.internalKeys,['opacity','fontSize','journalHotkey','trackerHotkey']);
+  assert.equal(fields.filter(f=>f.type!=='action').length,31);
+  assert.deepEqual(manifest.internalKeys,['opacity','fontSize','trackerSyncPipboy']);
   assert.ok(fields.every(f=>!/(settingsHotkey|settingsShortcut|settingsToggle)/i.test(f.id)));
-  const mcm=JSON.parse(load('mcm/Data/MCM/Config/K2040_Quest_Journal/config.json'));
-  assert.deepEqual(mcm.pages.flatMap(p=>p.content).filter(c=>c.type==='hotkey').map(c=>c.id),
-    ['questJournalToggle','questTrackerToggle']);
+  assert.equal(fs.existsSync('mcm/Data/MCM/Config/K2040_Quest_Journal'),false);
+  assert.doesNotMatch(native,/RegisterHubMcm|SeedDefaultKeyboardBindings|RefreshNativeMcm/);
   assert.match(native,/QueueInputAction\(i\?K2040::Hub::Action::Tracker:K2040::Hub::Action::Journal,false\)/);
   assert.doesNotMatch(native,/BindUIEvent\(view, "(?:updateJournalSetting|resetJournalAppearance|saveHubKeyboard|saveHubController)"/);
   assert.doesNotMatch(html,/id="openSettings"|id="settingsWorkspace"/);

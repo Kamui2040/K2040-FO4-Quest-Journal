@@ -57,6 +57,15 @@ int main() {
     assert(!Change("journalTheme:unknown"));
     assert(!Change("journalOpacity:101"));
     assert(!Change("journalAccent:invalid"));
+    // Gameplay pad settings are owner-local; no global MCM registry writes.
+    assert(Change("journalPadPrimary:3"));
+    assert(Change("journalPadHeld:9"));
+    assert(!Change("journalPadHeld:3"));
+    assert(Change("trackerPadPrimary:4"));
+    assert(Change("trackerPadHeld:10"));
+    assert(!Change("trackerPadPrimary:3"));
+    assert(!Change("trackerPadHeld:4"));
+    assert(Change("trackerSyncPipboy:true"));
     assert(Save());
 
     const auto path = testRoot / "Data" / "F4SE" / "Plugins" / "K2040_Quest_Journal.ini";
@@ -75,6 +84,9 @@ int main() {
     assert(Current().journalOpacity==76);
     assert(Current().journalFontSize==115);
     assert(Current().redirectQuestKey);
+    assert(Current().journalPadPrimary==3 && Current().journalPadHeld==9);
+    assert(Current().trackerPadPrimary==4 && Current().trackerPadHeld==10);
+    assert(Current().trackerSyncPipboy);
     const auto payload = Serialize();
     assert(payload.find("\"completed\":\"#12a3ef\"") != std::string::npos);
     assert(payload.find("\"sidebarWidth\":320") != std::string::npos);
@@ -89,6 +101,8 @@ int main() {
     assert(Current().journalOpacity==98 && Current().journalFontSize==100);
     assert(Current().sidebarWidth == 240 && Current().questListWidth == 360);
     assert(Current().journalHotkey == "Shift+G" && Current().trackerHotkey == "G");
+    assert(Current().journalPadPrimary==0 && Current().trackerPadPrimary==0);
+    assert(Current().trackerSyncPipboy); // reset in hub must not change Journal mirror
     assert(!Current().trackerOverridePhosphor); // reset revokes override
     assert(!Current().redirectQuestKey);
     Load();

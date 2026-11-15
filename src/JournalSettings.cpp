@@ -28,6 +28,36 @@ namespace {
     }
     Preferences preferences;
     const char* lastFailureReason = "none";
+    // Legacy controller user values are read once only. No writing to MCM.
+    unsigned ReadLegacyPad(const std::filesystem::path& path,const char* requested) {
+        std::ifstream file(path);
+        std::string line;
+        bool controller=false;
+        while(std::getline(file,line)){
+            if(line=="[Controller]" || line=="[Controller]\r") {
+                controller=true;continue;
+            }
+            if(!line.empty()&&line[0]=='['){controller=false;continue;}
+            if(!controller)continue;
+            const auto split=line.find('=');
+            if(split==line.npos || line.substr(0,split)!=requested)continue;
+            const auto value=std::string_view(line).substr(split+1);
+            unsigned n{};
+            const auto [end,error]=std::from_chars(value.data(),value.data()+value.size(),n);
+            return error==std::errc{} && (end==value.data()+value.size() ||
+                   (end+1==value.data()+value.size()&&*end=='\r')) && n<=16 ?n:0;
+        }
+        return 0;
+    }
+    std::string StoredKeys(const std::filesystem::path& path) {
+        std::ifstream input(path);
+        std::string keys,line;
+        while(std::getline(input,line)){
+            const auto split=line.find('=');
+            if(split!=line.npos)keys.append("|").append(line.substr(0,split)).append("|");
+        }
+        return keys;
+    }
     bool Choice(std::string_view value, std::initializer_list<std::string_view> valid) {
         return std::find(valid.begin(), valid.end(), value) != valid.end();
     }
@@ -85,6 +115,10 @@ namespace {
             else if(key=="trackerAutoPinNew")out.trackerAutoPinNew=val=="true";
             else out.trackerSyncPipboy=val=="true";
         }
+        else if (key=="journalPadPrimary")return Int(val,out.journalPadPrimary,0,16);
+        else if (key=="journalPadHeld")return Int(val,out.journalPadHeld,0,16);
+        else if (key=="trackerPadPrimary")return Int(val,out.trackerPadPrimary,0,16);
+        else if (key=="trackerPadHeld")return Int(val,out.trackerPadHeld,0,16);
         else if (key=="journalHotkey" || key=="trackerHotkey") {
             if (!Choice(val,{"Shift+G","G","F6","F7","F8","F10","F11","F12"}))return false;
             if(key=="journalHotkey")out.journalHotkey=val;
@@ -120,6 +154,27 @@ void Load() {
     }
     if(preferences.journalHotkey==preferences.trackerHotkey)
         preferences.trackerHotkey=preferences.journalHotkey=="G"?"Shift+G":"G";
+    // Preserve old controller bindings without writing to the retired
+    // MCM Settings folder. Owner-local preferences take priority.
+    const auto oldPath=std::filesystem::path(L"Data/MCM/Settings/K2040_Quest_Journal.ini");
+    if(std::filesystem::is_regular_file(oldPath)){
+        const auto saved=StoredKeys(path);
+        const auto migrate=[&](const char* old,const char* current,int& value){
+            if(saved.find(std::string("|")+current+"|")!=saved.npos)return;
+            const auto val=ReadLegacyPad(oldPath,old);
+            if(val<=16u)value=static_cast<int>(val);
+        };
+        migrate("iQuestJournalPadPrimary","journalPadPrimary",preferences.journalPadPrimary);
+        migrate("iQuestJournalPadModifier","journalPadHeld",preferences.journalPadHeld);
+        migrate("iQuestTrackerPadPrimary","trackerPadPrimary",preferences.trackerPadPrimary);
+        migrate("iQuestTrackerPadModifier","trackerPadHeld",preferences.trackerPadHeld);
+    }
+    if(!preferences.journalPadPrimary ||
+       preferences.journalPadHeld==preferences.journalPadPrimary)
+        preferences.journalPadHeld=0;
+    if(!preferences.trackerPadPrimary ||
+       preferences.trackerPadHeld==preferences.trackerPadPrimary)
+        preferences.trackerPadHeld=0;
 }
 const Preferences& Current() {return preferences;}
 std::string Serialize(std::string_view hudColor, std::string_view hudBackgroundColor,
@@ -144,6 +199,10 @@ std::string Serialize(std::string_view hudColor, std::string_view hudBackgroundC
         ",\"trackerShowCompleted\":"+(p.trackerShowCompleted?"true":"false")+
         ",\"trackerAutoPinNew\":"+(p.trackerAutoPinNew?"true":"false")+
         ",\"trackerSyncPipboy\":"+(p.trackerSyncPipboy?"true":"false")+
+        ",\"journalPadPrimary\":"+std::to_string(p.journalPadPrimary)+
+        ",\"journalPadHeld\":"+std::to_string(p.journalPadHeld)+
+        ",\"trackerPadPrimary\":"+std::to_string(p.trackerPadPrimary)+
+        ",\"trackerPadHeld\":"+std::to_string(p.trackerPadHeld)+
         ",\"journalHotkey\":\""+p.journalHotkey+"\",\"trackerHotkey\":\""+p.trackerHotkey+
         "\",\"hudColor\":\""+std::string(hudColor)+"\",\"hudBackgroundColor\":\""+std::string(hudBackgroundColor)+"\",\"pipboyColor\":\""+std::string(pipboyColor)+"\",\"redirectQuestKey\":"+(p.redirectQuestKey?"true":"false")+"}";
 }
@@ -154,6 +213,12 @@ bool Change(std::string_view command) {
     auto next=preferences;
     if (!Apply(command.substr(0,p),command.substr(p+1),next))return false;
     if(next.journalHotkey==next.trackerHotkey)return false;
+    if((!next.journalPadPrimary && next.journalPadHeld) ||
+       (!next.trackerPadPrimary && next.trackerPadHeld) ||
+       (next.journalPadPrimary && next.journalPadPrimary==next.journalPadHeld) ||
+       (next.trackerPadPrimary && next.trackerPadPrimary==next.trackerPadHeld) ||
+       (next.journalPadPrimary && next.journalPadPrimary==next.trackerPadPrimary))
+        return false;
     preferences=std::move(next);
     return true;
 }
@@ -190,6 +255,10 @@ bool Save() {
              << "\ntrackerSyncPipboy=" << (p.trackerSyncPipboy ? "true":"false")
              << "\njournalHotkey=" << p.journalHotkey
              << "\ntrackerHotkey=" << p.trackerHotkey
+             << "\njournalPadPrimary=" << p.journalPadPrimary
+             << "\njournalPadHeld=" << p.journalPadHeld
+             << "\ntrackerPadPrimary=" << p.trackerPadPrimary
+             << "\ntrackerPadHeld=" << p.trackerPadHeld
              << "\nredirectQuestKey=" << (p.redirectQuestKey ? "true":"false") << '\n';
         file.flush();if(!file)return false;
     }
@@ -204,6 +273,8 @@ namespace K2040::Settings {
 bool ResetToDefaults() {
     const Preferences before=preferences;
     preferences=Preferences{};
+    // Only the Journal may change its one-way Pip-Boy HUD mirror setting.
+    preferences.trackerSyncPipboy=before.trackerSyncPipboy;
     if(Save()) {
         lastFailureReason="none";
         return true;

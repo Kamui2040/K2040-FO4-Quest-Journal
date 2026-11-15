@@ -862,3 +862,11 @@
 .k2040-style-doom-eternal .tracker-panel{border-radius:0;border-width:2px}
 .k2040-style-fallout76 .tracker-panel{border-radius:3px}
 .k2040-style-fallout3-newvegas .tracker-panel{border-radius:0}
+
+/* One journal-owned gameplay control; not another settings renderer. */
+.pipboy-mirror{margin:22px 8px 12px;padding:13px 11px;border:1px solid var(--edge);border-radius:6px;background:rgba(255,255,255,.035)}
+.pipboy-mirror label{display:flex;gap:10px;align-items:center;color:var(--ui-text,var(--text));font-size:.88rem;font-weight:650;cursor:pointer;line-height:1.35}
+.pipboy-mirror input{width:18px;height:18px;flex:none;accent-color:var(--ui-accent,var(--blue));cursor:pointer}
+.pipboy-mirror input:focus-visible{outline:2px solid var(--ui-accent,var(--blue));outline-offset:2px}
+.pipboy-mirror p{font-size:.73rem;line-height:1.5;color:var(--muted);margin-top:8px}
+.pipboy-mirror .pipboy-mirror-status{min-height:0;margin-top:5px;color:var(--ui-accent,var(--blue))}

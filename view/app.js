@@ -37,35 +37,8 @@
     selectorReadOnlyPending:null,selectorReadOnlySummary:''
   };
   const el = id => document.getElementById(id);
-  let hubControls={installed:false,journal:{},tracker:{}};
-  function keyCode(event) {
-    const code=String(event.code||''),key=String(event.key||'');
-    if(/^Key[A-Z]$/.test(code))return code.charCodeAt(3);
-    if(/^Digit[0-9]$/.test(code))return code.charCodeAt(5);
-    const fx=key.match(/^F([1-9]|1[0-9]|2[0-4])$/);
-    if(fx)return 111+Number(fx[1]);
-    return ({Tab:9,Enter:13,Backspace:8,' ':32,ArrowLeft:37,
-      ArrowUp:38,ArrowRight:39,ArrowDown:40,Home:36,End:35,
-      Insert:45,Delete:46,PageUp:33,PageDown:34})[key]||0;
-  }
-  const keyModifiers=event=>(event.shiftKey?1:0)|(event.ctrlKey?2:0)|(event.altKey?4:0);
-  function hubShortcutPressed(event,which) {
-    const binding=hubControls[which];
-    return !!(hubControls.installed&&binding&&binding.assigned&&!binding.conflict&&
-      Number(binding.keycode)===keyCode(event)&&Number(binding.modifiers)===keyModifiers(event));
-  }
-  // Gameplay shortcuts are still owned by Quest Journal's native MCM
-  // registry; the retired per-mod settings panel no longer edits them.
-  window.receiveHubBindings=function(raw){
-    if(isTracker)return;
-    try{
-      const v=typeof raw==='string'?JSON.parse(raw):(raw||{});
-      if(!v || typeof v!=='object')return;
-      hubControls={installed:v.installed===true,
-        journal:v.journal&&typeof v.journal==='object'?v.journal:{},
-        tracker:v.tracker&&typeof v.tracker==='object'?v.tracker:{}};
-    }catch{}
-  };
+  // Gameplay shortcuts are owner settings edited in the Unified Settings
+  // hub, never stored/registered as extra MCM keybinds.
   const html = value => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const prettyState = s => ({active:'Active',completed:'Completed',failed:'Failed',inactive:'Not started'})[s] || 'Unknown';
     const channels = hex => hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16)).join(',');
@@ -181,6 +154,13 @@
       }
     }
     state.settings=S.normalize(settings);
+    if(!isTracker){
+      const checkbox=el('pipboySyncToggle');
+      if(checkbox) {
+        checkbox.checked=state.settings.trackerSyncPipboy;
+        checkbox.disabled=false;
+      }
+    }
     applySettings();
     // The passive tracker often receives unchanged quest JSON. Its snapshot
     // cache suppresses repeated render() calls, so a new visible quest limit
@@ -189,6 +169,17 @@
     if(isTracker)renderTracker();
     else window.K2040JournalSelects?.sync();
   }
+  window.receiveJournalPipboySyncStatus=function(status){
+    if(isTracker)return;
+    const box=el('pipboySyncToggle'),notice=el('pipboySyncStatus');
+    if(box) {
+      box.disabled=false;
+      box.checked=state.settings.trackerSyncPipboy;
+    }
+    if(notice)notice.textContent=status==='saved'?'Preference saved.':
+      status==='storage'?'Unable to save; previous setting restored.':
+      'Invalid request; previous setting restored.';
+  };
   // Escape always closes the Journal; no separate settings panel exists.
   window.handleJournalEscape=function(){
     if(!isTracker)emit('requestCloseJournal');
@@ -906,6 +897,18 @@
     el('resetFilters').addEventListener('click',()=>{state.query='';state.status='active';state.category='all';state.favoritesOnly=false;state.includeHidden=false;state.sort='pinned';el('questSearch').value='';el('questSort').value='pinned';render();});
     el('closeJournal').addEventListener('click',()=>emit('requestCloseJournal'));
     document.addEventListener('change',e=>{
+      if(e.target.id==='pipboySyncToggle'){
+        const enabled=Boolean(e.target.checked);
+        if(state.demo) {
+          state.settings.trackerSyncPipboy=enabled;
+          el('pipboySyncStatus').textContent='Demo only — not saved.';
+        } else {
+          e.target.disabled=true;
+          el('pipboySyncStatus').textContent='Saving…';
+          emit('requestJournalPipboySync',enabled?'true':'false');
+        }
+        return;
+      }
       if(e.target.id!=='questCategory' || !state.selected)return;
       const category=e.target.value;
       if(!M.USER_CATEGORIES.includes(category))return;
@@ -1211,11 +1214,6 @@
         else emit('requestJournalEscape');
       }
       else if(!e.repeat &&
-        hubShortcutPressed(e,'journal') &&
-        !e.target.closest('input,textarea,select,[contenteditable="true"]')){
-        e.preventDefault();emit('requestCloseJournal');
-      }
-      else if(!e.repeat && !hubControls.journal?.registered &&
         (!e.ctrlKey && !e.altKey &&
          (e.key.toUpperCase()==='G' &&
           (state.settings.journalHotkey==='Shift+G' ? e.shiftKey :

@@ -18,14 +18,17 @@ runtime verification, HUD's outstanding DLL and deployment remain pending.
 
 ## Source of truth and inventory
 
-- Contract: `K2040-Unified-Settings/docs/SETTINGS_SCHEMA_V1.md` and its
-  Draft 2020-12 schema, copied byte-for-byte into `schemas/`.
+- Contract: pinned shared Settings Schema V1, included locally under
+  schemas/; validator and schema hashes are verified by source tests.
 - Existing runtime owner: `src/JournalSettings.h/.cpp`; on Linux/Proton
   stored in the owning mod's user-local INI, with legacy game-relative import.
 - Existing runtime views: `view/journal.html`, `view/journal-settings.js`,
   `view/app.js`. These remain a Journal/tracker only; settings editing happens
   only inside the shared V2 hub renderer.
-- MCM keyboard/controller bindings: `mcm/**/K2040_Quest_Journal/`.
+- Journal/tracker gameplay shortcuts are now owner-local validated
+  preferences exposed through the common hub Controls page.
+  No Quest Journal child MCM page or registry action is shipped. Legacy
+  controller assignments are imported read-only if absent in owner settings.
 - Definition: `view/settings-v1-manifest.json`, module ID `quest-journal`.
   `nativeSettingsSchemaVersion: 1` denotes this first stable native preference
   key inventory. The owning native V2 adapter provides the versioned bridge
@@ -35,15 +38,16 @@ runtime verification, HUD's outstanding DLL and deployment remain pending.
 | Future section | Editable fields | Reason |
 | --- | ---: | --- |
 | General | 2 | Enable tracker; optional Phosphor coexistence |
-| Tracker layout | 6 | Position, width, quest limit, completed, new quests, Pip-Boy sync |
+| Tracker layout | 5 | Position, width, quest limit, completed, new quests |
 | Tracker appearance | 7 | Theme, opacity, scale, four custom palette colors |
 | Journal appearance | 7 | Independent theme, opacity, font scale, four palette colors |
 | Journal layout | 3 | Density, two column widths |
-| Controls | 1 | Quick Data redirect respects the game's effective binding |
+| Controls | 7 | Keyboard shortcuts, controller shortcuts, Quick Data redirect |
 | Maintenance | 1 action | Module-owned reset of native preferences |
 
-**Total:** 26 editable persisted preferences, one reset action. All 30
-`Preferences` members are accounted for: 26 visible and 4 internal.
+**Current total:** 31 hub-visible preferences and one reset action.
+All 34 native Preferences fields are accounted for: 31 hub-visible, three
+internal. Pip-Boy mirror is saved from the Journal, not from the hub.
 
 ## Duplicate, legacy and unsupported controls
 
@@ -52,15 +56,15 @@ runtime verification, HUD's outstanding DLL and deployment remain pending.
   Mark them `internalKeys`: never delete, migrate or reset them merely
   because their controls are hidden. A separately requested full native
   preferences reset still uses the owner's established behavior.
-- `journalHotkey` and `trackerHotkey` remain persisted standalone fallbacks,
-  not duplicate controls in the V2 common editor. Original standalone
-  keyboard selectors were retired from the Journal UI; existing saved values
-  and native fallback gameplay behavior still work. MCM continues to own its
-  separate assignments. They are `internalKeys` in the new catalog.
-- Controller action/held-button settings are MCM-owned keys
-  (`iQuest*Pad*:` in `settings.ini`), not native `Preferences` properties.
-  The V1 schema cannot represent MCM hotkey or controller capture as a value
-  control. Do not invent surrogate select fields or alter these assignments.
+- The Journal and tracker keyboard shortcuts (defaults Shift+G / G)
+  are now hub-editable owner values, not native MCM bindings.
+- Four owner-local controller select fields replace obsolete MCM dropdowns.
+  Existing user MCM controller INI values are imported read-only when
+  no matching owner preference exists; the original files are preserved.
+- Pip-Boy synchronization remains a direct Journal gameplay control.
+  The native owner validates, saves and immediately applies the checkbox,
+  with failure feedback. The hub explicitly rejects writing its internal
+  trackerSyncPipboy preference; gameplay quest-tracking flags never change.
 - The former per-mod color editor exposed color picker, hex input and RGB
   sliders for each color. These were alternate presentations of **one native
   color value**, not extra settings. One color field per value is now rendered
@@ -79,8 +83,9 @@ runtime verification, HUD's outstanding DLL and deployment remain pending.
   `theme=custom` select condition. They are advanced fields; help text says
   when they apply. Hidden/inactive values are never removed from storage.
 - The reset action describes the existing native `ResetToDefaults` operation,
-  which also resets standalone fallback shortcuts. MCM binding records and
-  save-specific quest state are outside its scope. Only the existing
+  which resets hub-exposed preferences and gameplay shortcuts. The
+  Journal-owned Pip-Boy mirror remains unchanged. Legacy MCM data and
+  save-specific quest state remain outside its scope. Only the existing
   owner-controlled V2 adapter may invoke this action.
 
 ## Compatibility and next integration gates

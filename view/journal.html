@@ -16,7 +16,15 @@
       <nav id="statusFilters" class="status-filters" aria-label="Quest statuses"></nav>
       <div class="group-title category-heading">CATEGORIES</div>
       <nav id="categories" class="category-list" aria-label="Quest categories"></nav>
-      <div class="sidebar-foot">Display preferences never alter Fallout 4 quest progression.</div>
+      <div class="pipboy-mirror">
+        <label for="pipboySyncToggle">
+          <input id="pipboySyncToggle" type="checkbox">
+          <span>Sync tracker with Pip-Boy</span>
+        </label>
+        <p>Include quests tracked in the Pip-Boy in the mini tracker, alongside manual pins.</p>
+        <p id="pipboySyncStatus" class="pipboy-mirror-status" role="status" aria-live="polite"></p>
+      </div>
+      <div class="sidebar-foot">HUD synchronization only reads Pip-Boy tracking; it never changes quests or objectives.</div>
     </aside>
     <section class="quest-list-column" aria-label="Quests">
       <div class="panel-head"><div><span class="eyebrow">QUESTS</span><h2 id="listHeading">All quests</h2></div><div class="list-tools"><label for="questSort">Sort</label><select id="questSort" aria-label="Sort quests"><option value="pinned">Pinned first</option><option value="name">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="category">Category</option></select><span id="resultCount" class="count">0</span></div></div>

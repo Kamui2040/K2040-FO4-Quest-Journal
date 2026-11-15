@@ -1,31 +1,14 @@
 #pragma once
+#include <array>
 #include <cstdint>
-#include <string>
-#include <string_view>
+// Gameplay action labels and XInput masks only. No MCM registry bridge.
 namespace K2040::Hub {
 enum class Action { Journal, Tracker };
-struct Keyboard {
- bool installed{}, registered{}, assigned{}, conflict{};
- std::uint32_t keycode{}, modifiers{};
-};
-struct Pad {
- bool installed{}, conflict{};
- unsigned primary{}, held{};
-};
-bool Installed() noexcept;
-bool NativeMcmOwnsRegistry() noexcept;
-// UI-thread MCM bridge; never edit global Keybinds.json while native MCM owns it.
-void RefreshNativeMcm() noexcept;
-bool StageNativeMcmBinding(Action action,unsigned key,unsigned modifiers) noexcept;
-Keyboard CachedNativeMcmBinding(Action action) noexcept;
-void MigrateLegacyIfNeeded() noexcept;
-void SeedDefaultKeyboardBindings() noexcept;
-Keyboard ReadKeyboard(Action action) noexcept;
-bool SaveKeyboard(Action action,unsigned key,unsigned modifiers) noexcept;
-Pad ReadPad(Action action) noexcept;
-bool SavePad(Action action,unsigned primary,unsigned held) noexcept;
-std::uint32_t PadMask(unsigned button) noexcept;
-std::string KeyboardLabel(const Keyboard& binding,std::string_view fallback);
-std::string SnapshotJson();
-bool DecodeRequest(std::string_view raw,Action& action,unsigned& first,unsigned& second) noexcept;
+inline std::uint32_t PadMask(unsigned button) noexcept {
+    constexpr std::array<std::uint32_t,17> codes{
+        0,0x1000,0x2000,0x4000,0x8000,0x0001,0x0002,0x0004,0x0008,
+        0x0100,0x0200,1u<<16,1u<<17,0x0010,0x0020,0x0040,0x0080
+    };
+    return button<codes.size()?codes[button]:0;
+}
 }

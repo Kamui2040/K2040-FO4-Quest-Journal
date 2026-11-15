@@ -10,10 +10,11 @@ No private source checkout or internal build artifacts are bundled.
 
 ## Implemented in Quest Journal
 
-- The existing V2 native settings adapter and manifest expose 26
-  persisted owner fields and owner-only reset. Stored settings and
-  independent Journal/tracker gameplay hotkeys remain owner-controlled;
-  no per-mod settings-only shortcut is registered.
+- The validated V2 adapter exposes 31 owner settings plus reset.
+  Pip-Boy mirroring is not a hub field: an on-screen Journal checkbox
+  saves via the native owner, updates both views and only changes what
+  the HUD tracker displays. Hub reset preserves this Journal-only value.
+  No in-game quest-tracking flags are changed.
 - Ported the controller-fix branch's native menu mapping, order-independent
   controller shortcut chords and search reset. The game-thread snapshot
   follows Fallout 4's remapped Confirm/Back/D-pad; optional pin/favorite
@@ -32,9 +33,11 @@ No private source checkout or internal build artifacts are bundled.
   MSVC/clang-cl compile fix: construct std::string from a bounded length,
   rather than mismatched char* and const char* iterator types. No ABI,
   callback or hub-source code was changed.
-- Only the core hub provides the Ctrl+Shift+B settings shortcut and MCM
-  remapping. Theme and palette overrides, named custom palettes, and the
-  full-screen two-pane settings editor are rendered by the hub.
+- The only MCM keybind is the hub's configurable Ctrl+Shift+B.
+  Quest Journal has no MCM child, registry actions, gamepad dropdowns or
+  native MCM callback. Its independent gameplay keyboard and gamepad
+  controls are native owner preferences shown on the hub Controls page.
+  Legacy controller user files are read only, never overwritten.
 - The optional HUD layout V2 adapter is NOT yet implemented by this owner.
   Quest Journal therefore offers no live tracker drag/resize action.
   Reversible owner geometry and viewport mapping require separate work.
@@ -57,7 +60,9 @@ or user settings. No game deployment or installation takes place.
 
 ## In-game acceptance — pending
 
-Verify Ctrl+Shift+B and remapped hub binding; module and category visibility,
+Verify Ctrl+Shift+B and remapped hub binding; no Journal MCM child;
+Journal-only Pip-Boy sync toggle, persistence and immediate tracker
+refresh; module and category visibility,
 typed edits with saved values after reload and owner reset; all themes,
 built-in and named custom palettes including Hot Omni; per-mod appearance
 override; controller native Confirm/Back; Journal/tracker gameplay shortcuts;

@@ -42,12 +42,15 @@ The bundle contains the Quest Journal, the matching Unified Settings hub
 DLL, full-screen hub UI/MCM, and Quest Journal's tagged settings provider.
 Use Ctrl+Shift+B to open the central Settings editor (the hub's provisional
 fallback) or remap it through K2040 Mods > K2040 Settings in MCM. The Journal
-and tracker retain their independent gameplay keybinds.
+and tracker gameplay shortcuts are configured inside the shared
+hub Controls category, never through Quest Journal MCM entries.
 
 The 4 visual themes and 6 built-in palettes are managed globally or per-mod
 inside the hub, including user-named custom palettes; the Quest Journal
 reads validated transient colors and never edits the hub appearance store.
-The Journal's existing local INI settings remain intact.
+The Journal's existing local INI settings remain intact. Its one-way
+Pip-Boy mirror toggle remains directly in the Journal, not the hub.
+The mirror never alters Fallout 4 quests or tracking flags.
 This owner does NOT yet export an optional live tracker position/resize
 layout adapter. Accordingly, the hub intentionally does not show that
 owner-specific layout-edit action. This is not a missing dependency.
@@ -122,6 +125,11 @@ def build(hub:Path,output:Path)->tuple[int,int,str]:
         if name in files and files[name]!=data:
             raise ValueError("colliding shared hub/owner asset "+name)
         files[name]=data
+    if any(n.startswith("Data/MCM/Config/K2040_Quest_Journal/") for n in files):
+        raise ValueError("obsolete Quest Journal MCM child must not ship")
+    if {n for n in files if n.endswith("/keybinds.json")} != {
+        "Data/MCM/Config/K2040_Unified_Settings/keybinds.json"}:
+        raise ValueError("the shared Settings Hub must own the sole MCM keybind")
     if any(n.startswith("Data/MCM/Settings/") or
            n.endswith("/FO4-Quest-Journal.ini") for n in files):
         raise ValueError("unexpected user preference or registry in QA archive")

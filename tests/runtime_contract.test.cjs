@@ -179,7 +179,7 @@ test('late Prisma provider discovery retries after both new and loaded games',()
  assert.match(s,/bool InitializePrismaIfAvailable\(\)/);
  assert.match(s,/if\(!apiReady\) \{[\s\S]*?Discover<UI::ApiFeature::Core>/);
  assert.match(s,/if\(!apiReady\)return false;/);
- assert.match(s,/RegisterHotkeysOnce\(\);\s*RegisterHubScaleformOnce\(\);\s*RegisterPadPollingOnce\(\);\s*return true;/);
+ assert.match(s,/RegisterHotkeysOnce\(\);\s*RegisterPadPollingOnce\(\);\s*return true;/);
  assert.match(s,/case F4SE::MessagingInterface::kNewGame:\s*case F4SE::MessagingInterface::kPostLoadGame:/);
  // The separate read-only GFx QA keeps a synchronized game-loaded
  // mirror between the native state change and the usual Prisma retry.

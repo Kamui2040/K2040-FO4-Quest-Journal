@@ -130,8 +130,11 @@ namespace {
     bool apiReady = false;
     bool gameLoaded = false;
     bool hotkeysRegistered = false;
-    bool hubScaleformRegistered = false;
     std::atomic_bool padPolling{false};
+    // Owner-owned gameplay shortcuts, synchronized from the game thread.
+    // No independent MCM registration, MCM UI tasks or global registry IO.
+    std::array<std::atomic<std::uint32_t>,2> gameplayKeyboard{};
+    std::array<std::atomic<std::uint32_t>,2> gameplayController{};
     // Only the game thread reads the mutable Fallout 4 ControlMap.
     std::mutex menuBindingsMutex;
     K2040::ControllerNavigation::MenuBindings menuBindings;
@@ -308,9 +311,8 @@ namespace {
         return key<=255?static_cast<int>(key):0;
     }
     std::uint32_t HeldJournalShortcutKey() {
-        const auto b=K2040::Hub::ReadKeyboard(K2040::Hub::Action::Journal);
-        if(!b.installed||!b.assigned||b.conflict)return 0;
-        const int key=VirtualKeyFromMcm(b.keycode);
+        const auto chord=gameplayKeyboard[0].load(std::memory_order_acquire);
+        const int key=VirtualKeyFromMcm(chord&0x1FFu);
         return key>0 && (GetAsyncKeyState(key)&0x8000)!=0
             ? static_cast<std::uint32_t>(key) : 0;
     }
@@ -346,7 +348,34 @@ namespace {
         if(!r || !g || !b)return {};
         return K2040::HudColor::ToCss(*r,*g,*b);
     }
+    void PublishGameplayBindings(){
+        const auto& settings=K2040::Settings::Current();
+        const auto keyboard=[](const std::string& binding)->std::uint32_t {
+            if(binding=="Shift+G")return 'G'|(1u<<9);
+            if(binding=="G")return 'G';
+            if(binding=="F6")return VK_F6;
+            if(binding=="F7")return VK_F7;
+            if(binding=="F8")return VK_F8;
+            if(binding=="F10")return VK_F10;
+            if(binding=="F11")return VK_F11;
+            if(binding=="F12")return VK_F12;
+            return 0;
+        };
+        gameplayKeyboard[0].store(keyboard(settings.journalHotkey),std::memory_order_release);
+        gameplayKeyboard[1].store(keyboard(settings.trackerHotkey),std::memory_order_release);
+        const auto pack=[](int primary,int held)->std::uint32_t {
+            if(primary<1||primary>16||held<0||held>16||
+               primary==held)return 0;
+            return static_cast<unsigned>(primary)|
+                (static_cast<unsigned>(held)<<8);
+        };
+        gameplayController[0].store(pack(settings.journalPadPrimary,settings.journalPadHeld),
+                                    std::memory_order_release);
+        gameplayController[1].store(pack(settings.trackerPadPrimary,settings.trackerPadHeld),
+                                    std::memory_order_release);
+    }
     void SyncSettings() {
+        PublishGameplayBindings();
         if (!apiReady || !interop.InteropCall) return;
         // The hub owns presentation tokens; never update persisted Journal colors.
         const auto snapshot=K2040::AppearanceClient::Current("quest-journal");
@@ -377,11 +406,6 @@ namespace {
             interop.InteropCall(journalView,"applyUnifiedAppearance",appearanceJson);
         if(TrackerMayShow()&&Valid(trackerView))
             interop.InteropCall(trackerView,"applyUnifiedAppearance",appearanceJson);
-        K2040::Hub::MigrateLegacyIfNeeded();
-        if(Valid(journalView)) {
-            const auto hub=K2040::Hub::SnapshotJson();
-            interop.InteropCall(journalView,"receiveHubBindings",hub.c_str());
-        }
     }
     // Adapted from the reviewed Quick Attach Menu cursor fix. Register only if
     // focus did not increase the engine cursor owner count; never double-own.
@@ -628,6 +652,19 @@ namespace {
             ReleaseJournalInputGuard();
         }
         // Focus is deferred until DOM-ready; closing early cancels it.
+    }
+    void SetPipboyMirror(const char* raw) {
+        if(!raw || !gameLoaded || !journalOpen ||
+           !journalFocused.load(std::memory_order_acquire) ||
+           !Valid(journalView))return;
+        const std::string_view value(raw,strnlen_s(raw,8));
+        const bool valid=value=="true"||value=="false";
+        const bool saved=valid && K2040::Settings::ChangeAndSave(
+            value=="true"?"trackerSyncPipboy:true":"trackerSyncPipboy:false");
+        if(saved)SyncSettings(); // both views receive owner-authoritative value
+        if(Valid(journalView))
+            interop.InteropCall(journalView,"receiveJournalPipboySyncStatus",
+                saved?"saved":valid?K2040::Settings::LastFailureReason():"invalid");
     }
     void ToggleTracker() {
         // Honor the explicit override; otherwise Phosphor owns the quest box
@@ -1499,6 +1536,9 @@ namespace {
             interop.BindUIEvent(view, "requestPipboyTracking", [](const char* request) {
                 QueueUIString(UpdatePipboyTracking,request);
             });
+            // Gameplay option stays directly in the Journal, not in hub settings.
+            interop.BindUIEvent(view, "requestJournalPipboySync",
+                [](const char* raw){QueueUIString(SetPipboyMirror,raw);});
 #ifdef K2040_SELECTOR_READONLY_QA
             interop.BindUIEvent(view,"selectedSelectorReadOnlyQuest",
                 [](const char* raw){
@@ -1760,16 +1800,6 @@ namespace {
             if (trackerView) views.Hide(trackerView);
         }
     }
-    std::uint32_t KeyCode(const std::string& value) {
-        if(value=="G" || value=="Shift+G")return static_cast<std::uint32_t>(RE::BS_BUTTON_CODE::kG);
-        if(value=="F6")return static_cast<std::uint32_t>(RE::BS_BUTTON_CODE::kF6);
-        if(value=="F7")return static_cast<std::uint32_t>(RE::BS_BUTTON_CODE::kF7);
-        if(value=="F8")return static_cast<std::uint32_t>(RE::BS_BUTTON_CODE::kF8);
-        if(value=="F10")return static_cast<std::uint32_t>(RE::BS_BUTTON_CODE::kF10);
-        if(value=="F11")return static_cast<std::uint32_t>(RE::BS_BUTTON_CODE::kF11);
-        if(value=="F12")return static_cast<std::uint32_t>(RE::BS_BUTTON_CODE::kF12);
-        return 0;
-    }
     void DispatchAction(K2040::Hub::Action action,bool controllerSource=false) {
         if(!gameLoaded || !apiReady || CompetingGameMenuOpen() || AnotherPrismaViewFocused())return;
         if(controllerSource && journalFocused)return; // focused journal owns LB/RB/X/Y
@@ -1784,34 +1814,6 @@ namespace {
     void QueueInputAction(K2040::Hub::Action action,bool controllerSource) {
         if(const auto* tasks=F4SE::GetTaskInterface())
             tasks->AddTask([action,controllerSource](){DispatchAction(action,controllerSource);});
-    }
-    class HubMcmHandler final : public Scaleform::GFx::FunctionHandler {
-    public:
-        explicit HubMcmHandler(K2040::Hub::Action value):action(value){}
-        void Call(const Params&) override {
-            // MCM has already dispatched its live registered hotkey;
-            // on-disk Keybinds.json may be stale until the next game save.
-            QueueInputAction(action,false);
-        }
-    private:
-        K2040::Hub::Action action;
-    };
-    bool F4SEAPI RegisterHubMcm(Scaleform::GFx::Movie* movie,Scaleform::GFx::Value* target) {
-        if(!movie || !target || !target->IsObject())return false;
-        for(const auto action:{K2040::Hub::Action::Journal,K2040::Hub::Action::Tracker}) {
-            auto* handler=new HubMcmHandler(action);
-            Scaleform::GFx::Value callback;
-            movie->CreateFunction(&callback,handler);
-            handler->Release();
-            if(!target->SetMember(action==K2040::Hub::Action::Journal?"ToggleJournal":"ToggleTracker",callback))
-                return false;
-        }
-        return true;
-    }
-    void RegisterHubScaleformOnce() {
-        if(hubScaleformRegistered)return;
-        if(const auto* scaleform=F4SE::GetScaleformInterface())
-            hubScaleformRegistered=scaleform->Register("K2040_Quest_Journal",&RegisterHubMcm);
     }
     struct XInputSample {std::uint32_t buttons{};std::int16_t leftX{},leftY{};};
     XInputSample ReadXInputSample() {
@@ -1959,7 +1961,8 @@ namespace {
     void PollHubPads() {
         struct Active {unsigned primary{},held{};K2040::ControllerNavigation::ChordLatch chord;};
         std::array<Active,2> active{};
-        std::array<K2040::Hub::Pad,2> bindings{};
+        struct PadBinding {unsigned primary{},held{};bool conflict{};};
+        std::array<PadBinding,2> bindings{};
         auto next=std::chrono::steady_clock::time_point{};
         struct KeyboardActive {unsigned key{},mods{};bool wasMatched{};};
         std::array<KeyboardActive,2> keyboard{};
@@ -1970,7 +1973,6 @@ namespace {
         bool qaWasDown=false;
 #endif
         auto nextKeyboard=std::chrono::steady_clock::time_point{};
-        auto nextMcmRefresh=std::chrono::steady_clock::time_point{};
         const auto down=[](int vk){return vk>0 && (GetAsyncKeyState(vk)&0x8000)!=0;};
         const auto virtualKey=[](unsigned k)->int{
             if(k==258)return VK_MBUTTON;
@@ -1980,22 +1982,12 @@ namespace {
         };
         while(padPolling.load()) {
             const auto now=std::chrono::steady_clock::now();
-            // Native MCM owns the live registry. All GFx calls must run
-            // through F4SE UI tasks, never on this input worker thread.
-            if(now>=nextMcmRefresh && K2040::Hub::NativeMcmOwnsRegistry()){
-                if(const auto* tasks=F4SE::GetTaskInterface())
-                    tasks->AddUITask([](){K2040::Hub::RefreshNativeMcm();});
-                nextMcmRefresh=now+std::chrono::milliseconds(750);
-            }
             if(now>=nextKeyboard) {
                 for(unsigned i=0;i<2;++i) {
-                    const auto b=K2040::Hub::ReadKeyboard(
-                        i?K2040::Hub::Action::Tracker:K2040::Hub::Action::Journal);
-                    const unsigned key=b.installed&&b.assigned&&!b.conflict?b.keycode:0;
-                    const unsigned mods=key?b.modifiers:0;
+                    const auto packed=gameplayKeyboard[i].load(std::memory_order_acquire);
+                    const unsigned key=packed&0x1FFu;
+                    const unsigned mods=(packed>>9)&7u;
                     if(key!=keyboard[i].key||mods!=keyboard[i].mods) {
-                        // A changed binding starts with the chord's current
-                        // state, not just the base key's state.
                         const bool matched=down(virtualKey(key)) &&
                             down(VK_SHIFT)==bool(mods&1u) &&
                             down(VK_CONTROL)==bool(mods&2u) &&
@@ -2075,7 +2067,8 @@ namespace {
             }
             if(now>=next) {
                 for(unsigned i=0;i<2;++i) {
-                    bindings[i]=K2040::Hub::ReadPad(i?K2040::Hub::Action::Tracker:K2040::Hub::Action::Journal);
+                    const auto packed=gameplayController[i].load(std::memory_order_acquire);
+                    bindings[i]={packed&0xFFu,(packed>>8)&0xFFu,false};
                     if(bindings[i].primary!=active[i].primary || bindings[i].held!=active[i].held) {
                         active[i].primary=bindings[i].primary;
                         active[i].held=bindings[i].held;
@@ -2106,39 +2099,21 @@ namespace {
     class Hotkeys final : public RE::BSInputEventUser {
     public:
         bool ShouldHandleEvent(const RE::InputEvent* event) override {
-            if(!event || event->eventType!=RE::INPUT_EVENT_TYPE::kButton)return false;
+            if(!event || event->eventType!=RE::INPUT_EVENT_TYPE::kButton)
+                return false;
             const auto* button=event->As<RE::ButtonEvent>();
-            return (button && event->device==RE::INPUT_DEVICE::kKeyboard) ||
-                   (K2040::Settings::Current().redirectQuestKey && button &&
-                    event->QUserEvent()=="QuickData");
+            return K2040::Settings::Current().redirectQuestKey && button &&
+                   event->QUserEvent()=="QuickData";
         }
         void OnButtonEvent(const RE::ButtonEvent* event) override {
-            if (!event || !event->QJustPressed() || !apiReady) return;
-            if(event->QUserEvent()=="QuickData") {
-                if(K2040::Settings::Current().redirectQuestKey && gameLoaded &&
-                   !CompetingGameMenuOpen() && !AnotherPrismaViewFocused()) {
-                    // The receiver API exposes events as const; kStop prevents vanilla Quick Data handling.
-                    const_cast<RE::InputEvent*>(static_cast<const RE::InputEvent*>(event))->handled=
-                        RE::InputEvent::HANDLED_RESULT::kStop;
-                    DispatchAction(K2040::Hub::Action::Journal);
-                }
-                return;
-            }
-            const auto key = static_cast<std::uint32_t>(event->GetBSButtonCode());
-            const auto& preferences=K2040::Settings::Current();
-            const bool shift=(GetAsyncKeyState(VK_SHIFT)&0x8000)!=0;
-            const bool ctrl=(GetAsyncKeyState(VK_CONTROL)&0x8000)!=0;
-            const bool alt=(GetAsyncKeyState(VK_MENU)&0x8000)!=0;
-            if(ctrl || alt)return;
-            const auto matches=[&](const std::string& binding){
-                return key==KeyCode(binding) && shift==(binding=="Shift+G");
-            };
-            if(matches(preferences.journalHotkey) &&
-               !K2040::Hub::ReadKeyboard(K2040::Hub::Action::Journal).registered)
+            if(!event || !event->QJustPressed() || !apiReady ||
+               event->QUserEvent()!="QuickData")return;
+            if(K2040::Settings::Current().redirectQuestKey && gameLoaded &&
+               !CompetingGameMenuOpen() && !AnotherPrismaViewFocused()) {
+                const_cast<RE::InputEvent*>(static_cast<const RE::InputEvent*>(event))->handled=
+                    RE::InputEvent::HANDLED_RESULT::kStop;
                 DispatchAction(K2040::Hub::Action::Journal);
-            else if(matches(preferences.trackerHotkey) &&
-                    !K2040::Hub::ReadKeyboard(K2040::Hub::Action::Tracker).registered)
-                DispatchAction(K2040::Hub::Action::Tracker);
+            }
         }
         static Hotkeys& Get() { static Hotkeys instance; return instance; }
     };
@@ -2160,12 +2135,12 @@ namespace {
                        UI::Discover<UI::ApiFeature::Interop>(UI::InteropApiVersion, interop);
             if(!apiReady)return false;
             K2040::Settings::Load();
+            PublishGameplayBindings();
             trackerEnabled=K2040::Settings::Current().trackerEnabled;
             // Optional controller API: missing support leaves keyboard/mouse.
             UI::Discover<UI::ApiFeature::Controller>(UI::ControllerApiVersion, controller);
         }
         RegisterHotkeysOnce();
-        RegisterHubScaleformOnce();
         RegisterPadPollingOnce();
         return true;
     }
@@ -2366,7 +2341,6 @@ F4SE_PLUGIN_LOAD(const F4SE::LoadInterface* load) {
 #endif
     const auto* messaging = F4SE::GetMessagingInterface();
     if (!messaging) return false;
-    K2040::Hub::SeedDefaultKeyboardBindings();
     K2040::QuestViewState::RegisterSerialization();
     return messaging->RegisterListener(Messages);
 }
@@ -2374,7 +2348,7 @@ F4SE_PLUGIN_LOAD(const F4SE::LoadInterface* load) {
 
 // Unified Settings V2: the manifest describes editable fields, while all
 // changes remain validated, saved and applied by Quest Journal itself.
-// V1 standalone settings and gameplay keybindings remain unaffected.
+// Gameplay shortcuts are module preferences exposed in the hub, never MCM.
 namespace {
     bool K2040_SETTINGS_V2_CALL JournalEditorReady() noexcept {
         return gameLoaded && apiReady;
@@ -2406,8 +2380,8 @@ namespace {
         // The V1 catalog deliberately retains these legacy values as
         // internal. Reject direct third-party attempts to write them even
         // when bypassing the shared renderer's manifest whitelist.
-        constexpr std::array<std::string_view,4> internalKeys{
-            "opacity","fontSize","journalHotkey","trackerHotkey"
+        constexpr std::array<std::string_view,3> internalKeys{
+            "opacity","fontSize","trackerSyncPipboy"
         };
         if(std::find(internalKeys.begin(),internalKeys.end(),id)!=internalKeys.end())
             return false;

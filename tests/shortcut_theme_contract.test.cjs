@@ -3,38 +3,28 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const S=require('../view/journal-settings.js');
 const read=name=>fs.readFileSync(name,'utf8');
-const grouped=JSON.parse(read('mcm/Data/MCM/Config/K2040_Quest_Journal/config.json'));
-const standalone=JSON.parse(read('mcm/standalone/Data/MCM/Config/K2040_Quest_Journal/config.json'));
-test('native and Prisma standalone factory defaults agree without removing legacy user choices',()=>{
- assert.equal(S.defaults.journalHotkey,'Shift+G');
- assert.equal(S.defaults.trackerHotkey,'G');
- assert.equal(S.normalize({journalHotkey:'F8',trackerHotkey:'F10'}).journalHotkey,'F8');
- assert.equal(S.normalize({journalHotkey:'F8',trackerHotkey:'F10'}).trackerHotkey,'F10');
- const cpp=read('src/JournalSettings.h');
- assert.match(cpp,/journalHotkey = "Shift\+G"/);
- assert.match(cpp,/trackerHotkey = "G"/);
- assert.match(read('src/HubBindings.cpp'),/unsigned key='G';/);
- assert.match(read('src/HubBindings.cpp'),/unsigned modifiers=action==Action::Journal\?1u:0u/);
- assert.match(read('src/HubMcmLive.cpp'),/InvokeUpdate\(movie,"root.mcm.SetKeybind",i,key,mods\)/);
- assert.match(read('src/HubBindings.cpp'),/if\(initialized\)return;/);
- assert.match(read('src/HubBindings.cpp'),/if\(found\)continue/);
- const ui=read('view/app.js');
- assert.doesNotMatch(ui,/saveHubKeyboard|setHubNativeCapture/);
- assert.doesNotMatch(read('view/journal.html'),/id="openSettings"|id="settingsWorkspace"/);
- assert.match(ui,/state.settings.journalHotkey==='Shift\+G'/);
- assert.match(read('src/main.cpp'),/shift==\(binding=="Shift\+G"\)/);
+test('Journal and tracker gameplay shortcuts live in owner preferences and hub editor',()=>{
+  assert.equal(S.defaults.journalHotkey,'Shift+G');
+  assert.equal(S.defaults.trackerHotkey,'G');
+  assert.equal(S.normalize({journalHotkey:'F8',trackerHotkey:'F10'}).journalHotkey,'F8');
+  assert.equal(S.normalize({journalHotkey:'F8',trackerHotkey:'F10'}).trackerHotkey,'F10');
+  const cpp=read('src/JournalSettings.h');
+  assert.match(cpp,/journalHotkey = "Shift\+G"/);
+  assert.match(cpp,/trackerHotkey = "G"/);
+  assert.match(read('src/main.cpp'),/keyboard\(settings\.journalHotkey\)/);
+  assert.match(read('src/main.cpp'),/keyboard\(settings\.trackerHotkey\)/);
+  const manifest=JSON.parse(read('view/settings-v1-manifest.json'));
+  const fields=manifest.categories.flatMap(c=>c.groups.flatMap(g=>g.fields));
+  for(const id of ['journalHotkey','trackerHotkey','journalPadPrimary','journalPadHeld','trackerPadPrimary','trackerPadHeld'])
+    assert.equal(fields.find(f=>f.id===id)?.type,'select',id);
+  assert.doesNotMatch(read('view/journal.html'),/id="openSettings"|id="settingsWorkspace"/);
 });
-test('grouped and standalone MCM pages place keyboard toggles side by side',()=>{
- for(const config of [grouped,standalone]){
-  const items=config.pages[0].content;
-  const ids=items.map(item=>item.id);
-  const journal=ids.indexOf('questJournalToggle');
-  assert.ok(journal>=0);
-  assert.equal(ids[journal+1],'questTrackerToggle');
-  assert.ok(ids.indexOf('iQuestJournalPadPrimary:Controller')>journal+1);
-  assert.ok(ids.indexOf('iQuestTrackerPadPrimary:Controller')>journal+1);
-  assert.ok(items.some(item=>item.type==='text' && item.text.includes('Shift+G and G')));
- }
+test('the bundled MCM parent has no Journal keybinds or actions',()=>{
+  const mcm=read('mcm/Data/MCM/Config/K2040_Mods/config.json');
+  const parent=JSON.parse(mcm);
+  assert.deepEqual(parent.pages,[]);
+  assert.doesNotMatch(mcm,/questJournalToggle|questTrackerToggle/);
+  assert.equal(fs.existsSync('mcm/Data/MCM/Config/K2040_Quest_Journal'),false);
 });
 test('all Journal selects use one themed popup and preserve native change-event contract',()=>{
  const html=read('view/journal.html'),css=read('view/styles.css');

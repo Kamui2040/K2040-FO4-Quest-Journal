@@ -66,16 +66,13 @@ class PackageTests(unittest.TestCase):
         common={"Data/F4SE/Plugins/K2040_Quest_Journal.dll":b"test"}
         for mode in ("grouped","standalone"):
             full=mod.with_mcm(common,mode)
-            self.assertEqual(len(full),5 if mode=="grouped" else 4)
+            self.assertEqual(len(full),2 if mode=="grouped" else 1)
             self.assertEqual("Data/MCM/Config/K2040_Mods/config.json" in full,mode=="grouped")
             if mode=="grouped":
                 self.assertEqual(mod.hashlib.sha256(
                     full[mod.PARENT_PATH]).hexdigest(),mod.CANONICAL_PARENT_SHA256)
-            config=json.loads(full["Data/MCM/Config/K2040_Quest_Journal/config.json"])
-            self.assertEqual(config.get("ownerModName"),"K2040_Mods" if mode=="grouped" else None)
-            self.assertEqual(config["modName"],"K2040_Quest_Journal")
-            ids=[a["id"] for a in config["pages"][0]["content"] if a.get("type")=="hotkey"]
-            self.assertEqual(ids,["questJournalToggle","questTrackerToggle"])
+            self.assertFalse(any("MCM/Config/K2040_Quest_Journal/" in name for name in full))
+            self.assertFalse(any(name.endswith("keybinds.json") for name in full))
         self.assertEqual(mod.with_mcm(common,"none"),common)
 
     def test_requires_every_view_asset(self):

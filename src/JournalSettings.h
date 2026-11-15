@@ -36,6 +36,12 @@ namespace K2040::Settings {
         bool trackerSyncPipboy = false;
         std::string journalHotkey = "Shift+G";
         std::string trackerHotkey = "G";
+        // Gamepad gameplay shortcuts belong to this owner's saved settings,
+        // not the global MCM registry. Zero is deliberately unassigned.
+        int journalPadPrimary = 0;
+        int journalPadHeld = 0;
+        int trackerPadPrimary = 0;
+        int trackerPadHeld = 0;
         bool redirectQuestKey = false;
     };
     void Load();

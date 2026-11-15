@@ -395,14 +395,14 @@ target("K2040_Quest_Journal")
         for _,asset in ipairs(os.files(path.join(os.scriptdir(),"view","*"))) do
             os.cp(asset,assets)
         end
-        -- Every K2040 mod carries the same canonical parent MCM menu.
-        -- Child controls remain scoped to their own MCM folder.
-        for _,name in ipairs({"K2040_Mods","K2040_Quest_Journal"}) do
-            local source=path.join(os.scriptdir(),"mcm","Data","MCM","Config",name)
-            local target=path.join(base,"Data","MCM","Config",name)
-            os.mkdir(target)
-            os.cp(path.join(source,"*"),target)
-        end
+        -- The unified hub is the ONLY MCM keybind owner.
+        -- Journal gameplay shortcuts are native preferences edited by hub V2.
+        -- Stage the canonical parent only, with no Quest Journal MCM child.
+        local parent=path.join(os.scriptdir(),"mcm","Data","MCM","Config",
+            "K2040_Mods","config.json")
+        local parentdest=path.join(base,"Data","MCM","Config","K2040_Mods")
+        os.mkdir(parentdest)
+        os.cp(parent,parentdest)
         -- Tagged VNext provider: only the already-loaded Quest Journal DLL
         -- can expose this descriptor's validated settings adapter.
         local providerdir=path.join(base,"Data","K2040","Settings","Providers")

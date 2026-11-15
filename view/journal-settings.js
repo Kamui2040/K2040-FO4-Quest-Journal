@@ -14,7 +14,9 @@
     trackerAnchor:'top-right', trackerScale:100, trackerWidth:340, trackerOpacity:88,
     trackerEnabled:true, trackerOverridePhosphor:false, trackerMaxQuests:6, trackerShowCompleted:false,
     trackerAutoPinNew:false, trackerSyncPipboy:false,
-    journalHotkey:'Shift+G', trackerHotkey:'G', redirectQuestKey:false
+    journalHotkey:'Shift+G', trackerHotkey:'G',
+    journalPadPrimary:0,journalPadHeld:0,trackerPadPrimary:0,trackerPadHeld:0,
+    redirectQuestKey:false
   });
   // K2040 cross-mod palette contract. High Contrast is exactly the palette
   // used by Quick Attach Menu's renderer; Fallout 76 values are drawn from
@@ -70,6 +72,10 @@
       trackerSyncPipboy:v.trackerSyncPipboy === true,
       journalHotkey,
       trackerHotkey:choose(v.trackerHotkey,safeKeys,defaults.trackerHotkey)===journalHotkey ? (journalHotkey==='G'?'Shift+G':'G') : choose(v.trackerHotkey,safeKeys,defaults.trackerHotkey),
+      journalPadPrimary:number(v.journalPadPrimary,0,0,16),
+      journalPadHeld:number(v.journalPadHeld,0,0,16),
+      trackerPadPrimary:number(v.trackerPadPrimary,0,0,16),
+      trackerPadHeld:number(v.trackerPadHeld,0,0,16),
       redirectQuestKey:v.redirectQuestKey===true
     };
   }
