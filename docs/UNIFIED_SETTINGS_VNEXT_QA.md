@@ -14,6 +14,11 @@ No private source checkout or internal build artifacts are bundled.
   persisted owner fields and owner-only reset. Stored settings and
   independent Journal/tracker gameplay hotkeys remain owner-controlled;
   no per-mod settings-only shortcut is registered.
+- Ported the controller-fix branch's native menu mapping, order-independent
+  controller shortcut chords and search reset. The game-thread snapshot
+  follows Fallout 4's remapped Confirm/Back/D-pad; optional pin/favorite
+  shortcuts yield to menu actions. Switch Pro/Steam Input runtime acceptance
+  remains pending.
 - providers/quest-journal.json is staged to
   Data/K2040/Settings/Providers/quest-journal.json, declaring the already
   loaded K2040_Quest_Journal.dll and V2 getter.
