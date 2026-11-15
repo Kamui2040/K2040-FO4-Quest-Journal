@@ -84,111 +84,24 @@ with sync_playwright() as p:
             page.evaluate("window.dispatchEvent(new CustomEvent('prisma-controller-action', {detail:{button:'RB',action:'journal.status-next',state:'pressed'}}))")
             assert 'Completed quests' in page.locator('#listHeading').inner_text()
             page.evaluate("window.dispatchEvent(new CustomEvent('prisma-controller-action', {detail:{button:'LB',action:'journal.status-prev',state:'pressed'}}))")
-            page.locator('#openSettings').click()
-            assert page.locator('#settingsWorkspace').is_visible()
-            assert not page.locator('#journalWorkspace').is_visible()
-            page.locator('[data-theme="contrast"]').click()
-            assert page.locator('.tracker-sample').evaluate(
-                "node => node.style.getPropertyValue('--sample-accent')") == '#00e5ff'
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#20ff48'
-            page.locator('[data-theme="fallout76"]').click()
-            assert page.locator('.tracker-sample').evaluate(
-                "node => node.style.getPropertyValue('--sample-accent')") == '#f5cb5b'
-            assert page.locator('.tracker-sample').evaluate(
-                "node => node.classList.contains('theme-fallout76')")
-            page.locator('[data-theme="pipboy"]').click()
-            assert page.locator('[data-theme="pipboy"]').get_attribute('class') == 'selected'
-            assert page.locator('#settingAccentHex').is_disabled()
-            page.locator('[data-theme="custom"]').click()
-            assert page.locator('#settingAccentHex').is_enabled()
-            page.locator('#settingAccentHex').fill('#112233')
-            page.locator('#settingAccentHex').press('Tab')
-            assert page.locator('#settingAccentHex').input_value() == '#112233'.upper()
-            assert page.locator('#settingAccent').input_value() == '#112233'
-            assert page.locator('[data-palette="accent"] [data-rgb-value="0"]').inner_text() == '17'
-            assert page.locator('[data-palette="accent"] [data-rgb-value="1"]').inner_text() == '34'
-            assert page.locator('[data-palette="accent"] [data-rgb-value="2"]').inner_text() == '51'
-            page.locator('[data-palette="accent"] [data-rgb-channel="1"]').evaluate("""node => {
-              node.value = '68';
-              node.dispatchEvent(new Event('input',{bubbles:true}));
-              node.dispatchEvent(new Event('change',{bubbles:true}));
-            }""")
-            assert page.locator('#settingAccentHex').input_value() == '#114433'.upper()
-            # Changing the tracker palette must not recolour the journal UI.
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#20ff48'
-            assert page.locator('.tracker-sample').evaluate(
-                "node => node.style.getPropertyValue('--sample-accent')") == '#114433'
-            page.locator('#settingCompletedHex').fill('#88ffaa')
-            page.locator('#settingCompletedHex').press('Tab')
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-completed')") == '#20ff48'
-            assert page.locator('.tracker-sample').evaluate(
-                "node => node.style.getPropertyValue('--sample-completed')") == '#88ffaa'
-            assert page.locator('.appearance-sample').count() == 1
-            assert page.locator('.appearance-sample .sample-done').count() == 1
-            assert page.locator('.appearance-sample .sample-completed-symbol').evaluate(
-                "node => getComputedStyle(node).color") == 'rgb(136, 255, 170)'
-            page.locator('#settingAccentHex').fill('#invalid')
-            page.locator('#settingAccentHex').press('Tab')
-            assert page.locator('#settingAccentHex').input_value() == '#114433'.upper()
-            page.locator('[data-settings-page="journal"]').click()
-            assert page.locator('#settingsJournal').is_visible()
-            page.locator('#settingSidebarWidth').evaluate("""node => {
-              node.value='320';
-              node.dispatchEvent(new Event('input',{bubbles:true}));
-              node.dispatchEvent(new Event('change',{bubbles:true}));
-            }""")
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--journal-sidebar-width')") == '320px'
-            page.locator('#settingQuestListWidth').evaluate("""node => {
-              node.value='450';
-              node.dispatchEvent(new Event('input',{bubbles:true}));
-              node.dispatchEvent(new Event('change',{bubbles:true}));
-            }""")
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--journal-list-width')") == '450px'
-            page.locator('[data-settings-page="appearance"]').click()
-            page.locator('#resetAppearance').click()
-            assert page.locator('#settingSidebarWidth').input_value() == '240'
-            assert page.locator('#settingQuestListWidth').input_value() == '360'
-            assert page.locator('#settingAccentHex').is_disabled()
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-completed')") == '#20ff48'
-            page.locator('[data-settings-page="journalAppearance"]').click()
-            assert page.locator('#settingsJournalAppearance').is_visible()
-            page.locator('[data-journal-theme="contrast"]').click()
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#00e5ff'
-            page.locator('[data-journal-theme="fallout76"]').click()
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#f5cb5b'
-            assert page.locator('body').evaluate(
-                "node => node.classList.contains('journal-theme-fallout76')")
-            assert page.locator('#settingJournalAccentHex').is_disabled()
-            page.locator('[data-journal-theme="custom"]').click()
-            assert page.locator('#settingJournalAccentHex').is_enabled()
-            page.locator('#settingJournalAccentHex').fill('#ba5511')
-            page.locator('#settingJournalAccentHex').press('Tab')
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#ba5511'
-            assert page.locator('.tracker-sample').evaluate(
-                "node => node.style.getPropertyValue('--sample-accent')") == '#20ff48'
-            page.locator('#settingJournalOpacity').evaluate("""node => {
-              node.value='63';
-              node.dispatchEvent(new Event('input',{bubbles:true}));
-              node.dispatchEvent(new Event('change',{bubbles:true}));
-            }""")
-            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-panel-background')") == 'rgba(11,18,24,0.63)'
-            page.locator('[data-settings-page="tracker"]').click()
-            assert page.locator('#settingTrackerAnchor').evaluate(
-                'node => getComputedStyle(node).appearance') == 'none'
-            assert page.locator('#settingTrackerWidth').evaluate(
-                'node => getComputedStyle(node).appearance') == 'none'
-            assert page.locator('#settingTrackerEnabled').evaluate(
-                'node => getComputedStyle(node).appearance') == 'none'
-            page.locator('#settingTrackerAnchor').select_option('bottom-left')
-            assert page.locator('#settingTrackerAnchor').input_value() == 'bottom-left'
-            page.locator('[data-settings-page="controls"]').click()
-            page.locator('#settingJournalHotkey').select_option('F7')
-            assert page.locator('#settingJournalHotkey').input_value() == 'F7'
-            page.locator('#settingTrackerHotkey').select_option('F11')
-            assert page.locator('#settingTrackerHotkey').input_value() == 'F11'
-            page.locator('#settingJournalHotkey').select_option('F11')
-            assert page.locator('#settingJournalHotkey').input_value() == 'F7'
-            page.locator('#backToJournal').click()
+            # V2: Settings are edited only through the shared hub.
+            assert page.locator('#openSettings').count() == 0
+            assert page.locator('#settingsWorkspace').count() == 0
+            assert page.locator('#journalWorkspace').is_visible()
+            page.evaluate("""() => window.receiveJournalSettings({
+                journalTheme:'custom', journalAccent:'#112233',
+                journalOpacity:63, trackerWidth:450
+            })""")
+            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#112233'
+            assert page.evaluate("document.documentElement.style.getPropertyValue('--journal-list-width')") == '360px'
+            page.evaluate("window.applyUnifiedTheme('midnight')")
+            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#b4a8ff'
+            assert page.evaluate("document.documentElement.style.getPropertyValue('--bg')") == '#090d18'
+            page.evaluate("window.applyUnifiedTheme('high-contrast')")
+            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#ffff73'
+            page.evaluate("window.applyUnifiedTheme('native')")
+            assert page.evaluate("document.documentElement.style.getPropertyValue('--ui-accent')") == '#112233'
+            assert page.evaluate("document.documentElement.style.getPropertyValue('--bg')") == ''
             assert page.locator('#journalWorkspace').is_visible()
         else:
             assert page.locator(".tracked-entry").count() == 2

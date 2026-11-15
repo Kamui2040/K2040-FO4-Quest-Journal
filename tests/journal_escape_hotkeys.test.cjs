@@ -67,31 +67,19 @@ function start(){
  return {element,win,click,escapeDom,nativeCalls,dispatchedEvents,addControl,activeElement:()=>doc.activeElement,
   setActive:control=>{doc.activeElement=control},setSelectPopup:popup=>{selectPopup=popup}};
 }
-test('native Escape closes Settings first and Journal on next press',()=>{
+test('native Escape immediately closes the Journal, not a retired settings panel',()=>{
  const v=start();
- v.click('openSettings');
- assert.equal(v.element('settingsWorkspace').hidden,false);
- assert.equal(v.activeElement().id,'[data-settings-page="appearance"]');
- v.win.handleJournalEscape();
- assert.equal(v.element('settingsWorkspace').hidden,true);
- assert.equal(v.activeElement().id,'openSettings');
- assert.equal(v.nativeCalls.includes('close'),false);
  v.win.handleJournalEscape();
  assert.equal(v.nativeCalls.filter(x=>x==='close').length,1);
+ assert.equal((v.element('openSettings')._listeners.get('click')||[]).length,0);
 });
-test('browser Escape routes through native only once and shortcut capture consumes it',()=>{
+test('browser Escape routes through native and never starts local shortcut capture',()=>{
  const v=start();
- v.click('openSettings');
  v.escapeDom();
  assert.equal(v.nativeCalls.at(-1),'escape');
- assert.equal(v.element('settingsWorkspace').hidden,false);
- v.win.receiveHubBindings(JSON.stringify({
-   installed:true,journal:{registered:true},tracker:{registered:true}
- }));
- v.click('captureButton');
- v.escapeDom();
- assert.equal(v.nativeCalls.at(-1),'ack');
- assert.equal(v.element('settingsWorkspace').hidden,false);
+ v.win.handleJournalEscape();
+ assert.equal(v.nativeCalls.filter(x=>x==='close').length,1);
+ assert.equal(typeof v.win.receiveHubNativeMouseCapture,'undefined');
 });
 test('native physical Escape and chord detection have scoped fallbacks',()=>{
  const s=fs.readFileSync('src/main.cpp','utf8');
@@ -105,7 +93,7 @@ test('native physical Escape and chord detection have scoped fallbacks',()=>{
  assert.doesNotMatch(s,/const bool rising=pressed&&!k\.wasDown/);
 });
 test('controller direction chooses the nearest enabled visible control and scrolls it into view',()=>{
- const v=start();v.click('openSettings');
+ const v=start();
  const first=v.addControl('first',{left:0,top:0,width:80,height:24});
  v.addControl('disabled',{left:0,top:30,width:80,height:24},{disabled:true});
  v.addControl('ariaDisabled',{left:0,top:40,width:80,height:24},{attributes:{'aria-disabled':'true'}});
@@ -119,7 +107,7 @@ test('controller direction chooses the nearest enabled visible control and scrol
  assert.equal(next.classList.contains('controller-focus-visible'),true);
 });
 test('controller navigation starts at the first control when nothing in the panel is focused',()=>{
- const v=start();v.click('openSettings');
+ const v=start();
  const first=v.addControl('first',{left:0,top:0,width:80,height:24});
  v.addControl('second',{left:0,top:30,width:80,height:24});
  v.setActive(null);
@@ -127,14 +115,14 @@ test('controller navigation starts at the first control when nothing in the pane
  assert.equal(v.activeElement(),first);
 });
 test('controller activation clicks the focused control',()=>{
- const v=start();v.click('openSettings');
+ const v=start();
  const control=v.addControl('control',{left:0,top:0,width:80,height:24});
  v.setActive(control);
  v.win.receiveJournalControllerAction('activate');
  assert.equal(control.clicked,1);
 });
 test('controller activation chooses a focused option in the open custom select',()=>{
- const v=start();v.click('openSettings');
+ const v=start();
  const option=v.element('popupOption');
  v.setActive(option);
  v.setSelectPopup({contains:node=>node===option});
@@ -142,7 +130,7 @@ test('controller activation chooses a focused option in the open custom select',
  assert.equal(option.clicked,1);
 });
 test('controller left and right adjust a focused range by one configured step',()=>{
- const v=start();v.click('openSettings');
+ const v=start();
  const slider=v.addControl('slider',{left:0,top:0,width:80,height:24},
   {tagName:'INPUT',type:'range',value:'5',min:'0',max:'10',step:'2'});
  v.addControl('neighbor',{left:100,top:0,width:80,height:24});
@@ -154,24 +142,21 @@ test('controller left and right adjust a focused range by one configured step',(
  v.win.receiveJournalControllerAction('left');
  assert.equal(slider.value,'5');
 });
-test('controller back closes Settings first and then closes the Journal',()=>{
- const v=start();v.click('openSettings');
- v.win.receiveJournalControllerAction('back');
- assert.equal(v.element('settingsWorkspace').hidden,true);
- assert.equal(v.activeElement().id,'openSettings');
+test('controller Back closes Journal without the retired editor',()=>{
+ const v=start();
  v.win.receiveJournalControllerAction('back');
  assert.equal(v.nativeCalls.filter(x=>x==='close').length,1);
 });
-test('controller back dismisses an open custom select before Settings',()=>{
- const v=start();v.click('openSettings');let closed=0;
+test('controller Back closes an open quest select before Journal',()=>{
+ const v=start();let closed=0;
  v.setSelectPopup({});
  v.win.K2040JournalSelects={close(){closed++;}};
  v.win.receiveJournalControllerAction('back');
  assert.equal(closed,1);
- assert.equal(v.element('settingsWorkspace').hidden,false);
+ assert.equal(v.nativeCalls.filter(x=>x==='close').length,0);
 });
 test('controller directions pass through to an open custom select popup',()=>{
- const v=start();v.click('openSettings');v.setSelectPopup({});
+ const v=start();v.setSelectPopup({});
  v.win.receiveJournalControllerAction('right');
  assert.equal(v.dispatchedEvents.at(-1).key,'ArrowRight');
  assert.equal(v.dispatchedEvents.at(-1).bubbles,true);
@@ -185,9 +170,11 @@ test('native controller actions use the focused UI task path and skip colliding 
  assert.match(s,/receiveJournalControllerAction",name/);
  assert.match(s,/ConflictsWithMenuNavigation\(/);
 });
-test('Controls page explains menu navigation and the shortcut priority',()=>{
+test('the Journal retains gamepad navigation, but no individual settings editor',()=>{
  const html=fs.readFileSync('view/journal.html','utf8');
- assert.match(html,/Use the D-pad or left stick to move the selection\. Press A to choose and B to go back/);
- assert.match(html,/right stick still moves the cursor/);
- assert.match(html,/these menu controls take priority over custom actions assigned to A, B, or the D-pad/);
+ const code=fs.readFileSync('view/app.js','utf8');
+ assert.doesNotMatch(html,/id="openSettings"|id="settingsWorkspace"/);
+ assert.match(code,/function moveControllerFocus/);
+ assert.match(code,/function visibleControllerControls/);
+ assert.match(code,/window.receiveJournalControllerAction=function/);
 });

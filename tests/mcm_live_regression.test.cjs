@@ -29,17 +29,13 @@ test('reserved modifier and numlock key values cannot be saved',()=>{
   'VK_NUMLOCK','VK_ESCAPE','VK_F9'])assert.match(hub,new RegExp('key!='+key));
 });
 
-test('mouse side-buttons use native XBUTTON high-bit sampler and Settings capture acknowledgment',()=>{
- assert.match(main,/const bool mouse4=down\(VK_XBUTTON1\),mouse5=down\(VK_XBUTTON2\)/);
- assert.match(main,/const unsigned physical=mouse4&&!oldMouse4\?259u:260u/);
- assert.match(main,/setHubNativeCapture/);
- assert.match(main,/hubNativeMouseCapture.exchange\(0,std::memory_order_acq_rel\)/);
- assert.match(main,/receiveHubNativeMouseCapture/);
+test('retired settings capture no longer polls mouse buttons or registers browser writers',()=>{
  const ui=fs.readFileSync('view/app.js','utf8');
- assert.match(ui,/window.receiveHubNativeMouseCapture/);
- assert.match(ui,/emit\('setHubNativeCapture',capturingHub\)/);
- assert.match(ui,/emit\('setHubNativeCapture',''\)/);
- assert.match(ui,/pending-mcm/);
+ assert.doesNotMatch(main,/hubNativeMouseCapture|oldMouse4|receiveHubNativeMouseCapture/);
+ assert.doesNotMatch(main,/BindUIEvent\(view, "saveHubKeyboard"/);
+ assert.doesNotMatch(main,/BindUIEvent\(view, "saveHubController"/);
+ assert.doesNotMatch(ui,/saveHubKeyboard|setHubNativeCapture|captureButton/);
+ assert.match(main,/K2040::Hub::RefreshNativeMcm/);
 });
 
 test('native MCM refuses stale disk registry when live bridge has not initialized',()=>{
@@ -59,22 +55,20 @@ test('unambiguous stale zero duplicate recovered only after stable observations'
  assert.match(live,/priorLive.reset\(\)/);
 });
 
-test('explicit Controls reset routes each default through this mod native writer',()=>{
- const ui=fs.readFileSync('view/app.js','utf8');
- const html=fs.readFileSync('view/journal.html','utf8');
- assert.match(ui,/data-hub-reset/);
- assert.match(ui,/action,first:71,second:action==='journal'\?1:0/);
- assert.match(ui,/emit\('saveHubKeyboard'/);
- assert.match(html,/data-hub-reset="journal">Reset Shift\+G/);
- assert.match(html,/data-hub-reset="tracker">Reset G/);
+test('Quest and tracker shortcut assignments remain native MCM gameplay controls',()=>{
+ const grouped=JSON.parse(fs.readFileSync('mcm/Data/MCM/Config/K2040_Quest_Journal/config.json','utf8'));
+ const controls=grouped.pages.flatMap(p=>p.content);
+ const keyboard=controls.filter(c=>c.type==='hotkey').map(c=>c.id);
+ assert.deepEqual(keyboard,['questJournalToggle','questTrackerToggle']);
+ assert.doesNotMatch(fs.readFileSync('view/journal.html','utf8'),/data-hub-reset|standaloneHotkeys/);
+ assert.match(hub,/StageNativeMcmBinding/);
 });
 
-test('controller selectors expose descriptive accessible names',()=>{
- const html=fs.readFileSync('view/journal.html','utf8');
- for(const [id,label] of [
-  ['hubJournalPrimary','Journal primary controller button'],
-  ['hubJournalHeld','Journal held controller button'],
-  ['hubTrackerPrimary','Tracker primary controller button'],
-  ['hubTrackerHeld','Tracker held controller button']
- ]) assert.match(html,new RegExp(`id="${id}"[^>]*aria-label="${label}"`));
+test('controller gameplay assignments remain in the owning MCM config',()=>{
+ const grouped=JSON.parse(fs.readFileSync('mcm/Data/MCM/Config/K2040_Quest_Journal/config.json','utf8'));
+ const controls=grouped.pages.flatMap(p=>p.content);
+ for(const id of ['iQuestJournalPadPrimary:Controller','iQuestJournalPadModifier:Controller',
+   'iQuestTrackerPadPrimary:Controller','iQuestTrackerPadModifier:Controller'])
+   assert.ok(controls.some(c=>c.id===id),id);
+ assert.doesNotMatch(fs.readFileSync('view/journal.html','utf8'),/hubJournalPrimary|hubTrackerHeld/);
 });

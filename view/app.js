@@ -6,11 +6,19 @@
   if (!S) throw new Error('Missing journal-settings.js');
   if (!M) throw new Error('Missing quest-model.js');
   const isTracker = document.body.classList.contains('tracker-page');
+  // Matches the shared K2040 hub theme tokens; these are transient UI
+  // colors, never changes to the player's two saved palettes.
+  const sharedThemes=Object.freeze({
+    default:{accent:'#88c4f1',text:'#e3eaf2',panel:'#1a2938',bg:'#101923',muted:'#b0c0ce'},
+    midnight:{accent:'#b4a8ff',text:'#e3eaf2',panel:'#171a31',bg:'#090d18',muted:'#b0c0ce'},
+    'high-contrast':{accent:'#ffff73',text:'#ffffff',panel:'#171717',bg:'#050505',muted:'#f1f1f1'},
+    pipboy:{accent:'#93f694',text:'#b2ffb5',panel:'#122b18',bg:'#09150d',muted:'#9bd69d'}
+  });
   const state = {
     snapshot: {ready:false, quests:[]}, query:'', status:'active', category:'all', sort:'pinned', selected:null,
     favorites:new Set(), hidden:new Set(), includeHidden:false, favoritesOnly:false,
     demo: new URLSearchParams(window.location.search).get('demo') === '1', lastSnapshotRaw:null,
-    settings: S.normalize({}), settingsPage:'appearance', showSettings:false,
+    settings: S.normalize({}), unifiedTheme:null,
     trackingRequest:null, trackingNotice:'',
     qaPreviewEnabled:false, qaPreviewPending:null, qaLastSelected:null,
     qaWriteEnabled:false, qaWriteArmed:false, qaWriteArmedId:null, qaWriteAttempted:false,
@@ -30,10 +38,6 @@
   };
   const el = id => document.getElementById(id);
   let hubControls={installed:false,journal:{},tracker:{}};
-  let capturingHub=null;
-  const hubActions=['journal','tracker'];
-  const hubPadIds={journal:['hubJournalPrimary','hubJournalHeld'],
-                   tracker:['hubTrackerPrimary','hubTrackerHeld']};
   function keyCode(event) {
     const code=String(event.code||''),key=String(event.key||'');
     if(/^Key[A-Z]$/.test(code))return code.charCodeAt(3);
@@ -50,34 +54,8 @@
     return !!(hubControls.installed&&binding&&binding.assigned&&!binding.conflict&&
       Number(binding.keycode)===keyCode(event)&&Number(binding.modifiers)===keyModifiers(event));
   }
-  function updateHubControls() {
-    if(isTracker)return;
-    const enabled=hubControls.installed;
-    el('hubControls').hidden=!enabled;
-    // Standalone hotkeys remain editable when the hub is unregistered
-    // or both actions are unassigned (e.g. no MCM installation yet).
-    el('standaloneHotkeys').hidden=enabled&&
-      !!(hubControls.journal?.registered||hubControls.tracker?.registered);
-    if(!enabled)return;
-    for(const action of hubActions){
-      const b=hubControls[action]||{};
-      el('hubLabel_'+action).textContent=(b.label||'Unassigned')+
-        (b.conflict?' — conflict; disabled':'');
-      const [primary,held]=hubPadIds[action];
-      el(primary).value=String(b.primary||0);
-      el(held).value=String(b.held||0);
-    }
-    el('hubBindingStatus').textContent=capturingHub?
-      'Press shortcut for '+capturingHub+' (Escape cancels)' :
-      'Shared with K2040 Mods MCM. Changes to MCM appear here when settings refresh.';
-  }
-  window.receiveHubNativeMouseCapture=function(action){
-    if(isTracker||!['journal','tracker'].includes(String(action)))return;
-    if(capturingHub===String(action)){
-      capturingHub=null;
-      updateHubControls();
-    }
-  };
+  // Gameplay shortcuts are still owned by Quest Journal's native MCM
+  // registry; the retired per-mod settings panel no longer edits them.
   window.receiveHubBindings=function(raw){
     if(isTracker)return;
     try{
@@ -86,8 +64,7 @@
       hubControls={installed:v.installed===true,
         journal:v.journal&&typeof v.journal==='object'?v.journal:{},
         tracker:v.tracker&&typeof v.tracker==='object'?v.tracker:{}};
-      updateHubControls();
-    }catch{el('hubBindingStatus').textContent='Hub settings unavailable';}
+    }catch{}
   };
   const html = value => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const prettyState = s => ({active:'Active',completed:'Completed',failed:'Failed',inactive:'Not started'})[s] || 'Unknown';
@@ -97,9 +74,23 @@
     const s=state.settings, trackerPalette=S.palette(s), root=document.documentElement;
     // Full-screen journal and its in-place settings share one saved theme.
     // The compact tracker remains independently configurable.
-    const p=isTracker?trackerPalette:S.journalPalette(s);
+    const nativePalette=isTracker?trackerPalette:S.journalPalette(s);
+    const shared=state.unifiedTheme?sharedThemes[state.unifiedTheme]:null;
+    const p=shared?{...shared,completed:shared.accent}:nativePalette;
     const rgb=channels(p.panel);
     root.style.fontSize=isTracker?'14px':(14*s.journalFontSize/100)+'px';
+    // Native palette always wins when the hub is missing or unavailable.
+    // Unlike body-scoped CSS, these root tokens override earlier inline
+    // native properties and therefore affect both Prisma views immediately.
+    if(shared){
+      root.style.setProperty('--bg',shared.bg);
+      root.style.setProperty('--blue',shared.accent);
+      root.style.setProperty('--text',shared.text);
+      root.style.setProperty('--muted',shared.muted);
+    }else{
+      for(const key of ['--bg','--blue','--text','--muted'])
+        root.style.removeProperty?.(key);
+    }
     root.style.setProperty('--ui-accent-rgb',channels(p.accent));
     root.style.setProperty('--ui-accent',p.accent);
     root.style.setProperty('--ui-text',p.text);
@@ -134,55 +125,7 @@
     document.body.classList.toggle('journal-theme-dark',s.journalTheme==='dark');
     document.body.classList.toggle('journal-theme-fallout76',s.journalTheme==='fallout76');
     document.body.classList.toggle('journal-theme-contrast',s.journalTheme==='contrast');
-    const preview=document.querySelector('.tracker-sample');
-    if(preview) {
-      preview.style.setProperty('--sample-accent',trackerPalette.accent);
-      preview.style.setProperty('--sample-accent-rgb',channels(trackerPalette.accent));
-      preview.style.setProperty('--sample-text',trackerPalette.text);
-      preview.style.setProperty('--sample-completed',trackerPalette.completed);
-      preview.style.setProperty('--sample-background',
-        'rgba('+channels(trackerPalette.panel)+','+(s.trackerOpacity/100)+')');
-      preview.style.setProperty('--sample-font-scale',String(s.trackerScale/100));
-      preview.classList.toggle('theme-pipboy',s.theme==='pipboy');
-      preview.classList.toggle('theme-fallout76',s.theme==='fallout76');
-      preview.classList.toggle('theme-contrast',s.theme==='contrast');
-    }
     document.querySelector('.journal-shell').classList.toggle('compact',s.density==='compact');
-    document.getElementById('journalWorkspace').hidden=state.showSettings;
-    document.getElementById('settingsWorkspace').hidden=!state.showSettings;
-    document.getElementById('pageTitle').textContent=state.showSettings?'Quest Journal Settings':'Quest Journal';
-    document.getElementById('resetFilters').hidden=state.showSettings;
-    document.getElementById('openSettings').hidden=state.showSettings;
-    document.querySelectorAll('[data-settings-page]').forEach(node=>{
-      const selected=node.dataset.settingsPage===state.settingsPage;
-      node.classList.toggle('selected',selected);
-      node.setAttribute('aria-current',selected?'page':'false');
-    });
-    for(const page of ['appearance','tracker','journalAppearance','journal','controls']) {
-      document.getElementById('settings'+page[0].toUpperCase()+page.slice(1)).hidden=page!==state.settingsPage;
-    }
-    document.querySelectorAll('[data-theme]').forEach(button=>button.classList.toggle('selected',button.dataset.theme===s.theme));
-    document.querySelectorAll('[data-journal-theme]').forEach(button=>
-      button.classList.toggle('selected',button.dataset.journalTheme===s.journalTheme));
-    for(const [key,id] of Object.entries({accent:'settingAccent',text:'settingText',panel:'settingPanel',completed:'settingCompleted',trackerOpacity:'settingOpacity',trackerScale:'settingFontSize',density:'settingDensity',sidebarWidth:'settingSidebarWidth',questListWidth:'settingQuestListWidth',trackerAnchor:'settingTrackerAnchor',trackerWidth:'settingTrackerWidth',trackerEnabled:'settingTrackerEnabled',trackerOverridePhosphor:'settingTrackerOverridePhosphor',trackerMaxQuests:'settingTrackerMaxQuests',trackerShowCompleted:'settingTrackerShowCompleted',trackerAutoPinNew:'settingTrackerAutoPinNew',trackerSyncPipboy:'settingTrackerSyncPipboy',journalHotkey:'settingJournalHotkey',trackerHotkey:'settingTrackerHotkey',journalOpacity:'settingJournalOpacity',journalFontSize:'settingJournalFontSize',journalAccent:'settingJournalAccent',journalText:'settingJournalText',journalPanel:'settingJournalPanel',journalCompleted:'settingJournalCompleted'})) {
-      const node=el(id);if(!node) continue;
-      if(node.type==='checkbox')node.checked=!!s[key]; else node.value=s[key];
-    }
-    for(const editor of document.querySelectorAll('.palette-editor')) {
-      const key=editor.dataset.palette;
-      const channels=S.hexChannels(s[key]);
-      const editable=(key.startsWith('journal')?s.journalTheme:s.theme)==='custom';
-      const hex=editor.querySelector('[data-hex]');
-      hex.value=s[key].toUpperCase();
-      editor.classList.toggle('inactive',!editable);
-      for(const control of editor.querySelectorAll('input'))control.disabled=!editable;
-      if(channels)for(const input of editor.querySelectorAll('[data-rgb-channel]')) {
-        const index=Number(input.dataset.rgbChannel);
-        input.value=channels[index];
-        editor.querySelector('[data-rgb-value="'+index+'"]').textContent=channels[index];
-      }
-    }
-    for(const [id,value] of Object.entries({settingOpacityValue:s.trackerOpacity+'%',settingFontSizeValue:s.trackerScale+'%',settingTrackerWidthValue:s.trackerWidth+' px',settingTrackerMaxQuestsValue:String(s.trackerMaxQuests),settingSidebarWidthValue:s.sidebarWidth+' px',settingQuestListWidthValue:s.questListWidth+' px',settingJournalOpacityValue:s.journalOpacity+'%',settingJournalFontSizeValue:s.journalFontSize+'%'}))el(id).textContent=value;
   }
   function receiveJournalSettings(input) {
     let settings=input;
@@ -192,8 +135,6 @@
         // A native payload format error must never overwrite the active
         // appearance with browser defaults; keep the last valid settings.
         console.error('Malformed native Quest Journal settings JSON',err);
-        if(!isTracker && el('settingsSaveStatus'))
-          el('settingsSaveStatus').textContent='Invalid settings response from Fallout 4';
         return;
       }
     }
@@ -206,50 +147,9 @@
     if(isTracker)renderTracker();
     else window.K2040JournalSelects?.sync();
   }
-  function changeSetting(key,value) {
-    if(!Object.prototype.hasOwnProperty.call(S.defaults,key))return;
-    if((key==='journalHotkey' && value===state.settings.trackerHotkey) ||
-       (key==='trackerHotkey' && value===state.settings.journalHotkey)) {
-      if(!isTracker)el('settingsSaveStatus').textContent='Use different keys for journal and tracker';
-      applySettings();
-      return;
-    }
-    if(!state.demo && typeof window.updateJournalSetting!=='function') {
-      el('settingsSaveStatus').textContent='Settings bridge unavailable; try reopening the journal';
-      return;
-    }
-    const next=S.normalize({...state.settings,[key]:value});
-    state.settings=next;
-    applySettings();
-    if(!isTracker)window.K2040JournalSelects?.sync();
-    if(state.demo){
-      try {localStorage.setItem('K2040QuestJournalPreviewSettings',JSON.stringify(next));} catch {}
-      el('settingsSaveStatus').textContent='Demo settings saved in this browser';
-    } else {
-      el('settingsSaveStatus').textContent='Sending setting to Fallout 4…';
-      emit('updateJournalSetting',key+':'+String(next[key]));
-    }
-  }
-  function showSettings(show) {
-    state.showSettings=show;
-    applySettings();
-    if(show)document.querySelector(`[data-settings-page="${state.settingsPage}"]`)?.focus();
-    else {clearControllerFocus();el('openSettings').focus();}
-    if(show&&!state.demo)emit('requestHubBindings');
-  }
-  // Both a browser key event and the native physical-Escape fallback call
-  // this one handler. Settings is dismissed before the journal itself.
+  // Escape always closes the Journal; no separate settings panel exists.
   window.handleJournalEscape=function(){
-    if(isTracker)return;
-    if(capturingHub){
-      if(!state.demo)emit('setHubNativeCapture','');
-      capturingHub=null;
-      updateHubControls();
-    }else if(state.showSettings){
-      showSettings(false);
-    }else{
-      emit('requestCloseJournal');
-    }
+    if(!isTracker)emit('requestCloseJournal');
   };
   let controllerFocused=null;
   function clearControllerFocus(){
@@ -257,7 +157,7 @@
     controllerFocused=null;
   }
   function visibleControllerControls(){
-    const panel=state.showSettings?el('settingsWorkspace'):el('journalWorkspace');
+    const panel=el('journalWorkspace');
     return Array.from(panel.querySelectorAll('button,input:not([type="hidden"]),select,textarea,[tabindex]'))
       .filter(node=>!node.disabled&&!node.hidden&&node.tabIndex>=0&&
         node.getAttribute?.('aria-hidden')!=='true'&&node.getAttribute?.('aria-disabled')!=='true'&&
@@ -338,21 +238,12 @@
   // Unified appearance is a transient token overlay, never a native
   // preference update. Both journal and tracker retain their own settings.
   window.applyUnifiedTheme=function(theme){
-    if(!['default','midnight','high-contrast','pipboy'].includes(theme))return;
-    document.body.dataset.k2040Theme=theme;
+    // "native" is used internally when the optional hub disappears.
+    if(theme!=='native' && !Object.prototype.hasOwnProperty.call(sharedThemes,theme))return;
+    state.unifiedTheme=theme==='native'?null:theme;
+    applySettings();
   };
   window.receiveJournalSettings=receiveJournalSettings;
-  window.receiveJournalSettingsStatus=function (value) {
-    if(!isTracker && el('settingsSaveStatus')) {
-      const messages={
-        saved:'Settings saved',
-        'pending-mcm':'Shortcut queued. Open and close the MCM pause menu to apply it; then refresh Controls.',
-        invalid:'Setting rejected; previous value restored',
-        storage:'Could not write settings file; previous value restored'
-      };
-      el('settingsSaveStatus').textContent=messages[value] || 'Settings update failed';
-    }
-  };
   function stats() {
     return {all:state.snapshot.quests.length,
       active:state.snapshot.quests.filter(q=>q.state==='active').length,
@@ -966,121 +857,6 @@
     });
     el('resetFilters').addEventListener('click',()=>{state.query='';state.status='active';state.category='all';state.favoritesOnly=false;state.includeHidden=false;state.sort='pinned';el('questSearch').value='';el('questSort').value='pinned';render();});
     el('closeJournal').addEventListener('click',()=>emit('requestCloseJournal'));
-    el('openSettings').addEventListener('click',()=>showSettings(true));
-    el('backToJournal').addEventListener('click',()=>showSettings(false));
-    el('resetAppearance').addEventListener('click',()=>{
-      if(state.demo){
-        state.settings=S.normalize({});
-        applySettings();
-        try{localStorage.setItem('K2040QuestJournalPreviewSettings',JSON.stringify(state.settings));}catch{}
-        el('settingsSaveStatus').textContent='Demo defaults restored';
-      }else{
-        el('settingsSaveStatus').textContent='Restoring settings…';
-        emit('resetJournalAppearance');
-      }
-    });
-    document.querySelectorAll('[data-settings-page]').forEach(button=>button.addEventListener('click',()=>{
-      state.settingsPage=button.dataset.settingsPage;
-      applySettings();
-      if(button.dataset.settingsPage==='controls'&&!state.demo)emit('requestHubBindings');
-    }));
-    document.querySelectorAll('[data-hub-capture]').forEach(button=>button.addEventListener('click',()=>{
-      if(!hubControls.installed)return;
-      capturingHub=button.dataset.hubCapture;
-      if(!state.demo)emit('setHubNativeCapture',capturingHub);
-      updateHubControls();
-      button.focus();
-    }));
-    document.querySelectorAll('[data-hub-clear]').forEach(button=>button.addEventListener('click',()=>{
-      if(!hubControls.installed)return;
-      emit('saveHubKeyboard',JSON.stringify({
-        action:button.dataset.hubClear,first:0,second:0
-      }));
-    }));
-    // Reset only this mod-owned action via the same native MCM writer
-    // as a regular capture; never mutate another mod's key registry.
-    document.querySelectorAll('[data-hub-reset]').forEach(button=>button.addEventListener('click',()=>{
-      if(!hubControls.installed)return;
-      const action=button.dataset.hubReset;
-      if(!['journal','tracker'].includes(action))return;
-      capturingHub=null;
-      if(!state.demo)emit('setHubNativeCapture','');
-      updateHubControls();
-      emit('saveHubKeyboard',JSON.stringify({
-        action,first:71,second:action==='journal'?1:0
-      }));
-    }));
-    document.querySelectorAll('[data-hub-pad]').forEach(select=>select.addEventListener('change',()=>{
-      if(!hubControls.installed)return;
-      const action=select.id.startsWith('hubJournal')?'journal':'tracker';
-      const [primary,held]=hubPadIds[action];
-      const a=Number(el(primary).value),b=Number(el(held).value);
-      if((!a&&b)||(a&&a===b)){
-        el('hubBindingStatus').textContent='Choose different buttons; optional held needs a primary button.';
-        return;
-      }
-      emit('saveHubController',JSON.stringify({action,first:a,second:b}));
-    }));
-    document.addEventListener('keydown',event=>{
-      if(!capturingHub)return;
-      event.preventDefault();event.stopPropagation();
-      if(event.stopImmediatePropagation)event.stopImmediatePropagation();
-      if(event.key==='Escape'){
-        if(!state.demo)emit('setHubNativeCapture','');
-        capturingHub=null;
-        updateHubControls();
-        if(!state.demo)emit('acknowledgeCapturedEscape');
-        return;
-      }
-      const key=keyCode(event),modifiers=keyModifiers(event);
-      if(!key || key===120 || (key===74&&!modifiers)){
-        el('hubBindingStatus').textContent='That key is reserved or unsupported; press another or Escape.';
-        return;
-      }
-      const action=capturingHub;
-      capturingHub=null;
-      if(!state.demo)emit('setHubNativeCapture','');
-      emit('saveHubKeyboard',JSON.stringify({action,first:key,second:modifiers}));
-      updateHubControls();
-    },true);
-    document.querySelectorAll('[data-theme]').forEach(button=>button.addEventListener('click',()=>changeSetting('theme',button.dataset.theme)));
-    document.querySelectorAll('[data-journal-theme]').forEach(button=>button.addEventListener('click',()=>changeSetting('journalTheme',button.dataset.journalTheme)));
-    // Exactly one edit commits to the native settings store when the slider is
-    // released; RGB channel input updates the theme immediately without disk I/O.
-    document.querySelectorAll('.palette-editor').forEach(editor=>{
-      const key=editor.dataset.palette, hexField=editor.querySelector('[data-hex]');
-      hexField.addEventListener('change',()=>{
-        const hex=hexField.value.trim();
-        if(S.hexChannels(hex))changeSetting(key,hex.toLowerCase());
-        else {
-          hexField.value=state.settings[key].toUpperCase();
-          el('settingsSaveStatus').textContent='Use a six-digit hex colour (#RRGGBB)';
-        }
-      });
-      for(const slider of editor.querySelectorAll('[data-rgb-channel]')){
-        slider.addEventListener('input',()=>{
-          if((key.startsWith('journal')?state.settings.journalTheme:state.settings.theme)!=='custom')return;
-          const channels=S.hexChannels(state.settings[key]);
-          if(!channels)return;
-          channels[Number(slider.dataset.rgbChannel)]=Number(slider.value);
-          const value=S.channelsHex(channels);
-          if(!value)return;
-          state.settings=S.normalize({...state.settings,[key]:value});
-          applySettings();
-        });
-        slider.addEventListener('change',()=>{
-          if((key.startsWith('journal')?state.settings.journalTheme:state.settings.theme)==='custom')
-            changeSetting(key,state.settings[key]);
-        });
-      }
-    });
-    document.querySelectorAll('[data-setting]').forEach(node=>{
-      node.addEventListener('change',()=>changeSetting(node.dataset.setting,node.type==='checkbox'?node.checked:node.value));
-      if(node.type==='range')node.addEventListener('input',()=>{
-        state.settings=S.normalize({...state.settings,[node.dataset.setting]:node.value});
-        applySettings(); // live preview; persist only on release
-      });
-    });
     document.addEventListener('change',e=>{
       if(e.target.id!=='questCategory' || !state.selected)return;
       const category=e.target.value;
@@ -1375,10 +1151,10 @@
     window.addEventListener('prisma-controller-action',({detail})=>{
       if(!detail || detail.state!=='pressed')return;
       const statuses=['active','completed','failed','all'];
-      if(detail.action==='journal.pin' && !state.showSettings && state.selected)emit('requestPinQuest',state.selected);
-      else if(detail.action==='journal.favorite' && !state.showSettings && state.selected)emit('requestFavoriteQuest',state.selected);
-      else if(detail.action==='journal.status-prev' && !state.showSettings){state.status=statuses[(statuses.indexOf(state.status)+3)%4];render();}
-      else if(detail.action==='journal.status-next' && !state.showSettings){state.status=statuses[(statuses.indexOf(state.status)+1)%4];render();}
+      if(detail.action==='journal.pin' && state.selected)emit('requestPinQuest',state.selected);
+      else if(detail.action==='journal.favorite' && state.selected)emit('requestFavoriteQuest',state.selected);
+      else if(detail.action==='journal.status-prev'){state.status=statuses[(statuses.indexOf(state.status)+3)%4];render();}
+      else if(detail.action==='journal.status-next'){state.status=statuses[(statuses.indexOf(state.status)+1)%4];render();}
     });
     document.addEventListener('keydown',e=>{
       if(e.key==='Escape'){
@@ -1386,8 +1162,8 @@
         if(state.demo)window.handleJournalEscape();
         else emit('requestJournalEscape');
       }
-      else if(!e.repeat && !capturingHub &&
-        hubShortcutPressed(e,'journal') && !state.showSettings &&
+      else if(!e.repeat &&
+        hubShortcutPressed(e,'journal') &&
         !e.target.closest('input,textarea,select,[contenteditable="true"]')){
         e.preventDefault();emit('requestCloseJournal');
       }
@@ -1401,9 +1177,9 @@
         e.preventDefault();emit('requestCloseJournal');
       }
       // Preserve native arrow navigation in sorting and text/edit controls.
-      else if(!state.showSettings && e.key==='ArrowDown' &&
+      else if(e.key==='ArrowDown' &&
               !e.target.closest('input,textarea,select,[contenteditable="true"]')){moveSelection(1);e.preventDefault();}
-      else if(!state.showSettings && e.key==='ArrowUp' &&
+      else if(e.key==='ArrowUp' &&
               !e.target.closest('input,textarea,select,[contenteditable="true"]')){moveSelection(-1);e.preventDefault();}
     });
   }

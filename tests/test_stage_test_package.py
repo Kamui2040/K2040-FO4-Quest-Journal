@@ -94,6 +94,8 @@ class PackageTests(unittest.TestCase):
             for asset in mod.ASSETS:
                 (base/"view"/asset).write_text("test",encoding="utf-8")
             files=mod.gather(base/"test.dll",base/"view")
+            manifest="Data/PrismaUI_F4/views/K2040QuestJournal/settings-v1-manifest.json"
+            self.assertEqual(files[manifest],b"test")
             for notice in ("LICENSE", "THIRD_PARTY_NOTICES.md", "README.md", "docs/COMPATIBILITY.md"):
                 self.assertTrue(files[notice],notice)
             output=base/"test.zip"

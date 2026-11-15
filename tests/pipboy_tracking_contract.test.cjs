@@ -49,7 +49,8 @@ test('Quick Data redirect follows and consumes the mapped gameplay action',()=>{
  assert.match(input,/handled\s*=\s*RE::InputEvent::HANDLED_RESULT::kStop/);
  assert.match(input,/DispatchAction\(K2040::Hub::Action::Journal\)/);
  assert.match(input,/!CompetingGameMenuOpen\(\) && !AnotherPrismaViewFocused\(\)/);
- const ui=fs.readFileSync('view/journal.html','utf8');
- assert.match(ui,/id="redirectQuestKey" type="checkbox" data-setting="redirectQuestKey"/);
- assert.match(ui,/follows your current key binding and is off by default/);
+ const metadata=JSON.parse(fs.readFileSync('view/settings-v1-manifest.json','utf8'));
+ const fields=metadata.categories.flatMap(c=>c.groups.flatMap(g=>g.fields));
+ assert.equal(fields.find(f=>f.id==='redirectQuestKey').type,'toggle');
+ assert.doesNotMatch(fs.readFileSync('view/journal.html','utf8'),/redirectQuestKey/);
 });

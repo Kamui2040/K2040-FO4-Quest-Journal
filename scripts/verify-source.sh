@@ -123,6 +123,10 @@ if command -v clang++ >/dev/null 2>&1; then
   "$tmp/text"
   clang++ -std=c++23 -O1 -Wall -Wextra -Itests/stubs -Isrc src/JournalSettings.cpp tests/native_journal_settings.cpp -o "$tmp/preferences"
   "$tmp/preferences"
+  # V2 owner JSON decoding is read-only and rejects malformed payloads
+  # before any native preference mutation can be attempted.
+  clang++ -std=c++23 -O1 -Wall -Wextra -Werror -Isrc tests/native_editor_v2_json.cpp -o "$tmp/editor-v2-json"
+  "$tmp/editor-v2-json"
   # Check the complete native serializer output through the actual JS
   # normalizer; substring assertions alone failed to catch malformed JSON.
   clang++ -std=c++23 -O1 -Wall -Wextra -Itests/stubs -Isrc src/JournalSettings.cpp tests/native_settings_payload.cpp -o "$tmp/payload"

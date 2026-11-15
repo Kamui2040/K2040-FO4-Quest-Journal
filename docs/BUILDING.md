@@ -23,8 +23,11 @@ npm run validate:settings
 `bash scripts/verify-source.sh` also validates the Quest Journal manifest
 and tests it against native settings definitions. The canonical schema and
 validator are copied byte-for-byte into this repo; the shared hub is not
-required to build or test. This is metadata validation only, not deployment
-or approval to replace the existing settings UI. See
+required to build or test. This validates metadata only. The older per-mod settings editor has been
+retired in this branch: the hub's V2 renderer is the sole settings surface.
+The Quest Journal remains usable on its own, with its pre-existing INI and
+gameplay hotkeys. Do not deploy until Windows DLL and in-game OG163 checks
+verify the shared hub/editor integration. See
 [the inventory](SETTINGS_CATALOG_V1.md).
 
 ## Build

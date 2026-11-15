@@ -30,15 +30,15 @@ test('quest collector matches CommonLibF4 TESFullName string_view return type',(
  assert.match(stub,/static std::string_view GetFullName/);
 });
 
-test('appearance reset is one game-thread native operation rather than a series of UI mutations',()=>{
+test('V2 reset stays with native owner and never routes through retired browser controls',()=>{
  const settings=fs.readFileSync('src/JournalSettings.cpp','utf8');
  const app=fs.readFileSync('view/app.js','utf8');
- assert.match(s,/interop.BindUIEvent\(view, "resetJournalAppearance"/);
+ assert.match(s,/JournalReset\(const char\* field/);
+ assert.match(s,/K2040::Settings::ResetToDefaults\(\)/);
  assert.match(settings,/bool ResetToDefaults\(\)/);
- assert.match(app,/emit\('resetJournalAppearance'\)/);
- assert.doesNotMatch(app,/for\(const \[key,value\] of Object.entries\(S.defaults\)\)/);
+ assert.doesNotMatch(s,/BindUIEvent\(view, "resetJournalAppearance"/);
+ assert.doesNotMatch(app,/emit\('resetJournalAppearance'\)/);
 });
-
 test('cursor fallback uses CommonLibF4 wrappers rather than hardcoded relocations',()=>{
  assert.match(s,/cursor->RegisterCursor\(\)/);
  assert.match(s,/cursor->UnregisterCursor\(\)/);
@@ -83,9 +83,9 @@ test('global appearance updates roll back after failed file persistence',()=>{
  assert.match(settings,/std::filesystem::path\(kLegacyPath\)/);
  assert.match(settings,/lastFailureReason="storage"/);
  assert.match(settings,/lastFailureReason="invalid"/);
- assert.match(s,/Settings::LastFailureReason\(\)/);
+ assert.match(s,/JournalApply\(const char\* setting/);
  assert.match(s,/if\(!K2040::Settings::ChangeAndSave\(desired\?/);
- assert.match(s,/const bool saved=K2040::Settings::ChangeAndSave\(setting\)/);
+ assert.match(s,/K2040::Settings::ChangeAndSave\(std::string\(id\)/);
 });
 
 test('Prisma UI callbacks schedule native work and copy borrowed payloads',()=>{
@@ -93,7 +93,8 @@ test('Prisma UI callbacks schedule native work and copy borrowed payloads',()=>{
  assert.match(s,/void QueueUIString\(void \(\*action\)\(const char\*\), const char\* raw\)/);
  assert.match(s,/const std::string value\(raw\)/);
  assert.match(s,/QueueUIAction\(\[action,value\]\(\) \{ action\(value\.c_str\(\)\); \}\)/);
- assert.match(s,/QueueUIString\(UpdateSetting,cmd\)/);
+ assert.doesNotMatch(s,/QueueUIString\(UpdateSetting,cmd\)/);
+ assert.match(s,/JournalApply\(const char\* setting/);
  assert.match(s,/QueueUIString\(UpdateCategory,choice\)/);
  assert.match(s,/QueueUIAction\(\[\]\(\)\{if\(journalOpen && journalFocused\)CloseJournal\(\);\}\)/);
  assert.match(s,/QueueTrackerAction\(\[\]\(\)\{if\(TrackerMayShow\(\) && trackerDomReady\)SyncSnapshots\(\);\}\)/);
@@ -252,17 +253,16 @@ test('journal controls use consistent in-page select, slider, checkbox and color
  assert.match(styles,/var\(--ui-accent,#66c4ff\)/);
 });
 
-test('K2040 contrast and MAP76-inspired presets have distinct scoped visual treatments',()=>{
+test('legacy owner presets stay independent from shared global theme tokens',()=>{
  const css=fs.readFileSync('view/styles.css','utf8');
  const js=fs.readFileSync('view/app.js','utf8');
- const html=fs.readFileSync('view/journal.html','utf8');
- for(const key of ['theme-contrast','theme-fallout76','journal-theme-contrast','journal-theme-fallout76']) {
-   assert.ok(css.includes(key),key);
-   assert.ok(js.includes(key),key);
+ for(const key of ['theme-contrast','theme-fallout76','journal-theme-contrast','journal-theme-fallout76']){
+   assert.ok(css.includes(key),key);assert.ok(js.includes(key),key);
  }
- for(const key of ['data-theme="fallout76"','data-journal-theme="fallout76"']) assert.ok(html.includes(key));
- assert.match(css,/\.tracker-page\.theme-fallout76 \.tracker-panel/);
- assert.match(css,/\.journal-page\.journal-theme-fallout76 \.journal-shell/);
+ assert.match(js,/sharedThemes=Object.freeze/);
+ assert.match(js,/window.applyUnifiedTheme=function/);
+ assert.match(js,/const nativePalette=isTracker\?trackerPalette:S.journalPalette\(s\)/);
+ assert.doesNotMatch(fs.readFileSync('view/journal.html','utf8'),/data-journal-theme/);
 });
 test('live Pip-Boy theme obtains HUD and background colors through the engine',()=>{
   const js=fs.readFileSync('view/journal-settings.js','utf8');
@@ -282,17 +282,14 @@ test('live Pip-Boy theme obtains HUD and background colors through the engine',(
   assert.match(fs.readFileSync('view/app.js','utf8'),/state\.settings\.journalTheme==='pipboy'/);
 });
 
-test('Pip-Boy tracker uses an independent bracketed condensed HUD skin without losing anchors',()=>{
-  const css=fs.readFileSync('view/styles.css','utf8');
-  const js=fs.readFileSync('view/app.js','utf8');
-  const html=fs.readFileSync('view/journal.html','utf8');
-  assert.match(css,/\.tracker-page\.theme-pipboy \.tracker-panel \{[^}]*position:absolute/s);
-  assert.match(css,/\.tracker-page\.theme-pipboy \.tracker-panel::before/);
-  assert.match(css,/font-family:"Roboto Condensed"/);
-  assert.match(css,/linear-gradient\(var\(--ui-accent\)/);
-  assert.match(js,/preview\.classList\.toggle\('theme-pipboy',s\.theme==='pipboy'\)/);
-  assert.match(html,/data-settings-page="journalAppearance"/);
-  assert.match(html,/id="settingsJournalAppearance"/);
-  assert.match(html,/data-journal-theme="custom"/);
-  assert.match(html,/data-setting="journalOpacity"/);
+test('Pip-Boy tracker keeps its HUD styling and four anchor positions',()=>{
+ const css=fs.readFileSync('view/styles.css','utf8');
+ const js=fs.readFileSync('view/app.js','utf8');
+ const S=require('../view/journal-settings.js');
+ assert.match(css,/\.tracker-page\.theme-pipboy \.tracker-panel \{[^}]*position:absolute/s);
+ assert.match(css,/\.tracker-page\.theme-pipboy \.tracker-panel::before/);
+ assert.match(css,/font-family:"Roboto Condensed"/);
+ assert.match(css,/linear-gradient\(var\(--ui-accent\)/);
+ assert.match(js,/document.body.className='tracker-page anchor-'/);
+ assert.deepEqual(S.anchors,['top-right','top-left','bottom-right','bottom-left']);
 });

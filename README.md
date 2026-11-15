@@ -11,7 +11,7 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 - Track supported quests from the Journal and keep them in sync with your Pip-Boy.
 - Pin quests to a compact tracker on your HUD. Choose where it appears, how large it is and how many quests it shows.
 - Customize the Journal and tracker separately with five themes or your own colors.
-- Change settings from the Journal or through the optional **K2040 Mods** MCM menu.
+- Edit settings in the **K2040 Unified Settings V2** two-pane editor using **Ctrl+Shift+B** (configurable through the Unified Settings MCM page). Individual Journal settings controls are no longer maintained.
 - Optionally use Fallout 4's Quick Data action (usually J) to open Quest Journal, following your current key binding. This is off by default.
 - Keyboard and controller support.
 
@@ -37,7 +37,7 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 | Open or close the Quest Journal | **Shift + G** |
 | Show or hide the mini tracker | **G** |
 
-You can change these shortcuts in MCM or the Journal settings. Your custom bindings will be kept when updating.
+These are **gameplay shortcuts**, not settings-only shortcuts. Configure their keyboard and controller assignments through Quest Journal's existing MCM gameplay controls. Saved standalone fallback values remain supported if MCM is unavailable. Ctrl+Shift+B opens the separate Unified Settings editor when installed.
 
 The upcoming v0.0.3 development build adds menu navigation: use the **D-pad** or **left stick** to move between controls, **A** to select, and **B** to go back. The right stick remains available for cursor navigation.
 

@@ -19,7 +19,8 @@ test('native and Prisma standalone factory defaults agree without removing legac
  assert.match(read('src/HubBindings.cpp'),/if\(initialized\)return;/);
  assert.match(read('src/HubBindings.cpp'),/if\(found\)continue/);
  const ui=read('view/app.js');
- assert.match(ui,/action,first:71,second:action==='journal'\?1:0/);
+ assert.doesNotMatch(ui,/saveHubKeyboard|setHubNativeCapture/);
+ assert.doesNotMatch(read('view/journal.html'),/id="openSettings"|id="settingsWorkspace"/);
  assert.match(ui,/state.settings.journalHotkey==='Shift\+G'/);
  assert.match(read('src/main.cpp'),/shift==\(binding=="Shift\+G"\)/);
 });

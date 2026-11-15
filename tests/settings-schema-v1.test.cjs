@@ -70,11 +70,8 @@ test('control types, choices and number ranges match the existing native and sta
       assert.ok(match,'Native numeric bounds missing for '+field.id);
       assert.equal(field.min,Number(match[1]),field.id+' min');
       assert.equal(field.max,Number(match[2]),field.id+' max');
-      const el=html.match(new RegExp('data-setting="'+field.id+'"[^>]*>'))?.[0];
-      assert.ok(el,'Existing standalone numeric control missing: '+field.id);
-      assert.match(el,new RegExp('min="'+field.min+'"'),field.id);
-      assert.match(el,new RegExp('max="'+field.max+'"'),field.id);
-      assert.match(el,new RegExp('step="'+field.step+'"'),field.id);
+      assert.equal(S.normalize({[field.id]:field.min})[field.id],field.min);
+      assert.equal(S.normalize({[field.id]:field.max})[field.id],field.max);
     }
   }
   assert.deepEqual(manifest.categories.map(c=>c.id),
@@ -115,6 +112,7 @@ test('shortcuts remain in their existing owner stores and reset is module-owned'
   assert.match(cpp,/bool ResetToDefaults\(\)/);
   assert.match(cpp,/kLegacyPath/);
   assert.match(cpp,/LOCALAPPDATA/);
+  assert.doesNotMatch(html,/id="openSettings"|id="settingsWorkspace"/);
   assert.doesNotMatch(html,/settings-v1-manifest\.json/);
 });
 

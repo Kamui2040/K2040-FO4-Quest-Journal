@@ -6,7 +6,7 @@ const vm=require('node:vm');
 const Model=require('../view/quest-model.js');
 const Settings=require('../view/journal-settings.js');
 
-test('full-screen journal theme and opacity stay fixed while miniature tracker preview changes',()=>{
+test('full-screen journal appearance stays independent of native mini-tracker preferences',()=>{
   const nodes={};
   const makeNode=()=>({
     style:{},
@@ -63,22 +63,12 @@ test('full-screen journal theme and opacity stay fixed while miniature tracker p
     trackerOpacity:25,trackerScale:130,opacity:40,fontSize:150
   }));
   assert.deepEqual(constantValues(),initial);
-  assert.equal(previewCss['--sample-accent'],'#de5210');
-  assert.equal(previewCss['--sample-background'],'rgba(28,43,48,0.25)');
-  assert.equal(previewCss['--sample-font-scale'],'1.3');
-  assert.equal(node('settingOpacity').value,25);
-  assert.equal(node('settingFontSize').value,130);
 
   window.receiveJournalSettings(JSON.stringify({
     theme:'custom',journalTheme:'dark',accent:'#dc1466',text:'#abbacd',panel:'#030405',
     completed:'#ffaa00',trackerOpacity:100,trackerScale:75
   }));
   assert.deepEqual(constantValues(),initial);
-  assert.equal(previewCss['--sample-accent'],'#dc1466');
-  assert.equal(previewCss['--sample-text'],'#abbacd');
-  assert.equal(previewCss['--sample-completed'],'#ffaa00');
-  assert.equal(previewCss['--sample-background'],'rgba(3,4,5,1)');
-  assert.equal(previewCss['--sample-font-scale'],'0.75');
 
   window.receiveJournalSettings(JSON.stringify({
     theme:'commonwealth',journalTheme:'dark',density:'compact',sidebarWidth:320,questListWidth:440
@@ -99,20 +89,15 @@ test('full-screen journal theme and opacity stay fixed while miniature tracker p
   assert.equal(css['--ui-completed'],'#55ffaa');
   assert.equal(css['--ui-panel-background'],'rgba(18,26,35,0.72)');
   assert.equal(root.style.fontSize,'16.8px');
-  assert.equal(previewCss['--sample-accent'],'#ff9900');
-  assert.equal(node('settingJournalFontSize').value,120);
-  assert.equal(node('settingJournalOpacity').value,72);
 
   window.receiveJournalSettings(JSON.stringify({theme:'contrast',journalTheme:'fallout76'}));
   assert.equal(css['--ui-accent'],'#f5cb5b');
   assert.equal(css['--ui-text'],'#ffffcb');
   assert.equal(css['--ui-panel-background'],'rgba(24,28,29,0.98)');
-  assert.equal(previewCss['--sample-accent'],'#00e5ff');
 
   window.receiveJournalSettings(JSON.stringify({theme:'fallout76',journalTheme:'contrast'}));
   assert.equal(css['--ui-accent'],'#00e5ff');
   assert.equal(css['--ui-completed'],'#63ff9b');
-  assert.equal(previewCss['--sample-accent'],'#f5cb5b');
 
   window.receiveJournalSettings(JSON.stringify({theme:'commonwealth',journalTheme:'dark'}));
   assert.deepEqual(constantValues(),initial);
@@ -121,5 +106,17 @@ test('full-screen journal theme and opacity stay fixed while miniature tracker p
   }));
   assert.equal(css['--ui-accent'],'#bb9944');
   assert.equal(css['--ui-text'],'#bb9944');
+  assert.equal(css['--ui-panel-background'],'rgba(22,35,19,0.98)');
+  // Hub themes temporarily override the live CSS tokens, never the owner INI.
+  window.applyUnifiedTheme('midnight');
+  assert.equal(css['--ui-accent'],'#b4a8ff');
+  assert.equal(css['--ui-panel-background'],'rgba(23,26,49,0.98)');
+  assert.equal(css['--bg'],'#090d18');
+  window.applyUnifiedTheme('high-contrast');
+  assert.equal(css['--ui-accent'],'#ffff73');
+  window.applyUnifiedTheme('pipboy');
+  assert.equal(css['--ui-accent'],'#93f694');
+  window.applyUnifiedTheme('native');
+  assert.equal(css['--ui-accent'],'#bb9944');
   assert.equal(css['--ui-panel-background'],'rgba(22,35,19,0.98)');
 });

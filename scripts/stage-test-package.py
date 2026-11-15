@@ -15,7 +15,8 @@ CANONICAL_PARENT_SHA256="8eccc0c1313d1ec982e6094650835e7f83b42e03c56d8435a81ff55
 DLL=ROOT/"dist"/"Data"/"F4SE"/"Plugins"/"K2040_Quest_Journal.dll"
 OUTPUT=ROOT/"dist"/"K2040_Quest_Journal-test-package.zip"
 ASSETS=("journal.html","tracker.html","styles.css","app.js",
-        "quest-selects.js","quest-model.js","journal-settings.js","demo-data.js")
+        "quest-selects.js","quest-model.js","journal-settings.js","demo-data.js",
+        "settings-v1-manifest.json")
 
 
 def inspect_pe(blob):

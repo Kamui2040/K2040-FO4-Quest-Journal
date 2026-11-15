@@ -49,6 +49,8 @@
 #include "K2040SettingsAdapterV2.h"
 #include "K2040ThemeClient.h"
 #include "JsonPreferencesParser.h"
+#include <array>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -235,7 +237,6 @@ namespace {
     std::atomic_bool deferredJournalReleaseQueued{false};
     // Native Mouse4/5 sampler mirrors Quick Attach's accepted Proton fix.
     // 0=inactive, 1=journal, 2=tracker. No cursor/window hooking.
-    std::atomic_int hubNativeMouseCapture{0};
 
     // Prevent underlying player controls from processing inputs while the
     // full-screen Prisma journal is open. The passive HUD never uses this layer.
@@ -315,8 +316,9 @@ namespace {
     }
     void SyncSettings() {
         if (!apiReady || !interop.InteropCall) return;
-        if(const auto theme=K2040::ThemeClient::Current("quest-journal"))
-            gUnifiedAppearanceTheme=*theme;
+        // A removed/unavailable optional hub must restore the owner palette.
+        const auto sharedTheme=K2040::ThemeClient::Current("quest-journal");
+        gUnifiedAppearanceTheme=sharedTheme.value_or("");
         // Read the live engine colors like Quick Attach Menu does (OG + AE).
         const auto hud=RE::HUDMenuUtils::GetGameplayHUDColor();
         const auto background=RE::HUDMenuUtils::GetGameplayHUDBackgroundColor();
@@ -326,12 +328,12 @@ namespace {
             CurrentPipboyRgb());
         if(Valid(journalView))interop.InteropCall(journalView,"receiveJournalSettings",payload.c_str());
         if(TrackerMayShow() && Valid(trackerView))interop.InteropCall(trackerView,"receiveJournalSettings",payload.c_str());
-        if(!gUnifiedAppearanceTheme.empty()) {
-            if(Valid(journalView))
-                interop.InteropCall(journalView,"applyUnifiedTheme",gUnifiedAppearanceTheme.c_str());
-            if(TrackerMayShow()&&Valid(trackerView))
-                interop.InteropCall(trackerView,"applyUnifiedTheme",gUnifiedAppearanceTheme.c_str());
-        }
+        const char* effectiveTheme=gUnifiedAppearanceTheme.empty()
+            ?"native":gUnifiedAppearanceTheme.c_str();
+        if(Valid(journalView))
+            interop.InteropCall(journalView,"applyUnifiedTheme",effectiveTheme);
+        if(TrackerMayShow()&&Valid(trackerView))
+            interop.InteropCall(trackerView,"applyUnifiedTheme",effectiveTheme);
         K2040::Hub::MigrateLegacyIfNeeded();
         if(Valid(journalView)) {
             const auto hub=K2040::Hub::SnapshotJson();
@@ -527,8 +529,8 @@ namespace {
         // A DOM key-down is sufficient to consume this *physical* gesture,
         // regardless of how long the player holds Escape before key-up.
         if(fromUi)escapeUiAcknowledged.store(true,std::memory_order_release);
-        // Native polling must not change a Prisma DOM directly. Forward the
-        // request to its existing page, which knows if Settings is open.
+        // Native polling must not mutate the Prisma DOM directly. Let the
+        // full-screen journal handle the close request on its own view.
         if(!journalOpen || !journalFocused || !Valid(journalView))return;
         const auto now=static_cast<std::uint64_t>(GetTickCount64());
         if(now-lastJournalEscapeTick<320)return; // DOM + poller same press
@@ -537,12 +539,6 @@ namespace {
             interop.InteropCall(journalView,"handleJournalEscape","");
         else
             CloseJournal();
-    }
-    void AcknowledgeCapturedEscape() {
-        // Capturing a replacement shortcut consumes Escape in the browser.
-        // Suppress the physical key-up fallback for the same key press.
-        lastJournalEscapeTick=static_cast<std::uint64_t>(GetTickCount64());
-        escapeUiAcknowledged.store(true,std::memory_order_release);
     }
     void OpenJournal() {
         // Never start Prisma rendering from main menu or a load transition.
@@ -605,58 +601,6 @@ namespace {
         if (TrackerMayShow()) { views.Show(trackerView); SyncSnapshots(); }
         else views.Hide(trackerView);
         SyncSettings();
-    }
-    // A pending native MCM edit is NOT a persisted assignment until
-    // the live PauseMenu bridge applies and verifies it.
-    void UpdateHubBinding(const char* command,bool controllerBinding) {
-        if(!command || !journalOpen || !journalFocused)return;
-        K2040::Hub::Action action{};
-        unsigned first{},second{};
-        const bool valid=K2040::Hub::DecodeRequest(command,action,first,second);
-        const bool saved=valid && (controllerBinding
-            ? K2040::Hub::SavePad(action,first,second)
-            : K2040::Hub::SaveKeyboard(action,first,second));
-        if(Valid(journalView)) {
-            const auto payload=K2040::Hub::SnapshotJson();
-            interop.InteropCall(journalView,"receiveHubBindings",payload.c_str());
-            const bool pendingMcm=saved && !controllerBinding &&
-                K2040::Hub::NativeMcmOwnsRegistry();
-            interop.InteropCall(journalView,"receiveJournalSettingsStatus",
-                                !saved?"invalid":pendingMcm?"pending-mcm":"saved");
-        }
-    }
-    void UpdateSetting(const char* setting) {
-        if(!setting || !journalOpen || !journalFocused)return;
-        const bool saved=K2040::Settings::ChangeAndSave(setting);
-        if(!saved) {
-            // The browser may already have shown the speculative appearance.
-            // Send the previous validated settings back when disk write fails.
-            SyncSettings();
-            if(Valid(journalView))interop.InteropCall(journalView,"receiveJournalSettingsStatus",K2040::Settings::LastFailureReason());
-            return;
-        }
-        trackerEnabled=K2040::Settings::Current().trackerEnabled;
-        // Phosphor auto-hide skips creating the mini tracker at startup.
-        // Opting in during gameplay must create it without a save reload.
-        if(TrackerMayShow() && !trackerView)CreateViews();
-        if(Valid(trackerView)) {
-            if(TrackerMayShow())views.Show(trackerView);
-            else views.Hide(trackerView);
-        }
-        SyncSettings();
-        if(Valid(journalView))interop.InteropCall(journalView,"receiveJournalSettingsStatus",saved?"saved":K2040::Settings::LastFailureReason());
-    }
-    void ResetAppearance() {
-        if(!journalOpen || !journalFocused)return;
-        const bool saved=K2040::Settings::ResetToDefaults();
-        trackerEnabled=K2040::Settings::Current().trackerEnabled;
-        if(TrackerMayShow() && !trackerView)CreateViews();
-        if(Valid(trackerView)) {
-            if(TrackerMayShow())views.Show(trackerView);
-            else views.Hide(trackerView);
-        }
-        SyncSettings();
-        if(Valid(journalView))interop.InteropCall(journalView,"receiveJournalSettingsStatus",saved?"saved":K2040::Settings::LastFailureReason());
     }
     void UpdateQuestFlag(const char* formString, K2040::QuestViewState::Kind kind) {
         if (!formString || !journalOpen || !journalFocused) return;
@@ -1495,9 +1439,6 @@ namespace {
             interop.BindUIEvent(view, "requestJournalEscape", [](const char*) {
                 QueueUIAction([](){HandleJournalEscape(true);});
             });
-            interop.BindUIEvent(view, "acknowledgeCapturedEscape", [](const char*) {
-                QueueUIAction([](){AcknowledgeCapturedEscape();});
-            });
             interop.BindUIEvent(view, "requestQuestSnapshot", [](const char*) {
                 QueueUIAction([](){
                     ValidateJournalOwnership();
@@ -1509,32 +1450,6 @@ namespace {
                     ValidateJournalOwnership();
                     if(journalOpen && journalFocused)SyncSettings();
                 });
-            });
-            interop.BindUIEvent(view, "updateJournalSetting", [](const char* cmd) {
-                QueueUIString(UpdateSetting,cmd);
-            });
-            interop.BindUIEvent(view, "requestHubBindings", [](const char*) {
-                QueueUIAction([](){
-                    if(journalOpen && journalFocused && Valid(journalView)) {
-                        const auto payload=K2040::Hub::SnapshotJson();
-                        interop.InteropCall(journalView,"receiveHubBindings",payload.c_str());
-                    }
-                });
-            });
-            interop.BindUIEvent(view,"setHubNativeCapture",[](const char* raw){
-                const std::string_view action=raw?std::string_view(raw):std::string_view{};
-                hubNativeMouseCapture.store(
-                    action=="journal"?1:action=="tracker"?2:0,
-                    std::memory_order_release);
-            });
-            interop.BindUIEvent(view, "saveHubKeyboard", [](const char* raw) {
-                QueueUIString([](const char* value){UpdateHubBinding(value,false);},raw);
-            });
-            interop.BindUIEvent(view, "saveHubController", [](const char* raw) {
-                QueueUIString([](const char* value){UpdateHubBinding(value,true);},raw);
-            });
-            interop.BindUIEvent(view, "resetJournalAppearance", [](const char*) {
-                QueueUIAction([](){ResetAppearance();});
             });
             interop.BindUIEvent(view, "requestPipboyTracking", [](const char* request) {
                 QueueUIString(UpdatePipboyTracking,request);
@@ -2003,7 +1918,6 @@ namespace {
         K2040::ControllerNavigation::Sampler navigation;
         bool escapeWasDown=false;
         bool journalWasFocused=false;
-        bool oldMouse4=false,oldMouse5=false;
 #ifdef K2040_PIPBOY_SELECTION_READONLY_QA
         bool qaWasDown=false;
 #endif
@@ -2053,29 +1967,6 @@ namespace {
                 QueuePipboySelectedEntryQA();
             qaWasDown=qaChord;
 #endif
-            // Capture the physical high-bit XBUTTON press: Prisma's DOM
-            // does not consistently receive Mouse4/5 under Proton.
-            const bool mouse4=down(VK_XBUTTON1),mouse5=down(VK_XBUTTON2);
-            const int capture=hubNativeMouseCapture.load(std::memory_order_acquire);
-            if(capture && focused && (mouse4&&!oldMouse4 || mouse5&&!oldMouse5)){
-                const unsigned physical=mouse4&&!oldMouse4?259u:260u;
-                const unsigned chord=(shift?1u:0u)|(ctrl?2u:0u)|(alt?4u:0u);
-                if(hubNativeMouseCapture.exchange(0,std::memory_order_acq_rel)==capture){
-                    if(const auto* tasks=F4SE::GetTaskInterface())
-                        tasks->AddTask([capture,physical,chord](){
-                            if(!journalOpen || !journalFocused || !Valid(journalView))return;
-                            const auto action=capture==1?"journal":"tracker";
-                            char request[90]{};
-                            std::snprintf(request,sizeof(request),
-                                "{\"action\":\"%s\",\"first\":%u,\"second\":%u}",
-                                action,physical,chord);
-                            UpdateHubBinding(request,false);
-                            interop.InteropCall(journalView,"receiveHubNativeMouseCapture",action);
-                        });
-                }
-            }
-            oldMouse4=mouse4;oldMouse5=mouse5;
-            if(!focused)hubNativeMouseCapture.store(0,std::memory_order_release);
             const bool gameInputActive=focused || ForegroundGame();
             // An exact chord transitions to pressed when *either* the base
             // key or its modifier completes the combination. Polling only
@@ -2461,9 +2352,17 @@ namespace {
         return payload.c_str();
     }
     bool K2040_SETTINGS_V2_CALL JournalApply(const char* setting,const char* jsonValue) noexcept {
-        if(!setting||!jsonValue)return false;
+        if(!JournalEditorReady()||!setting||!jsonValue)return false;
         const std::string_view id(setting);
         if(id.empty()||id.size()>80)return false;
+        // The V1 catalog deliberately retains these legacy values as
+        // internal. Reject direct third-party attempts to write them even
+        // when bypassing the shared renderer's manifest whitelist.
+        constexpr std::array<std::string_view,4> internalKeys{
+            "opacity","fontSize","journalHotkey","trackerHotkey"
+        };
+        if(std::find(internalKeys.begin(),internalKeys.end(),id)!=internalKeys.end())
+            return false;
         const std::string_view raw(jsonValue);
         if(raw.size()>256)return false;
         const auto value=k2040::json::JsonParser(std::string(raw)).Parse();
@@ -2479,6 +2378,11 @@ namespace {
         if(encoded.size()>128||encoded.find('\n')!=std::string::npos)return false;
         if(!K2040::Settings::ChangeAndSave(std::string(id)+":"+encoded))return false;
         trackerEnabled=K2040::Settings::Current().trackerEnabled;
+        if(TrackerMayShow()&&!trackerView)CreateViews();
+        if(Valid(trackerView)){
+            if(TrackerMayShow())views.Show(trackerView);
+            else views.Hide(trackerView);
+        }
         SyncSettings();
         return true;
     }
@@ -2497,9 +2401,14 @@ namespace {
         return true;
     }
     bool K2040_SETTINGS_V2_CALL JournalReset(const char* field) noexcept {
-        if(!field||std::string_view(field)!="resetPreferences")return false;
+        if(!JournalEditorReady()||!field||std::string_view(field)!="resetPreferences")return false;
         if(!K2040::Settings::ResetToDefaults())return false;
         trackerEnabled=K2040::Settings::Current().trackerEnabled;
+        if(TrackerMayShow()&&!trackerView)CreateViews();
+        if(Valid(trackerView)){
+            if(TrackerMayShow())views.Show(trackerView);
+            else views.Hide(trackerView);
+        }
         SyncSettings();
         return true;
     }
