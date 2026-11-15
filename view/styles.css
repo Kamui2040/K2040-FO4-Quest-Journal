@@ -849,3 +849,9 @@
   outline-offset:2px;
   box-shadow:0 0 0 2px rgba(102,196,255,.22);
 }
+
+/* Hub-governed common appearance: owner journal and tracker values remain persisted unchanged. */
+body[data-k2040-theme="default"] { --ui-accent:#88c4f1;--ui-text:#e3eaf2;--ui-panel-background:#1a2938;--blue:#88c4f1;--bg:#101923;--muted:#b0c0ce; }
+body[data-k2040-theme="midnight"] { --ui-accent:#b4a8ff;--ui-text:#e4e1ff;--ui-panel-background:#171a31;--blue:#b4a8ff;--bg:#090d18;--muted:#b7b1df; }
+body[data-k2040-theme="high-contrast"] { --ui-accent:#ffff73;--ui-text:#fff;--ui-panel-background:#171717;--blue:#ffff73;--bg:#050505;--muted:#eee; }
+body[data-k2040-theme="pipboy"] { --ui-accent:#93f694;--ui-text:#b2ffb5;--ui-panel-background:#122b18;--blue:#93f694;--bg:#09150d;--muted:#9bd69d; }

@@ -335,6 +335,12 @@
     document.addEventListener('pointermove',clearControllerFocus,true);
     document.addEventListener('keydown',clearControllerFocus,true);
   }
+  // Unified appearance is a transient token overlay, never a native
+  // preference update. Both journal and tracker retain their own settings.
+  window.applyUnifiedTheme=function(theme){
+    if(!['default','midnight','high-contrast','pipboy'].includes(theme))return;
+    document.body.dataset.k2040Theme=theme;
+  };
   window.receiveJournalSettings=receiveJournalSettings;
   window.receiveJournalSettingsStatus=function (value) {
     if(!isTracker && el('settingsSaveStatus')) {

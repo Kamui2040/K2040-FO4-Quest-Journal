@@ -1,5 +1,17 @@
 # Quest Journal — K2040 Settings Schema V1 inventory
 
+## Unified Editor V2 owner candidate — 2026-11-15
+
+Source-only feature/unified-editor-v2 adds a versioned native adapter
+on top of the existing V1 JSON manifest. Owner-side ChangeAndSave and
+ResetToDefaults retain the user-local journal preferences, legacy
+shortcuts and MCM mappings; no saved quest state is rewritten.
+The shared theme is applied transiently to the journal and tracker
+without changing their separately saved palettes. Existing theme
+pickers remain available in Advanced. Windows x64 and schema tests
+passed; game runtime verification and deployment are pending.
+The original V1 catalog design notes below remain historical.
+
 **Status (2026-11-15):** source-only settings catalog. The existing PrismaUI
 settings screen, MCM pages, saved INI files, keybind behavior and optional
 Unified Settings V1 adapter remain untouched. No game deployment or runtime

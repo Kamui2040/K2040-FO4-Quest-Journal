@@ -46,6 +46,12 @@
 #include <cstdio>
 #endif
 #include "JournalSettings.h"
+#include "K2040SettingsAdapterV2.h"
+#include "K2040ThemeClient.h"
+#include "JsonPreferencesParser.h"
+#include <filesystem>
+#include <fstream>
+#include <iterator>
 #include "TrackerCompatibility.h"
 #include "HudColor.h"
 #include <RE/H/HUDMenuUtils.h>
@@ -87,6 +93,7 @@ namespace {
     bool journalOpen = false;
     bool journalDomReady = false;
     bool trackerDomReady = false;
+    std::string gUnifiedAppearanceTheme; // empty when shared hub is absent
     std::atomic_bool journalFocused{false};
     bool trackerEnabled = true;
     // The user's saved preference is not changed by another HUD being loaded.
@@ -308,6 +315,8 @@ namespace {
     }
     void SyncSettings() {
         if (!apiReady || !interop.InteropCall) return;
+        if(const auto theme=K2040::ThemeClient::Current("quest-journal"))
+            gUnifiedAppearanceTheme=*theme;
         // Read the live engine colors like Quick Attach Menu does (OG + AE).
         const auto hud=RE::HUDMenuUtils::GetGameplayHUDColor();
         const auto background=RE::HUDMenuUtils::GetGameplayHUDBackgroundColor();
@@ -317,6 +326,12 @@ namespace {
             CurrentPipboyRgb());
         if(Valid(journalView))interop.InteropCall(journalView,"receiveJournalSettings",payload.c_str());
         if(TrackerMayShow() && Valid(trackerView))interop.InteropCall(trackerView,"receiveJournalSettings",payload.c_str());
+        if(!gUnifiedAppearanceTheme.empty()) {
+            if(Valid(journalView))
+                interop.InteropCall(journalView,"applyUnifiedTheme",gUnifiedAppearanceTheme.c_str());
+            if(TrackerMayShow()&&Valid(trackerView))
+                interop.InteropCall(trackerView,"applyUnifiedTheme",gUnifiedAppearanceTheme.c_str());
+        }
         K2040::Hub::MigrateLegacyIfNeeded();
         if(Valid(journalView)) {
             const auto hub=K2040::Hub::SnapshotJson();
@@ -2415,4 +2430,87 @@ F4SE_PLUGIN_LOAD(const F4SE::LoadInterface* load) {
     K2040::Hub::SeedDefaultKeyboardBindings();
     K2040::QuestViewState::RegisterSerialization();
     return messaging->RegisterListener(Messages);
+}
+
+
+// Unified Settings V2: the manifest describes editable fields, while all
+// changes remain validated, saved and applied by Quest Journal itself.
+// V1 standalone settings and gameplay keybindings remain unaffected.
+namespace {
+    bool K2040_SETTINGS_V2_CALL JournalEditorReady() noexcept {
+        return gameLoaded && apiReady;
+    }
+    const char* K2040_SETTINGS_V2_CALL JournalManifest() noexcept {
+        static std::string text;
+        if(!text.empty())return text.c_str();
+        const auto path=std::filesystem::path("Data")/"PrismaUI_F4"/"views"/
+                        "K2040QuestJournal"/"settings-v1-manifest.json";
+        std::error_code ec;
+        const auto size=std::filesystem::file_size(path,ec);
+        if(ec||size==0||size>131072)return nullptr;
+        std::ifstream file(path,std::ios::binary);
+        if(!file)return nullptr;
+        std::string data((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
+        if(data.size()!=size)return nullptr;
+        text=std::move(data);
+        return text.c_str();
+    }
+    const char* K2040_SETTINGS_V2_CALL JournalValues() noexcept {
+        static std::string payload;
+        payload=K2040::Settings::Serialize();
+        return payload.c_str();
+    }
+    bool K2040_SETTINGS_V2_CALL JournalApply(const char* setting,const char* jsonValue) noexcept {
+        if(!setting||!jsonValue)return false;
+        const std::string_view id(setting);
+        if(id.empty()||id.size()>80)return false;
+        const std::string_view raw(jsonValue);
+        if(raw.size()>256)return false;
+        const auto value=k2040::json::JsonParser(std::string(raw)).Parse();
+        if(!value)return false;
+        std::string encoded;
+        if(const auto* boolVal=value->AsBool())encoded=*boolVal?"true":"false";
+        else if(const auto* str=value->AsString())encoded=*str;
+        else if(const auto* number=value->AsNumber()){
+            if(!std::isfinite(*number)||std::floor(*number)!=*number||
+               *number<-100000||*number>100000)return false;
+            encoded=std::to_string(static_cast<int>(*number));
+        }else return false;
+        if(encoded.size()>128||encoded.find('\n')!=std::string::npos)return false;
+        if(!K2040::Settings::ChangeAndSave(std::string(id)+":"+encoded))return false;
+        trackerEnabled=K2040::Settings::Current().trackerEnabled;
+        SyncSettings();
+        return true;
+    }
+    bool K2040_SETTINGS_V2_CALL JournalTheme(const char* id) noexcept {
+        if(!id)return false;
+        const std::string_view theme(id);
+        if(theme!="default"&&theme!="midnight"&&
+           theme!="high-contrast"&&theme!="pipboy")return false;
+        gUnifiedAppearanceTheme=theme;
+        if(apiReady&&interop.InteropCall) {
+            if(Valid(journalView))
+                interop.InteropCall(journalView,"applyUnifiedTheme",gUnifiedAppearanceTheme.c_str());
+            if(TrackerMayShow()&&Valid(trackerView))
+                interop.InteropCall(trackerView,"applyUnifiedTheme",gUnifiedAppearanceTheme.c_str());
+        }
+        return true;
+    }
+    bool K2040_SETTINGS_V2_CALL JournalReset(const char* field) noexcept {
+        if(!field||std::string_view(field)!="resetPreferences")return false;
+        if(!K2040::Settings::ResetToDefaults())return false;
+        trackerEnabled=K2040::Settings::Current().trackerEnabled;
+        SyncSettings();
+        return true;
+    }
+}
+extern "C" __declspec(dllexport)
+const K2040SettingsAdapterV2* K2040_SETTINGS_V2_CALL
+K2040_GetSettingsAdapterV2() noexcept {
+    static const K2040SettingsAdapterV2 adapter{
+        sizeof(K2040SettingsAdapterV2),K2040_SETTINGS_ADAPTER_V2_ABI,
+        "quest-journal",JournalEditorReady,JournalManifest,JournalValues,
+        JournalApply,JournalReset,JournalTheme
+    };
+    return &adapter;
 }

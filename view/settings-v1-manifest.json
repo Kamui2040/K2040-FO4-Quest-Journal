@@ -174,7 +174,9 @@
                 "all": [
                   "trackerEnabled"
                 ]
-              }
+              },
+              "advanced": true,
+              "help": " Preserved legacy appearance setting; the unified theme override controls the shared visual style."
             },
             {
               "id": "trackerOpacity",
@@ -293,7 +295,9 @@
                   "value": "custom",
                   "label": "Custom Colors"
                 }
-              ]
+              ],
+              "advanced": true,
+              "help": " Preserved legacy appearance setting; the unified theme override controls the shared visual style."
             },
             {
               "id": "journalOpacity",
