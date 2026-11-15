@@ -33,7 +33,7 @@ No private source checkout or internal build artifacts are bundled.
   MSVC/clang-cl compile fix: construct std::string from a bounded length,
   rather than mismatched char* and const char* iterator types. No ABI,
   callback or hub-source code was changed.
-- The only MCM keybind is the hub's configurable Ctrl+Shift+B.
+- The only MCM keybind is the hub's configurable F3 default.
   Quest Journal has no MCM child, registry actions, gamepad dropdowns or
   native MCM callback. Its independent gameplay keyboard and gamepad
   controls are native owner preferences shown on the hub Controls page.
@@ -69,13 +69,13 @@ together with the official, source-matched Unified Settings hub checkout:
 The script checks clean correct source branches, identical settings AND
 layout V2 ABI headers, provider, Windows x64 F4SE and adapter exports,
 hub appearance
-exports, source/staging asset consistency and identical shared MCM parent.
+exports, source/staging asset consistency and one hub-owned top-level MCM menu only.
 It rejects existing ZIP outputs, unexpected files and private MCM registry
 or user settings. No game deployment or installation takes place.
 
 ## In-game acceptance — pending
 
-Verify Ctrl+Shift+B and remapped hub binding; no Journal MCM child;
+Verify F3 and remapped hub binding; no Journal MCM child;
 Journal-only Pip-Boy sync toggle, persistence and immediate tracker
 refresh; module and category visibility; live tracker layout Edit button
 for a visible tracker, drag/nudge, proportional 1% wheel and 10% key

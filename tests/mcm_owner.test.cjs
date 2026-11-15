@@ -18,12 +18,11 @@ test('Journal ships no child MCM config, keybind registry or native MCM bridge',
   assert.match(native,/gameplayController/);
   assert.match(native,/requestJournalPipboySync/);
 });
-test('only shared parent template remains in owner stage and standalone package omits MCM',()=>{
-  const stage=read('scripts/stage-test-package.py');
-  assert.match(stage,/result\[PARENT_PATH\]=raw/);
-  assert.match(stage,/mode in \("standalone","none"\)/);
-  assert.doesNotMatch(stage,/keybinds\.json/);
-  const build=read('xmake.lua');
-  assert.doesNotMatch(build,/K2040_Quest_Journal"\}/);
-  assert.match(build,/local parentdest=/);
+test('standalone or grouped owner packaging never adds MCM',()=>{
+ const stage=read('scripts/stage-test-package.py');
+ assert.match(stage,/every owner QA ZIP excludes MCM/);
+ assert.doesNotMatch(stage,/result\[PARENT_PATH\]=raw/);
+ const build=read('xmake.lua');
+ assert.doesNotMatch(build,/local parentdest=/);
+ assert.equal(fs.existsSync('mcm/Data/MCM/Config/K2040_Mods/config.json'),false);
 });

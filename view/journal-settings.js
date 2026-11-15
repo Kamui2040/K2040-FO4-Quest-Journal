@@ -29,7 +29,13 @@
     fallout76:Object.freeze({accent:'#f5cb5b',text:'#ffffcb',panel:'#181c1d',completed:'#e0c870'})
   });
   const themeChoices = ['commonwealth','pipboy','contrast','fallout76','custom'];
-  const safeKeys=['Shift+G','G','F6','F7','F8','F10','F11','F12'];
+  const validChord = v => typeof v==='string' &&
+    (v==='Unbound'||(
+      /^(?:(?:Ctrl|Shift|Alt)\+){0,3}(?:[A-Z0-9]|F(?:[1-9]|1[0-2])|Mouse[345])$/.test(v)&&
+      new Set(v.split('+').slice(0,-1)).size===v.split('+').length-1&&
+      ['Ctrl','Shift','Alt'].filter(m=>v.split('+').slice(0,-1).includes(m)).join('+')===
+        v.split('+').slice(0,-1).join('+')&&v!=='F3'));
+  const gameplayShortcut=(value,fallback)=>validChord(value)?value:fallback;
   const anchors = ['top-right','top-left','bottom-right','bottom-left'];
   function number(value, fallback, min, max) {
     const n = Number(value);
@@ -41,7 +47,7 @@
     if (typeof v === 'string') { try { v = JSON.parse(v); } catch { v = {}; } }
     if (!v || typeof v !== 'object' || Array.isArray(v)) v = {};
     const choose = (value, allowed, fallback) => allowed.includes(value) ? value : fallback;
-    const journalHotkey=choose(v.journalHotkey,safeKeys,defaults.journalHotkey);
+    const journalHotkey=gameplayShortcut(v.journalHotkey,defaults.journalHotkey);
     return {
       theme:choose(v.theme, themeChoices, defaults.theme),
       // Read-only game-derived HUD colors; never save in the user's INI.
@@ -78,7 +84,9 @@
       trackerAutoPinNew:v.trackerAutoPinNew === true,
       trackerSyncPipboy:v.trackerSyncPipboy === true,
       journalHotkey,
-      trackerHotkey:choose(v.trackerHotkey,safeKeys,defaults.trackerHotkey)===journalHotkey ? (journalHotkey==='G'?'Shift+G':'G') : choose(v.trackerHotkey,safeKeys,defaults.trackerHotkey),
+      trackerHotkey:gameplayShortcut(v.trackerHotkey,defaults.trackerHotkey)===journalHotkey ?
+        (journalHotkey==='G'?'Shift+G':'G') :
+        gameplayShortcut(v.trackerHotkey,defaults.trackerHotkey),
       journalPadPrimary:number(v.journalPadPrimary,0,0,16),
       journalPadHeld:number(v.journalPadHeld,0,0,16),
       trackerPadPrimary:number(v.trackerPadPrimary,0,0,16),

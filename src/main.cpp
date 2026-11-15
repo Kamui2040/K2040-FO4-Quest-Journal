@@ -64,6 +64,7 @@
 #include <RE/H/HUDMenuUtils.h>
 #include "QuestViewState.h"
 #include "HubBindings.h"
+#include "JournalGameplayChord.h"
 #include "ControllerNavigation.h"
 #include <Scaleform/G/GFx_FunctionHandler.h>
 #include <Scaleform/G/GFx_Movie.h>
@@ -361,15 +362,7 @@ namespace {
     void PublishGameplayBindings(){
         const auto& settings=K2040::Settings::Current();
         const auto keyboard=[](const std::string& binding)->std::uint32_t {
-            if(binding=="Shift+G")return 'G'|(1u<<9);
-            if(binding=="G")return 'G';
-            if(binding=="F6")return VK_F6;
-            if(binding=="F7")return VK_F7;
-            if(binding=="F8")return VK_F8;
-            if(binding=="F10")return VK_F10;
-            if(binding=="F11")return VK_F11;
-            if(binding=="F12")return VK_F12;
-            return 0;
+            return K2040::JournalGameplayChord::Packed(binding);
         };
         gameplayKeyboard[0].store(keyboard(settings.journalHotkey),std::memory_order_release);
         gameplayKeyboard[1].store(keyboard(settings.trackerHotkey),std::memory_order_release);

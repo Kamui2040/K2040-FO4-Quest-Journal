@@ -66,11 +66,8 @@ class PackageTests(unittest.TestCase):
         common={"Data/F4SE/Plugins/K2040_Quest_Journal.dll":b"test"}
         for mode in ("grouped","standalone"):
             full=mod.with_mcm(common,mode)
-            self.assertEqual(len(full),2 if mode=="grouped" else 1)
-            self.assertEqual("Data/MCM/Config/K2040_Mods/config.json" in full,mode=="grouped")
-            if mode=="grouped":
-                self.assertEqual(mod.hashlib.sha256(
-                    full[mod.PARENT_PATH]).hexdigest(),mod.CANONICAL_PARENT_SHA256)
+            self.assertEqual(full,common)
+            self.assertFalse(any(name.startswith("Data/MCM/") for name in full))
             self.assertFalse(any("MCM/Config/K2040_Quest_Journal/" in name for name in full))
             self.assertFalse(any(name.endswith("keybinds.json") for name in full))
         self.assertEqual(mod.with_mcm(common,"none"),common)

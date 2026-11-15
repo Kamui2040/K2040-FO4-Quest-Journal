@@ -23,7 +23,6 @@ spec.loader.exec_module(stager)
 
 CORE_REQUIRED={
     "Data/F4SE/Plugins/K2040_Unified_Settings.dll",
-    "Data/MCM/Config/K2040_Mods/config.json",
     "Data/MCM/Config/K2040_Unified_Settings/config.json",
     "Data/MCM/Config/K2040_Unified_Settings/keybinds.json",
     "Data/MCM/Config/K2040_Unified_Settings/settings.ini",
@@ -40,8 +39,8 @@ Do not enable another Quest Journal version at the same time.
 
 The bundle contains the Quest Journal, the matching Unified Settings hub
 DLL, full-screen hub UI/MCM, and Quest Journal's tagged settings provider.
-Use Ctrl+Shift+B to open the central Settings editor (the hub's provisional
-fallback) or remap it through K2040 Mods > K2040 Settings in MCM. The Journal
+Use F3 to open the central Settings editor (the hub's provisional
+fallback) or remap it through K2040 Settings in MCM. The Journal
 and tracker gameplay shortcuts are configured inside the shared
 hub Controls category, never through Quest Journal MCM entries.
 
@@ -109,10 +108,10 @@ def build(hub:Path,output:Path)->tuple[int,int,str]:
         raise FileExistsError("refusing existing QA archive")
     if ROOT in output.resolve().parents or hub in output.resolve().parents:
         raise ValueError("QA package output cannot be inside a source checkout")
-    if git(ROOT,"branch","--show-current")!="feature/unified-editor-v2":
-        raise ValueError("wrong Quest Journal branch")
-    if git(hub,"branch","--show-current")!="feature/unified-settings-editor-v2":
-        raise ValueError("wrong Unified Settings branch")
+    if not git(ROOT,"branch","--show-current").startswith("fix/") and git(ROOT,"branch","--show-current")!="feature/unified-editor-v2":
+        raise ValueError("unexpected Quest Journal branch")
+    if not git(hub,"branch","--show-current").startswith("fix/") and git(hub,"branch","--show-current")!="feature/unified-settings-editor-v2":
+        raise ValueError("unexpected Unified Settings branch")
     if git(ROOT,"status","--porcelain") or git(hub,"status","--porcelain"):
         raise ValueError("uncommitted source or hub changes; package provenance blocked")
     if (ROOT/"src/K2040SettingsAdapterV2.h").read_bytes()!=\
@@ -123,7 +122,7 @@ def build(hub:Path,output:Path)->tuple[int,int,str]:
         raise ValueError("native layout V2 ABI header drift")
     dll=ROOT/"dist/Data/F4SE/Plugins/K2040_Quest_Journal.dll"
     assert_exports(dll,("K2040_GetSettingsAdapterV2","K2040_GetLayoutAdapterV2"))
-    files=stager.with_mcm(stager.gather(dll,ROOT/"view"),"grouped")
+    files=stager.with_mcm(stager.gather(dll,ROOT/"view"),"none")
     provider=json.loads(files[PROVIDER])
     if provider["modId"]!="quest-journal" or provider["plugin"]!=dll.name:
         raise ValueError("Quest Journal provider identity mismatch")

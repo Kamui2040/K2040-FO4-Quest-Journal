@@ -68,8 +68,12 @@ test('palette picks custom, pipboy and contrast',()=>{
 });
 
 test('configurable shortcuts refuse reserved hotkeys and duplicate assignments',()=>{
- assert.equal(S.normalize({journalHotkey:'F9'}).journalHotkey,'Shift+G');
- assert.equal(S.normalize({journalHotkey:'J'}).journalHotkey,'Shift+G');
+ assert.equal(S.normalize({journalHotkey:'F9'}).journalHotkey,'F9');
+ assert.equal(S.normalize({journalHotkey:'J'}).journalHotkey,'J');
+ assert.equal(S.normalize({journalHotkey:'Mouse4'}).journalHotkey,'Mouse4');
+ assert.equal(S.normalize({trackerHotkey:'Ctrl+Mouse5'}).trackerHotkey,'Ctrl+Mouse5');
+ assert.equal(S.normalize({journalHotkey:'F3'}).journalHotkey,'Shift+G');
+ assert.equal(S.normalize({journalHotkey:'Mouse6'}).journalHotkey,'Shift+G');
  assert.equal(S.normalize({journalHotkey:'F10',trackerHotkey:'F10'}).trackerHotkey,'G');
  assert.equal(S.normalize({journalHotkey:'F6',trackerHotkey:'F11'}).trackerHotkey,'F11');
 });

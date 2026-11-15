@@ -15,16 +15,16 @@ test('Journal and tracker gameplay shortcuts live in owner preferences and hub e
   assert.match(read('src/main.cpp'),/keyboard\(settings\.trackerHotkey\)/);
   const manifest=JSON.parse(read('view/settings-v1-manifest.json'));
   const fields=manifest.categories.flatMap(c=>c.groups.flatMap(g=>g.fields));
-  for(const id of ['journalHotkey','trackerHotkey','journalPadPrimary','journalPadHeld','trackerPadPrimary','trackerPadHeld'])
+  for(const id of ['journalHotkey','trackerHotkey'])
+    assert.equal(fields.find(f=>f.id===id)?.type,'keybind',id);
+  for(const id of ['journalPadPrimary','journalPadHeld','trackerPadPrimary','trackerPadHeld'])
     assert.equal(fields.find(f=>f.id===id)?.type,'select',id);
   assert.doesNotMatch(read('view/journal.html'),/id="openSettings"|id="settingsWorkspace"/);
 });
-test('the bundled MCM parent has no Journal keybinds or actions',()=>{
-  const mcm=read('mcm/Data/MCM/Config/K2040_Mods/config.json');
-  const parent=JSON.parse(mcm);
-  assert.deepEqual(parent.pages,[]);
-  assert.doesNotMatch(mcm,/questJournalToggle|questTrackerToggle/);
+test('only the shared hub supplies MCM; Journal has no nested entries',()=>{
+  assert.equal(fs.existsSync('mcm/Data/MCM/Config/K2040_Mods/config.json'),false);
   assert.equal(fs.existsSync('mcm/Data/MCM/Config/K2040_Quest_Journal'),false);
+  assert.equal(fs.existsSync('dist/Data/MCM/Config/K2040_Mods/config.json'),false);
 });
 test('all Journal selects use one themed popup and preserve native change-event contract',()=>{
  const html=read('view/journal.html'),css=read('view/styles.css');

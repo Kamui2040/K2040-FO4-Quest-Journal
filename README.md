@@ -11,7 +11,7 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 - Track supported quests from the Journal and keep them in sync with your Pip-Boy.
 - Pin quests to a compact HUD tracker. The upcoming V2 layout editor lets you drag and proportionally resize it inside Unified Settings, then Save, Abort or Retry without changing quest tracking.
 - Customize the Journal and tracker separately with five themes or your own colors.
-- Edit settings in the **K2040 Unified Settings V2** two-pane editor using **Ctrl+Shift+B** (configurable through the Unified Settings MCM page). Individual Journal settings controls are no longer maintained.
+- Edit settings in the **K2040 Unified Settings V2** two-pane editor using **F3** by default (configurable through the single top-level Unified Settings MCM entry). Individual Journal settings controls are no longer maintained.
 - Optionally use Fallout 4's Quick Data action (usually J) to open Quest Journal, following your current key binding. This is off by default.
 - Keyboard and controller support.
 
@@ -37,7 +37,7 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 | Open or close the Quest Journal | **Shift + G** |
 | Show or hide the mini tracker | **G** |
 
-These are **gameplay shortcuts**, not settings-only shortcuts. The VNext development build configures Journal/tracker keyboard and controller shortcuts in the shared Unified Settings **Controls** category, not in Quest Journal's MCM. Ctrl+Shift+B opens the Unified Settings hub; it is the only MCM keyboard shortcut in the bundled VNext QA build. The published v0.0.2 package is unchanged.
+These are **gameplay shortcuts**, not settings-only shortcuts. The VNext development build configures Journal/tracker keyboard and controller shortcuts in the shared Unified Settings **Controls** category, not in Quest Journal's MCM. F3 opens the Unified Settings hub by default; the hub alone installs an MCM settings shortcut. This owner package contains no separate MCM entries. The published v0.0.2 package is unchanged.
 
 The upcoming v0.0.3 development build adds D-pad and left-stick menu navigation and follows Fallout 4's effective Confirm/Back assignments rather than assuming Xbox button labels. The right stick remains available for cursor navigation.
 

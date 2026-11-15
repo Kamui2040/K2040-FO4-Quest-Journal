@@ -398,82 +398,14 @@
             {
               "id": "journalHotkey",
               "label": "Journal keyboard shortcut",
-              "type": "select",
-              "options": [
-                {
-                  "value": "Shift+G",
-                  "label": "Shift+G"
-                },
-                {
-                  "value": "G",
-                  "label": "G"
-                },
-                {
-                  "value": "F6",
-                  "label": "F6"
-                },
-                {
-                  "value": "F7",
-                  "label": "F7"
-                },
-                {
-                  "value": "F8",
-                  "label": "F8"
-                },
-                {
-                  "value": "F10",
-                  "label": "F10"
-                },
-                {
-                  "value": "F11",
-                  "label": "F11"
-                },
-                {
-                  "value": "F12",
-                  "label": "F12"
-                }
-              ],
-              "help": "Gameplay shortcut. Default Shift+G; not an MCM binding."
+              "type": "keybind",
+              "help": "Gameplay shortcut edited and saved by Quest Journal. Supports Mouse 3–5 on Proton. F3 is reserved for the unified settings hub."
             },
             {
               "id": "trackerHotkey",
               "label": "Tracker keyboard shortcut",
-              "type": "select",
-              "options": [
-                {
-                  "value": "Shift+G",
-                  "label": "Shift+G"
-                },
-                {
-                  "value": "G",
-                  "label": "G"
-                },
-                {
-                  "value": "F6",
-                  "label": "F6"
-                },
-                {
-                  "value": "F7",
-                  "label": "F7"
-                },
-                {
-                  "value": "F8",
-                  "label": "F8"
-                },
-                {
-                  "value": "F10",
-                  "label": "F10"
-                },
-                {
-                  "value": "F11",
-                  "label": "F11"
-                },
-                {
-                  "value": "F12",
-                  "label": "F12"
-                }
-              ],
-              "help": "Gameplay shortcut. Default G; not an MCM binding."
+              "type": "keybind",
+              "help": "Gameplay shortcut edited and saved by Quest Journal. Supports Mouse 3–5 on Proton. F3 is reserved for the unified settings hub."
             },
             {
               "id": "journalPadPrimary",

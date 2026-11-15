@@ -127,7 +127,8 @@
             "select",
             "color",
             "marker-style",
-            "action"
+            "action",
+            "keybind"
           ]
         },
         "help": {
@@ -174,6 +175,11 @@
           "enum": [
             "module",
             "mcm"
+          ]
+        },
+        "preview": {
+          "enum": [
+            "attachment-layout"
           ]
         }
       },
