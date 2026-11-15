@@ -27,6 +27,13 @@ namespace K2040::Settings {
         int trackerScale = 100;
         int trackerWidth = 340;
         int trackerOpacity = 88;
+        // Normalized 1/10000 viewport geometry, enabled only after hub Save.
+        // Existing installations retain their legacy anchor/width until then.
+        bool trackerLayoutEnabled = false;
+        int trackerLayoutX = 7900;
+        int trackerLayoutY = 500;
+        int trackerLayoutWidth = 1800;
+        int trackerLayoutHeight = 1900;
         bool trackerEnabled = true;
         // Explicit opt-in: retain Quest Journal's tracker even alongside Phosphor HUD.
         bool trackerOverridePhosphor = false;
@@ -53,6 +60,9 @@ namespace K2040::Settings {
     bool Change(std::string_view command);
     // Commit validated updates together; restore previous preferences on write failure.
     bool ChangeAndSave(std::string_view command);
+    // One atomic owner transaction for the hub's reversible layout editor.
+    // Updates all four normalized coordinates or restores prior settings.
+    bool SaveTrackerLayout(int x,int y,int width,int height);
     // Fixed non-sensitive status code for UI feedback: invalid or storage.
     const char* LastFailureReason();
     bool Save();

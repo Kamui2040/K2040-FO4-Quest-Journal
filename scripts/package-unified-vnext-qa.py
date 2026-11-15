@@ -51,9 +51,12 @@ reads validated transient colors and never edits the hub appearance store.
 The Journal's existing local INI settings remain intact. Its one-way
 Pip-Boy mirror toggle remains directly in the Journal, not the hub.
 The mirror never alters Fallout 4 quests or tracking flags.
-This owner does NOT yet export an optional live tracker position/resize
-layout adapter. Accordingly, the hub intentionally does not show that
-owner-specific layout-edit action. This is not a missing dependency.
+The Settings Hub Appearance category now offers "Edit this mod's HUD layout"
+when the mini tracker is visible. Click/drag to move and use the hub's
+mouse wheel (+/-1%) or +/- keys (+/-10%) to resize proportionally.
+Esc offers Save, Abort or Retry; only Save writes Quest Journal's own INI.
+Older corner/width preferences remain effective until a live layout is saved.
+Changing legacy width or anchor later exits the custom geometry mode.
 
 All source/Windows x64 build checks are separate from actual in-game tests.
 Check opening, editing/persistence, theme + palette overrides, gamepad
@@ -115,8 +118,11 @@ def build(hub:Path,output:Path)->tuple[int,int,str]:
     if (ROOT/"src/K2040SettingsAdapterV2.h").read_bytes()!=\
        (hub/"include/K2040SettingsAdapterV2.h").read_bytes():
         raise ValueError("native settings V2 ABI header drift")
+    if (ROOT/"src/K2040LayoutAdapterV2.h").read_bytes()!=\
+       (hub/"include/K2040LayoutAdapterV2.h").read_bytes():
+        raise ValueError("native layout V2 ABI header drift")
     dll=ROOT/"dist/Data/F4SE/Plugins/K2040_Quest_Journal.dll"
-    assert_exports(dll,("K2040_GetSettingsAdapterV2",))
+    assert_exports(dll,("K2040_GetSettingsAdapterV2","K2040_GetLayoutAdapterV2"))
     files=stager.with_mcm(stager.gather(dll,ROOT/"view"),"grouped")
     provider=json.loads(files[PROVIDER])
     if provider["modId"]!="quest-journal" or provider["plugin"]!=dll.name:

@@ -66,7 +66,8 @@
                 "all": [
                   "trackerEnabled"
                 ]
-              }
+              },
+              "help": "Legacy corner placement. Changing this exits custom live layout; use Edit this mod HUD layout in the Appearance category to position freely."
             },
             {
               "id": "trackerWidth",
@@ -79,7 +80,8 @@
                 "all": [
                   "trackerEnabled"
                 ]
-              }
+              },
+              "help": "Legacy width control. Changing this exits custom live layout; use Edit this mod HUD layout to resize proportionally."
             },
             {
               "id": "trackerMaxQuests",
@@ -802,6 +804,11 @@
   "internalKeys": [
     "opacity",
     "fontSize",
-    "trackerSyncPipboy"
+    "trackerSyncPipboy",
+    "trackerLayoutEnabled",
+    "trackerLayoutX",
+    "trackerLayoutY",
+    "trackerLayoutWidth",
+    "trackerLayoutHeight"
   ]
 }

@@ -46,8 +46,10 @@ runtime verification, HUD's outstanding DLL and deployment remain pending.
 | Maintenance | 1 action | Module-owned reset of native preferences |
 
 **Current total:** 31 hub-visible preferences and one reset action.
-All 34 native Preferences fields are accounted for: 31 hub-visible, three
-internal. Pip-Boy mirror is saved from the Journal, not from the hub.
+All 39 native Preferences fields are accounted for: 31 hub-visible,
+eight internal. Pip-Boy mirror stays in the Journal; five normalized live
+layout values are owned by the adapter and are not duplicated as raw
+settings fields in the hub.
 
 ## Duplicate, legacy and unsupported controls
 
@@ -61,6 +63,14 @@ internal. Pip-Boy mirror is saved from the Journal, not from the hub.
 - Four owner-local controller select fields replace obsolete MCM dropdowns.
   Existing user MCM controller INI values are imported read-only when
   no matching owner preference exists; the original files are preserved.
+- The live HUD layout editor is available through the canonical V2
+  owner adapter, not new manifest fields. One supported element,
+  quest-tracker, exposes proportional position/size. The owner stores
+  trackerLayoutEnabled and integer viewport basis-point coordinates
+  (trackerLayoutX/Y/Width/Height) only after Save, validates on load,
+  and never modifies Fallout save data. These five keys are internal.
+  Legacy anchor/width fields explicitly disable custom geometry when
+  edited, so the Settings Hub numeric controls remain effective.
 - Pip-Boy synchronization remains a direct Journal gameplay control.
   The native owner validates, saves and immediately applies the checkbox,
   with failure feedback. The hub explicitly rejects writing its internal

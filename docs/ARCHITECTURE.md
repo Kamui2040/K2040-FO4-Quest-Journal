@@ -21,3 +21,13 @@ The legacy Papyrus `GameVM` dispatch path stays disabled. The normal unflagged `
 ## UI behavior
 
 The Journal and tracker save their themes separately. `Commonwealth Blue` keeps the tracker's `commonwealth` value and the Journal's older `dark` value working as before. The default keyboard shortcuts are Shift+G for the Journal and G for the tracker; updates preserve custom shortcuts. MCM keyboard settings stay separate from controller settings. In Journal menus, the D-pad or left stick moves the selection, A chooses, and B goes back. The right stick and mouse can still control the cursor. When a display setting changes, the tracker redraws its current quest list without waiting for a new game update.
+
+The optional K2040LayoutAdapterV2 export is an independent feature of the
+Quest Journal owner DLL. Only the existing compact tracker is a movable
+HUD element. Its DOM reports current normalized viewport bounds, the owner
+validates hub-originated geometry and applies reversible preview to the
+tracker view, and only a successful Save commits all four integer viewport
+basis-point coordinates atomically into the existing per-user INI. Legacy
+anchor/width controls disable custom placement when changed. Neither
+preview nor abort changes the Pip-Boy one-way mirror, quest save, or HUD
+tracker's individual gameplay hotkeys. The hub owns all overlay input.

@@ -19,6 +19,7 @@
     favorites:new Set(), hidden:new Set(), includeHidden:false, favoritesOnly:false,
     demo: new URLSearchParams(window.location.search).get('demo') === '1', lastSnapshotRaw:null,
     settings: S.normalize({}), unifiedTheme:null, unifiedAppearance:null,
+    layoutPreview:null,lastTrackerMetrics:null,
     trackingRequest:null, trackingNotice:'',
     qaPreviewEnabled:false, qaPreviewPending:null, qaLastSelected:null,
     qaWriteEnabled:false, qaWriteArmed:false, qaWriteArmedId:null, qaWriteAttempted:false,
@@ -68,6 +69,79 @@
            !hexColor.test(data.colors[role])))return undefined;
       return data;
     }catch{return undefined;}
+  }
+  function validTrackerGeometry(g){
+    if(!g || typeof g!=='object'||Array.isArray(g))return false;
+    const values=['x','y','width','height'].map(key=>g[key]);
+    return values.every(v=>typeof v==='number'&&Number.isFinite(v)) &&
+      g.x>=0&&g.y>=0&&g.width>.015&&g.height>.015 &&
+      g.x+g.width<=1.000001&&g.y+g.height<=1.000001;
+  }
+  function ownerTrackerGeometry(s){
+    if(s.trackerLayoutEnabled!==true)return null;
+    const result={x:s.trackerLayoutX/10000,y:s.trackerLayoutY/10000,
+      width:s.trackerLayoutWidth/10000,height:s.trackerLayoutHeight/10000};
+    return validTrackerGeometry(result)?result:null;
+  }
+  function positionTracker(s){
+    const tracker=el('tracker');
+    if(!tracker)return;
+    const edit=state.layoutPreview||ownerTrackerGeometry(s);
+    if(!edit){
+      // rem-based tracker labels must return to the default owner text scale.
+      document.documentElement.style.fontSize=(14*s.trackerScale/100).toFixed(3)+'px';
+      const [vertical,horizontal]=s.trackerAnchor.split('-');
+      tracker.style.top=vertical==='top'?'5%':'auto';
+      tracker.style.bottom=vertical==='bottom'?'5%':'auto';
+      tracker.style.left=horizontal==='left'?'3%':'auto';
+      tracker.style.right=horizontal==='right'?'3%':'auto';
+      for(const property of ['width','height','maxHeight','fontSize'])
+        tracker.style[property]='';
+    }else{
+      tracker.style.top=(edit.y*100).toFixed(4)+'vh';
+      tracker.style.left=(edit.x*100).toFixed(4)+'vw';
+      tracker.style.bottom='auto';tracker.style.right='auto';
+      tracker.style.width=(edit.width*100).toFixed(4)+'vw';
+      tracker.style.height=(edit.height*100).toFixed(4)+'vh';
+      tracker.style.maxHeight=(edit.height*100).toFixed(4)+'vh';
+      const viewportWidth=Number(window.innerWidth||document.documentElement.clientWidth)||1920;
+      const ratio=edit.width*viewportWidth/s.trackerWidth;
+      const size=(14*s.trackerScale/100*Math.min(3,Math.max(.35,ratio))).toFixed(3)+'px';
+      tracker.style.fontSize=size;
+      document.documentElement.style.fontSize=size; // rem-based labels also resize
+    }
+    tracker.classList?.toggle?.('layout-edited',Boolean(edit));
+  }
+  // The hub owns all selection and input. Only validated geometry is applied.
+  window.applyJournalTrackerLayout=function(input){
+    if(!isTracker)return;
+    if(input==='native')state.layoutPreview=null;
+    else{
+      let next;
+      try{next=typeof input==='string'?JSON.parse(input):input;}catch{return;}
+      if(!validTrackerGeometry(next))return;
+      state.layoutPreview={x:next.x,y:next.y,width:next.width,height:next.height};
+    }
+    positionTracker(state.settings);
+  };
+  function reportTrackerMetrics(){
+    if(!isTracker||state.demo||state.layoutPreview||
+       state.settings.trackerLayoutEnabled||
+       typeof window.reportTrackerLayoutMetrics!=='function')return;
+    const tracker=el('tracker');
+    const width=Number(window.innerWidth||document.documentElement.clientWidth);
+    const height=Number(window.innerHeight||document.documentElement.clientHeight);
+    if(!tracker||typeof tracker.getBoundingClientRect!=='function'||
+       !(width>0&&height>0))return;
+    const rect=tracker.getBoundingClientRect();
+    const geometry={x:rect.left/width,y:rect.top/height,
+      width:rect.width/width,height:rect.height/height};
+    if(!validTrackerGeometry(geometry))return;
+    const previous=state.lastTrackerMetrics;
+    if(previous&&Object.keys(geometry).every(key=>
+        Math.abs(previous[key]-geometry[key])<0.002))return;
+    state.lastTrackerMetrics=geometry;
+    emit('reportTrackerLayoutMetrics',JSON.stringify(geometry));
   }
   function applySettings() {
     const s=state.settings, trackerPalette=S.palette(s), root=document.documentElement;
@@ -122,14 +196,7 @@
     if (isTracker) {
       document.body.className='tracker-page anchor-'+s.trackerAnchor+
         (s.theme==='pipboy'?' theme-pipboy':s.theme==='fallout76'?' theme-fallout76':s.theme==='contrast'?' theme-contrast':'');
-      // Position the passive overlay explicitly as well as through CSS classes.
-      // Reset the opposite edges each time so all four anchors can be selected.
-      const tracker=el('tracker');
-      const [vertical,horizontal]=s.trackerAnchor.split('-');
-      tracker.style.top=vertical==='top'?'5%':'auto';
-      tracker.style.bottom=vertical==='bottom'?'5%':'auto';
-      tracker.style.left=horizontal==='left'?'3%':'auto';
-      tracker.style.right=horizontal==='right'?'3%':'auto';
+      positionTracker(s);
       applyUnifiedStyleClass();
       return;
     }
@@ -470,6 +537,7 @@
     el('trackerCount').textContent=eligible.length;
     if(!quests.length){
       el('trackedQuests').innerHTML=`<div class="tracker-hint">${state.snapshot.ready?'No tracked active quests. Pin one in the journal or enable Pip-Boy sync.':'Waiting for quest data…'}</div>`;
+      reportTrackerMetrics();
       return;
     }
     const rows=quests.map(q=>{
@@ -481,7 +549,8 @@
       </section>`;
     }).join('');
     const remainder=eligible.length-quests.length;
-    el('trackedQuests').innerHTML=rows+(remainder?`<div class="tracker-hint">+${remainder} more pinned quest${remainder===1?'':'s'} · Change limit in Journal Settings</div>`:'');
+    el('trackedQuests').innerHTML=rows+(remainder?`<div class="tracker-hint">+${remainder} more pinned quest${remainder===1?'':'s'} · Change limit in Settings Hub</div>`:'');
+    reportTrackerMetrics();
 }
   // Polling or a quest-action update must not discard keyboard/controller
   // focus simply because the corresponding row was re-created in the DOM.

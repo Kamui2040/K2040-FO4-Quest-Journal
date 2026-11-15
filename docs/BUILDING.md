@@ -67,3 +67,15 @@ combined packaging command and runtime acceptance checklist.
 The archive does not contain user preferences, a Quest Journal MCM child
 or a user MCM Settings registry. The single included MCM shortcut belongs
 to the shared Unified Settings core.
+
+## Live HUD layout V2
+
+Quest Journal exports the hub's exact K2040LayoutAdapterV2 ABI for the
+compact tracker. The hub handles the preview/edit overlay; only the owner
+DLL validates, previews and atomically saves the normalized rectangle in
+the user-local Journal INI. The browser asset applies those temporary
+coordinates to the tracker DOM, leaving quest saves and the Pip-Boy
+read-only mirror untouched. Static/native and Windows builds do not replace
+in-game confirmation of correct positioning, scaling, Abort/Retry and
+save/reload persistence. The combined QA packager verifies the layout
+ABI header matches the source hub and the DLL exports the adapter getter.

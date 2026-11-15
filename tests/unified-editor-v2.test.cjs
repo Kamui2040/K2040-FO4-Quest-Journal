@@ -29,7 +29,7 @@ test('V2 native owner reads packaged manifest and validates/saves native prefere
   assert.match(native,/K2040::Settings::ChangeAndSave\(std::string\(id\)/);
   assert.match(native,/K2040::Settings::ResetToDefaults\(\)/);
   assert.match(native,/if\(TrackerMayShow\(\)\&\&!trackerView\)CreateViews\(\)/);
-  for(const key of ['opacity','fontSize','trackerSyncPipboy'])
+  for(const key of ['opacity','fontSize','trackerSyncPipboy','trackerLayoutEnabled','trackerLayoutX','trackerLayoutY','trackerLayoutWidth','trackerLayoutHeight'])
     assert.ok(native.includes('"'+key+'"'),key);
 });
 
@@ -37,7 +37,7 @@ test('V2 metadata excludes obsolete settings-only shortcuts and retains gameplay
   const fields=manifest.categories.flatMap(c=>c.groups.flatMap(g=>g.fields));
   assert.equal(fields.filter(f=>f.type==='action').length,1);
   assert.equal(fields.filter(f=>f.type!=='action').length,31);
-  assert.deepEqual(manifest.internalKeys,['opacity','fontSize','trackerSyncPipboy']);
+  assert.deepEqual(manifest.internalKeys,['opacity','fontSize','trackerSyncPipboy','trackerLayoutEnabled','trackerLayoutX','trackerLayoutY','trackerLayoutWidth','trackerLayoutHeight']);
   assert.ok(fields.every(f=>!/(settingsHotkey|settingsShortcut|settingsToggle)/i.test(f.id)));
   assert.equal(fs.existsSync('mcm/Data/MCM/Config/K2040_Quest_Journal'),false);
   assert.doesNotMatch(native,/RegisterHubMcm|SeedDefaultKeyboardBindings|RefreshNativeMcm/);

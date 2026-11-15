@@ -38,9 +38,23 @@ No private source checkout or internal build artifacts are bundled.
   native MCM callback. Its independent gameplay keyboard and gamepad
   controls are native owner preferences shown on the hub Controls page.
   Legacy controller user files are read only, never overwritten.
-- The optional HUD layout V2 adapter is NOT yet implemented by this owner.
-  Quest Journal therefore offers no live tracker drag/resize action.
-  Reversible owner geometry and viewport mapping require separate work.
+- Live HUD layout adapter V2 exports K2040_GetLayoutAdapterV2 with the
+  canonical byte-matched hub ABI. Its single widget ID is quest-tracker.
+  The hub's Appearance category exposes Edit this mod's HUD layout only
+  when the mini tracker is visible and initialized. The owner reports its
+  current Prisma viewport rectangle (including ultrawide screens);
+  the hub owns the transparent overlay, dragging, keyboard/controller
+  nudges, wheel 1% and +/- 10% proportional resizing, and confirmation UI.
+  The Journal accepts only bounded, proportional, in-viewport geometry.
+  Save atomically persists normalized position and size in the existing
+  owner INI; Abort restores the saved layout without writing; Retry
+  restores the original in-memory snapshot and continues editing.
+  Loading or changing saves invalidates the live session without writing.
+  Older anchor/width settings work until Save, and a later change to either
+  restores the legacy placement behavior. The old on-screen Pip-Boy sync
+  toggle and other gameplay features are unaffected.
+  **Runtime confirmation of overlay positioning and visual scaling is
+  still pending**; source/build tests do not establish actual FO4 behavior.
 
 ## Packaging and QA
 
@@ -52,8 +66,9 @@ together with the official, source-matched Unified Settings hub checkout:
       --hub-root "/path/to/K2040-Unified-Settings-editor-v2" \
       --output "$HOME/Downloads/K2040-FO4-Quest-Journal/Quest-Journal-Unified-VNext-OG163-QA.zip"
 
-The script checks clean correct source branches, identical V2 adapter ABI
-header, provider, Windows x64 F4SE and adapter exports, hub appearance
+The script checks clean correct source branches, identical settings AND
+layout V2 ABI headers, provider, Windows x64 F4SE and adapter exports,
+hub appearance
 exports, source/staging asset consistency and identical shared MCM parent.
 It rejects existing ZIP outputs, unexpected files and private MCM registry
 or user settings. No game deployment or installation takes place.
@@ -62,7 +77,10 @@ or user settings. No game deployment or installation takes place.
 
 Verify Ctrl+Shift+B and remapped hub binding; no Journal MCM child;
 Journal-only Pip-Boy sync toggle, persistence and immediate tracker
-refresh; module and category visibility,
+refresh; module and category visibility; live tracker layout Edit button
+for a visible tracker, drag/nudge, proportional 1% wheel and 10% key
+resize, Esc Save/Abort/Retry, save/reload persistence, rollback and
+legacy layout recovery;
 typed edits with saved values after reload and owner reset; all themes,
 built-in and named custom palettes including Hot Omni; per-mod appearance
 override; controller native Confirm/Back; Journal/tracker gameplay shortcuts;

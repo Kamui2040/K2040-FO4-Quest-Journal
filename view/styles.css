@@ -870,3 +870,12 @@
 .pipboy-mirror input:focus-visible{outline:2px solid var(--ui-accent,var(--blue));outline-offset:2px}
 .pipboy-mirror p{font-size:.73rem;line-height:1.5;color:var(--muted);margin-top:8px}
 .pipboy-mirror .pipboy-mirror-status{min-height:0;margin-top:5px;color:var(--ui-accent,var(--blue))}
+
+/* V2 owner HUD layout; legacy responsive sizing remains default until Save. */
+.tracker-page .tracker-panel.layout-edited{
+    display:flex;flex-direction:column;min-height:0;
+    box-sizing:border-box;overflow:hidden;
+}
+.tracker-page .tracker-panel.layout-edited #trackedQuests{
+    min-height:0;flex:1 1 auto;overflow:hidden;
+}

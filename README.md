@@ -9,7 +9,7 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 - Browse your quests and objectives, including completed quests.
 - Find what you're looking for with search, sorting, categories and favorites.
 - Track supported quests from the Journal and keep them in sync with your Pip-Boy.
-- Pin quests to a compact tracker on your HUD. Choose where it appears, how large it is and how many quests it shows.
+- Pin quests to a compact HUD tracker. The upcoming V2 layout editor lets you drag and proportionally resize it inside Unified Settings, then Save, Abort or Retry without changing quest tracking.
 - Customize the Journal and tracker separately with five themes or your own colors.
 - Edit settings in the **K2040 Unified Settings V2** two-pane editor using **Ctrl+Shift+B** (configurable through the Unified Settings MCM page). Individual Journal settings controls are no longer maintained.
 - Optionally use Fallout 4's Quick Data action (usually J) to open Quest Journal, following your current key binding. This is off by default.
@@ -37,9 +37,9 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 | Open or close the Quest Journal | **Shift + G** |
 | Show or hide the mini tracker | **G** |
 
-These are **gameplay shortcuts**, not settings-only shortcuts. Configure their keyboard and controller assignments through Quest Journal's existing MCM gameplay controls. Saved standalone fallback values remain supported if MCM is unavailable. Ctrl+Shift+B opens the separate Unified Settings editor when installed.
+These are **gameplay shortcuts**, not settings-only shortcuts. The VNext development build configures Journal/tracker keyboard and controller shortcuts in the shared Unified Settings **Controls** category, not in Quest Journal's MCM. Ctrl+Shift+B opens the Unified Settings hub; it is the only MCM keyboard shortcut in the bundled VNext QA build. The published v0.0.2 package is unchanged.
 
-The upcoming v0.0.3 development build adds menu navigation: use the **D-pad** or **left stick** to move between controls, **A** to select, and **B** to go back. The right stick remains available for cursor navigation.
+The upcoming v0.0.3 development build adds D-pad and left-stick menu navigation and follows Fallout 4's effective Confirm/Back assignments rather than assuming Xbox button labels. The right stick remains available for cursor navigation.
 
 ## Compatibility
 

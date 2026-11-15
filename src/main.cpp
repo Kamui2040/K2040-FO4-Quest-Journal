@@ -47,10 +47,13 @@
 #endif
 #include "JournalSettings.h"
 #include "K2040SettingsAdapterV2.h"
+#include "K2040LayoutAdapterV2.h"
+#include "TrackerLayoutGeometry.h"
 #include "K2040ThemeClient.h"
 #include "K2040AppearanceClientV1.h"
 #include "UnifiedAppearance.h"
 #include "JsonPreferencesParser.h"
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <filesystem>
@@ -98,6 +101,13 @@ namespace {
     bool journalOpen = false;
     bool journalDomReady = false;
     bool trackerDomReady = false;
+    using TrackerGeometry = K2040::TrackerLayout::Geometry;
+    // All owner layout callbacks and DOM metrics update on the game thread.
+    std::optional<TrackerGeometry> trackerObservedGeometry;
+    std::optional<TrackerGeometry> trackerPreparedGeometry;
+    TrackerGeometry trackerEditBaseline{};
+    TrackerGeometry trackerEditDraft{};
+    bool trackerEditing = false;
     std::string gUnifiedAppearanceTheme; // empty when shared hub is absent
     std::atomic_bool journalFocused{false};
     bool trackerEnabled = true;
@@ -406,6 +416,131 @@ namespace {
             interop.InteropCall(journalView,"applyUnifiedAppearance",appearanceJson);
         if(TrackerMayShow()&&Valid(trackerView))
             interop.InteropCall(trackerView,"applyUnifiedAppearance",appearanceJson);
+    }
+    // Versioned layout extension. The hub provides its single interactive
+    // overlay; Quest Journal owns reversible preview and atomic persistence.
+    bool TrackerLayoutReady() noexcept {
+        return gameLoaded && apiReady && TrackerMayShow() &&
+            trackerDomReady && Valid(trackerView) && interop.InteropCall;
+    }
+    TrackerGeometry StoredTrackerGeometry() noexcept {
+        const auto& p=K2040::Settings::Current();
+        return K2040::TrackerLayout::FromBasis(p.trackerLayoutX,
+            p.trackerLayoutY,p.trackerLayoutWidth,p.trackerLayoutHeight);
+    }
+    TrackerGeometry CurrentTrackerGeometry() noexcept {
+        const auto& p=K2040::Settings::Current();
+        if(p.trackerLayoutEnabled) {
+            const auto saved=StoredTrackerGeometry();
+            if(K2040::TrackerLayout::Valid(saved))return saved;
+        }
+        if(trackerObservedGeometry && K2040::TrackerLayout::Valid(*trackerObservedGeometry))
+            return *trackerObservedGeometry;
+        // Safe fallback only until tracker reports its real Prisma viewport
+        // geometry; editor edits the actual measured rectangle when available.
+        const auto screenWidth=std::max(800,GetSystemMetrics(SM_CXSCREEN));
+        const auto screenHeight=std::max(600,GetSystemMetrics(SM_CYSCREEN));
+        const auto width=std::clamp(static_cast<double>(p.trackerWidth)/screenWidth,.04,.8);
+        const auto height=std::clamp(190.0/screenHeight,.04,.7);
+        const bool right=p.trackerAnchor.ends_with("right");
+        const bool bottom=p.trackerAnchor.starts_with("bottom");
+        return {right?1.0-.03-width:.03,bottom?1.0-.05-height:.05,
+                width,height};
+    }
+    bool PushTrackerGeometry(const std::optional<TrackerGeometry>& draft) noexcept {
+        if(!TrackerLayoutReady())return false;
+        const auto payload=draft?K2040::TrackerLayout::ToJson(*draft):std::string("native");
+        interop.InteropCall(trackerView,"applyJournalTrackerLayout",payload.c_str());
+        return true;
+    }
+    void ObserveTrackerGeometry(const std::string& input) {
+        if(trackerEditing||!TrackerLayoutReady()||
+           K2040::Settings::Current().trackerLayoutEnabled||
+           input.size()>256)return;
+        const auto parsed=k2040::json::JsonParser(input).Parse();
+        const auto* obj=parsed?parsed->AsObject():nullptr;
+        if(!obj||obj->size()!=4)return;
+        const auto number=[&](const char* id)->std::optional<double> {
+            const auto it=obj->find(id);
+            if(it==obj->end())return {};
+            const auto* value=it->second.AsNumber();
+            return value?std::optional<double>{*value}:std::nullopt;
+        };
+        const auto x=number("x"),y=number("y");
+        const auto w=number("width"),h=number("height");
+        if(!x||!y||!w||!h)return;
+        const TrackerGeometry candidate{*x,*y,*w,*h};
+        if(K2040::TrackerLayout::Valid(candidate))
+            trackerObservedGeometry=candidate;
+    }
+    bool TrackerLayoutAvailable() noexcept {
+        return TrackerLayoutReady() && !trackerEditing;
+    }
+    const char* TrackerLayoutElements() noexcept {
+        static std::string snapshot;
+        if(!TrackerLayoutAvailable())return nullptr;
+        const auto geometry=CurrentTrackerGeometry();
+        if(!K2040::TrackerLayout::Valid(geometry))return nullptr;
+        trackerPreparedGeometry=geometry;
+        snapshot=K2040::TrackerLayout::ElementsJson(geometry);
+        return snapshot.c_str();
+    }
+    bool TrackerLayoutBegin() noexcept {
+        if(!TrackerLayoutAvailable())return false;
+        const auto baseline=trackerPreparedGeometry.value_or(CurrentTrackerGeometry());
+        if(!K2040::TrackerLayout::Valid(baseline))return false;
+        trackerEditBaseline=baseline;
+        trackerEditDraft=baseline;
+        trackerPreparedGeometry.reset();
+        trackerEditing=true;
+        return true;
+    }
+    bool TrackerLayoutPreview(const char* element,double x,double y,
+                              double width,double height) noexcept {
+        if(!trackerEditing||!TrackerLayoutReady()||!element||
+           std::string_view(element)!="quest-tracker")return false;
+        const TrackerGeometry next{x,y,width,height};
+        if(!K2040::TrackerLayout::Proportional(trackerEditBaseline,next))
+            return false;
+        if(!PushTrackerGeometry(next))return false;
+        trackerEditDraft=next;
+        return true;
+    }
+    bool TrackerLayoutRetry() noexcept {
+        if(!trackerEditing||!TrackerLayoutReady())return false;
+        if(!PushTrackerGeometry(trackerEditBaseline))return false;
+        trackerEditDraft=trackerEditBaseline;
+        return true;
+    }
+    bool TrackerLayoutFinish(bool commit) noexcept {
+        if(!trackerEditing)return false;
+        trackerEditing=false;
+        trackerPreparedGeometry.reset();
+        bool ok=true;
+        if(commit) {
+            const auto& g=trackerEditDraft;
+            if(!K2040::TrackerLayout::Proportional(trackerEditBaseline,g))
+                ok=false;
+            else{
+                const int width=K2040::TrackerLayout::Basis(g.width);
+                const int height=K2040::TrackerLayout::Basis(g.height);
+                const int x=std::min(K2040::TrackerLayout::Basis(g.x),10000-width);
+                const int y=std::min(K2040::TrackerLayout::Basis(g.y),10000-height);
+                ok=K2040::Settings::SaveTrackerLayout(x,y,width,height);
+            }
+        }
+        // Abort or failed Save restores the last saved owner settings.
+        // A successful save propagates both size and position to Prisma.
+        SyncSettings();
+        (void)PushTrackerGeometry(std::nullopt);
+        return ok;
+    }
+    void ResetTrackerLayoutSession() noexcept {
+        // Game/new-save transitions invalidate previews; there is no disk
+        // mutation and the destroyed view cannot retain draft geometry.
+        trackerEditing=false;
+        trackerPreparedGeometry.reset();
+        trackerObservedGeometry.reset();
     }
     // Adapted from the reviewed Quick Attach Menu cursor fix. Register only if
     // focus did not increase the engine cursor owner count; never double-own.
@@ -1712,6 +1847,14 @@ namespace {
             interop.BindUIEvent(view, "requestJournalSettings", [](const char*) {
                 QueueTrackerAction([](){if(TrackerMayShow() && trackerDomReady)SyncSettings();});
             });
+            // Read-only viewport metrics help the hub's selection frame match
+            // the actual tracker widget, including ultrawide displays.
+            interop.BindUIEvent(view, "reportTrackerLayoutMetrics", [](const char* raw){
+                if(!raw)return;
+                const std::string bounded(raw,strnlen_s(raw,257));
+                if(bounded.size()>256)return;
+                QueueTrackerAction([bounded](){ObserveTrackerGeometry(bounded);});
+            });
             if (controller.SetViewRole) controller.SetViewRole(view, UI::ViewRole::kWidget);
             trackerDomReady=true;
             if (TrackerMayShow()) views.Show(view);
@@ -1744,6 +1887,7 @@ namespace {
             });
     }
     void DestroyViews() {
+        ResetTrackerLayoutSession();
         uiEpoch.Invalidate();
         trackerEpoch.Invalidate();
 #ifdef K2040_SELECTOR_READONLY_QA
@@ -2380,8 +2524,10 @@ namespace {
         // The V1 catalog deliberately retains these legacy values as
         // internal. Reject direct third-party attempts to write them even
         // when bypassing the shared renderer's manifest whitelist.
-        constexpr std::array<std::string_view,3> internalKeys{
-            "opacity","fontSize","trackerSyncPipboy"
+        constexpr std::array<std::string_view,8> internalKeys{
+            "opacity","fontSize","trackerSyncPipboy",
+            "trackerLayoutEnabled","trackerLayoutX","trackerLayoutY",
+            "trackerLayoutWidth","trackerLayoutHeight"
         };
         if(std::find(internalKeys.begin(),internalKeys.end(),id)!=internalKeys.end())
             return false;
@@ -2439,6 +2585,18 @@ K2040_GetSettingsAdapterV2() noexcept {
         sizeof(K2040SettingsAdapterV2),K2040_SETTINGS_ADAPTER_V2_ABI,
         "quest-journal",JournalEditorReady,JournalManifest,JournalValues,
         JournalApply,JournalReset,JournalTheme
+    };
+    return &adapter;
+}
+
+extern "C" __declspec(dllexport)
+const K2040LayoutAdapterV2* K2040_LAYOUT_V2_CALL
+K2040_GetLayoutAdapterV2() noexcept {
+    static const K2040LayoutAdapterV2 adapter{
+        sizeof(K2040LayoutAdapterV2),K2040_LAYOUT_ADAPTER_ABI_V2,
+        "quest-journal",TrackerLayoutAvailable,TrackerLayoutElements,
+        TrackerLayoutBegin,TrackerLayoutPreview,TrackerLayoutRetry,
+        TrackerLayoutFinish
     };
     return &adapter;
 }

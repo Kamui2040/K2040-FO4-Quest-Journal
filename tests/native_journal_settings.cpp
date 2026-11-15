@@ -25,6 +25,7 @@ int main() {
     assert(Current().questListWidth == 360);
     assert(!Current().trackerOverridePhosphor); // safe default for older INIs
     assert(!Current().redirectQuestKey);
+    assert(!Current().trackerLayoutEnabled);
     assert(!Change("completed:bogus"));
     assert(!Change("completed:#12345"));
     assert(!Change("sidebarWidth:159"));
@@ -103,6 +104,7 @@ int main() {
     assert(Current().journalHotkey == "Shift+G" && Current().trackerHotkey == "G");
     assert(Current().journalPadPrimary==0 && Current().trackerPadPrimary==0);
     assert(Current().trackerSyncPipboy); // reset in hub must not change Journal mirror
+    assert(!Current().trackerLayoutEnabled);
     assert(!Current().trackerOverridePhosphor); // reset revokes override
     assert(!Current().redirectQuestKey);
     Load();
@@ -118,9 +120,26 @@ int main() {
     assert(!ChangeAndSave("opacity:67"));
     assert(std::string(LastFailureReason())=="storage");
     assert(Current().opacity==81);
+    assert(!SaveTrackerLayout(6600,800,2500,2200));
+    assert(!Current().trackerLayoutEnabled);
     fs::remove(path);
     assert(Save());  // writes a fresh file after failed replacement
 
+    // Layout V2 saves position and size as one atomic owner transaction.
+    assert(!SaveTrackerLayout(9990,100,200,200)); // viewport overflow
+    assert(!Current().trackerLayoutEnabled);
+    assert(SaveTrackerLayout(6800,900,2500,2200));
+    assert(Current().trackerLayoutEnabled);
+    assert(Current().trackerLayoutWidth==2500);
+    assert(Serialize().find("\"trackerLayoutHeight\":2200")!=std::string::npos);
+    Load();
+    assert(Current().trackerLayoutEnabled && Current().trackerLayoutX==6800);
+    assert(ChangeAndSave("trackerWidth:410"));
+    assert(!Current().trackerLayoutEnabled); // legacy width override is live
+    assert(SaveTrackerLayout(6800,900,2500,2200));
+    assert(ResetToDefaults());
+    assert(!Current().trackerLayoutEnabled);
+    assert(ChangeAndSave("opacity:81")); // preserve original migration fixture
     // Test the real preferred Windows/Proton per-user destination independently
     // of the game's managed Data directory and migrate existing preferences.
     const auto appData=testRoot/"profile"/"AppData"/"Local";

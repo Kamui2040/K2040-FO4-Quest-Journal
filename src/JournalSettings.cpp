@@ -1,4 +1,5 @@
 #include "JournalSettings.h"
+#include "TrackerLayoutGeometry.h"
 #include <algorithm>
 #include <array>
 #include <charconv>
@@ -108,6 +109,14 @@ namespace {
         else if (key=="trackerScale")return Int(val,out.trackerScale,75,150);
         else if (key=="trackerWidth")return Int(val,out.trackerWidth,260,520);
         else if (key=="trackerOpacity")return Int(val,out.trackerOpacity,25,100);
+        else if (key=="trackerLayoutEnabled") {
+            if(val!="true"&&val!="false")return false;
+            out.trackerLayoutEnabled=val=="true";
+        }
+        else if (key=="trackerLayoutX")return Int(val,out.trackerLayoutX,0,10000);
+        else if (key=="trackerLayoutY")return Int(val,out.trackerLayoutY,0,10000);
+        else if (key=="trackerLayoutWidth")return Int(val,out.trackerLayoutWidth,0,10000);
+        else if (key=="trackerLayoutHeight")return Int(val,out.trackerLayoutHeight,0,10000);
         else if (key=="trackerMaxQuests")return Int(val,out.trackerMaxQuests,1,12);
         else if (key=="trackerShowCompleted" || key=="trackerAutoPinNew" || key=="trackerSyncPipboy") {
             if(val!="true" && val!="false")return false;
@@ -175,6 +184,11 @@ void Load() {
     if(!preferences.trackerPadPrimary ||
        preferences.trackerPadHeld==preferences.trackerPadPrimary)
         preferences.trackerPadHeld=0;
+    // Corrupt geometry must never enable an offscreen widget or overwrite INI.
+    if(preferences.trackerLayoutEnabled &&
+       !K2040::TrackerLayout::ValidBasis(preferences.trackerLayoutX,
+           preferences.trackerLayoutY,preferences.trackerLayoutWidth,
+           preferences.trackerLayoutHeight))preferences.trackerLayoutEnabled=false;
 }
 const Preferences& Current() {return preferences;}
 std::string Serialize(std::string_view hudColor, std::string_view hudBackgroundColor,
@@ -193,6 +207,11 @@ std::string Serialize(std::string_view hudColor, std::string_view hudBackgroundC
         ",\"journalFontSize\":"+std::to_string(p.journalFontSize)+
         ",\"trackerAnchor\":\""+p.trackerAnchor+"\",\"trackerScale\":"+std::to_string(p.trackerScale)+
         ",\"trackerWidth\":"+std::to_string(p.trackerWidth)+",\"trackerOpacity\":"+std::to_string(p.trackerOpacity)+
+        ",\"trackerLayoutEnabled\":"+(p.trackerLayoutEnabled?"true":"false")+
+        ",\"trackerLayoutX\":"+std::to_string(p.trackerLayoutX)+
+        ",\"trackerLayoutY\":"+std::to_string(p.trackerLayoutY)+
+        ",\"trackerLayoutWidth\":"+std::to_string(p.trackerLayoutWidth)+
+        ",\"trackerLayoutHeight\":"+std::to_string(p.trackerLayoutHeight)+
         ",\"trackerEnabled\":"+(p.trackerEnabled?"true":"false")+
         ",\"trackerOverridePhosphor\":"+(p.trackerOverridePhosphor?"true":"false")+
         ",\"trackerMaxQuests\":"+std::to_string(p.trackerMaxQuests)+
@@ -212,6 +231,13 @@ bool Change(std::string_view command) {
     if (p==std::string_view::npos)return false;
     auto next=preferences;
     if (!Apply(command.substr(0,p),command.substr(p+1),next))return false;
+    // Legacy width and anchor controls remain effective after a custom edit.
+    const auto key=command.substr(0,p);
+    if(key=="trackerAnchor"||key=="trackerWidth")
+        next.trackerLayoutEnabled=false;
+    if(next.trackerLayoutEnabled &&
+       !K2040::TrackerLayout::ValidBasis(next.trackerLayoutX,next.trackerLayoutY,
+           next.trackerLayoutWidth,next.trackerLayoutHeight))return false;
     if(next.journalHotkey==next.trackerHotkey)return false;
     if((!next.journalPadPrimary && next.journalPadHeld) ||
        (!next.trackerPadPrimary && next.trackerPadHeld) ||
@@ -247,6 +273,11 @@ bool Save() {
              << "\nsidebarWidth=" << p.sidebarWidth << "\nquestListWidth=" << p.questListWidth
              << "\ntrackerAnchor=" << p.trackerAnchor << "\ntrackerScale=" << p.trackerScale
              << "\ntrackerWidth=" << p.trackerWidth << "\ntrackerOpacity=" << p.trackerOpacity
+             << "\ntrackerLayoutEnabled=" << (p.trackerLayoutEnabled?"true":"false")
+             << "\ntrackerLayoutX=" << p.trackerLayoutX
+             << "\ntrackerLayoutY=" << p.trackerLayoutY
+             << "\ntrackerLayoutWidth=" << p.trackerLayoutWidth
+             << "\ntrackerLayoutHeight=" << p.trackerLayoutHeight
              << "\ntrackerEnabled=" << (p.trackerEnabled ? "true":"false")
              << "\ntrackerOverridePhosphor=" << (p.trackerOverridePhosphor ? "true":"false")
              << "\ntrackerMaxQuests=" << p.trackerMaxQuests
@@ -296,6 +327,21 @@ bool ChangeAndSave(std::string_view command) {
         lastFailureReason="none";
         return true;
     }
+    preferences=before;
+    lastFailureReason="storage";
+    return false;
+}
+bool SaveTrackerLayout(int x,int y,int width,int height) {
+    if(!K2040::TrackerLayout::ValidBasis(x,y,width,height)) {
+        lastFailureReason="invalid";return false;
+    }
+    const Preferences before=preferences;
+    preferences.trackerLayoutEnabled=true;
+    preferences.trackerLayoutX=x;
+    preferences.trackerLayoutY=y;
+    preferences.trackerLayoutWidth=width;
+    preferences.trackerLayoutHeight=height;
+    if(Save()) {lastFailureReason="none";return true;}
     preferences=before;
     lastFailureReason="storage";
     return false;

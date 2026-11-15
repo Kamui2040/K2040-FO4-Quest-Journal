@@ -127,6 +127,9 @@ if command -v clang++ >/dev/null 2>&1; then
   # before any native preference mutation can be attempted.
   clang++ -std=c++23 -O1 -Wall -Wextra -Werror -Isrc tests/native_editor_v2_json.cpp -o "$tmp/editor-v2-json"
   "$tmp/editor-v2-json"
+  # V2 geometry ABI, bounds, proportional scaling and native owner policy.
+  clang++ -std=c++23 -O1 -Wall -Wextra -Werror -Isrc tests/native_tracker_layout_geometry.cpp -o "$tmp/tracker-layout"
+  "$tmp/tracker-layout"
   # VNext native tokens are owner-validated before reaching PrismaUI.
   clang++ -std=c++23 -O1 -Wall -Wextra -Werror -Isrc tests/native_unified_appearance.cpp -o "$tmp/vnext-appearance"
   "$tmp/vnext-appearance"

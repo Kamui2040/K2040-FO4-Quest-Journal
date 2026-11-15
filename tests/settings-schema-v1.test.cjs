@@ -35,7 +35,7 @@ test('canonical V1 validator and schema are pinned to upstream byte hashes',()=>
 test('every native saved preference is visible once or explicitly internal',()=>{
   const body=nativeHeader.split('struct Preferences {')[1].split('};')[0];
   const native=[...body.matchAll(/^\s*(?:std::string|int|bool)\s+([a-zA-Z]\w*)\s*=/gm)].map(m=>m[1]);
-  assert.equal(native.length,34,'Update inventory for a changed native Preferences struct');
+  assert.equal(native.length,39,'Update inventory for a changed native Preferences struct');
   assert.equal(new Set(native).size,native.length);
   const covered=[...settings.map(f=>f.id),...manifest.internalKeys];
   assert.deepEqual(covered.slice().sort(),native.slice().sort());
