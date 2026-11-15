@@ -1,0 +1,8 @@
+{
+  "tag": "k2040.settings",
+  "protocolVersion": 2,
+  "modId": "quest-journal",
+  "displayName": "Quest Journal",
+  "plugin": "K2040_Quest_Journal.dll",
+  "adapter": "K2040_GetSettingsAdapterV2"
+}

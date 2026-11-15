@@ -18,7 +18,7 @@
     snapshot: {ready:false, quests:[]}, query:'', status:'active', category:'all', sort:'pinned', selected:null,
     favorites:new Set(), hidden:new Set(), includeHidden:false, favoritesOnly:false,
     demo: new URLSearchParams(window.location.search).get('demo') === '1', lastSnapshotRaw:null,
-    settings: S.normalize({}), unifiedTheme:null,
+    settings: S.normalize({}), unifiedTheme:null, unifiedAppearance:null,
     trackingRequest:null, trackingNotice:'',
     qaPreviewEnabled:false, qaPreviewPending:null, qaLastSelected:null,
     qaWriteEnabled:false, qaWriteArmed:false, qaWriteArmedId:null, qaWriteAttempted:false,
@@ -70,13 +70,46 @@
   const prettyState = s => ({active:'Active',completed:'Completed',failed:'Failed',inactive:'Not started'})[s] || 'Unknown';
     const channels = hex => hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16)).join(',');
   const emit = (name, value='') => { if (typeof window[name] === 'function') window[name](String(value)); };
+  const visualThemes=new Set(['fallout4','fallout76','doom-eternal','fallout3-newvegas']);
+  const builtInPalettes=new Set([
+    'default','fallout76','radioactive-green','monochrome','midnight-blue','hot-omni'
+  ]);
+  const colorRoles=['background','panel','text','accent','muted','border','highlight'];
+  const hexColor=/^#[0-9a-fA-F]{6}$/;
+  const styles=['fallout4','fallout76','doom-eternal','fallout3-newvegas'];
+  function applyUnifiedStyleClass(){
+    const current=state.unifiedAppearance?.theme;
+    for(const name of styles)
+      document.body.classList.toggle?.('k2040-style-'+name,current===name);
+  }
+  function readAppearance(input){
+    const raw=typeof input==='string'?input:JSON.stringify(input);
+    if(raw==='native')return null;
+    if(raw.length>4095)return undefined;
+    try{
+      const data=JSON.parse(raw);
+      if(!data||data.schema!==1||!visualThemes.has(data.theme)||
+         !(builtInPalettes.has(data.palette)||/^user-[0-9]{1,19}$/.test(data.palette))||
+         !data.colors||typeof data.colors!=='object'||Array.isArray(data.colors)||
+         colorRoles.some(role=>typeof data.colors[role]!=='string'||
+           !hexColor.test(data.colors[role])))return undefined;
+      return data;
+    }catch{return undefined;}
+  }
   function applySettings() {
     const s=state.settings, trackerPalette=S.palette(s), root=document.documentElement;
     // Full-screen journal and its in-place settings share one saved theme.
     // The compact tracker remains independently configurable.
     const nativePalette=isTracker?trackerPalette:S.journalPalette(s);
-    const shared=state.unifiedTheme?sharedThemes[state.unifiedTheme]:null;
-    const p=shared?{...shared,completed:shared.accent}:nativePalette;
+    const next=state.unifiedAppearance;
+    const nextColors=next?.colors;
+    const shared=nextColors
+      ? {accent:nextColors.accent,text:nextColors.text,panel:nextColors.panel,
+         bg:nextColors.background,muted:nextColors.muted,
+         completed:nextColors.highlight,border:nextColors.border,
+         highlight:nextColors.highlight}
+      : state.unifiedTheme?sharedThemes[state.unifiedTheme]:null;
+    const p=shared?{completed:shared.accent,...shared}:nativePalette;
     const rgb=channels(p.panel);
     root.style.fontSize=isTracker?'14px':(14*s.journalFontSize/100)+'px';
     // Native palette always wins when the hub is missing or unavailable.
@@ -87,8 +120,15 @@
       root.style.setProperty('--blue',shared.accent);
       root.style.setProperty('--text',shared.text);
       root.style.setProperty('--muted',shared.muted);
+      if(nextColors){
+        root.style.setProperty('--edge',shared.border);
+        root.style.setProperty('--gold',shared.highlight);
+      }else{
+        root.style.removeProperty?.('--edge');
+        root.style.removeProperty?.('--gold');
+      }
     }else{
-      for(const key of ['--bg','--blue','--text','--muted'])
+      for(const key of ['--bg','--blue','--text','--muted','--edge','--gold'])
         root.style.removeProperty?.(key);
     }
     root.style.setProperty('--ui-accent-rgb',channels(p.accent));
@@ -117,6 +157,7 @@
       tracker.style.bottom=vertical==='bottom'?'5%':'auto';
       tracker.style.left=horizontal==='left'?'3%':'auto';
       tracker.style.right=horizontal==='right'?'3%':'auto';
+      applyUnifiedStyleClass();
       return;
     }
     // Apply the journal's own palette to both workspaces and settings;
@@ -125,6 +166,7 @@
     document.body.classList.toggle('journal-theme-dark',s.journalTheme==='dark');
     document.body.classList.toggle('journal-theme-fallout76',s.journalTheme==='fallout76');
     document.body.classList.toggle('journal-theme-contrast',s.journalTheme==='contrast');
+    applyUnifiedStyleClass();
     document.querySelector('.journal-shell').classList.toggle('compact',s.density==='compact');
   }
   function receiveJournalSettings(input) {
@@ -241,6 +283,12 @@
     // "native" is used internally when the optional hub disappears.
     if(theme!=='native' && !Object.prototype.hasOwnProperty.call(sharedThemes,theme))return;
     state.unifiedTheme=theme==='native'?null:theme;
+    applySettings();
+  };
+  window.applyUnifiedAppearance=function(input){
+    const next=readAppearance(input);
+    if(next===undefined)return; // reject invalid hub data without changing UI
+    state.unifiedAppearance=next;
     applySettings();
   };
   window.receiveJournalSettings=receiveJournalSettings;

@@ -849,3 +849,16 @@
   outline-offset:2px;
   box-shadow:0 0 0 2px rgba(102,196,255,.22);
 }
+
+/* Optional VNext visual-frame identity; palette RGB values are supplied by the hub. */
+.k2040-style-fallout4 .journal-shell{border-radius:7px;border-color:var(--edge)}
+.k2040-style-fallout76 .journal-shell{border-radius:3px;border-width:2px}
+.k2040-style-fallout76 .app-header{border-bottom:2px solid var(--gold)}
+.k2040-style-doom-eternal .journal-shell{border-radius:0;border-width:2px}
+.k2040-style-doom-eternal .app-header{text-transform:uppercase;letter-spacing:.055em}
+.k2040-style-fallout3-newvegas .journal-shell{border-radius:0}
+.k2040-style-fallout3-newvegas .app-header{border-bottom:2px double var(--gold)}
+.k2040-style-fallout3-newvegas .mark{border-radius:0}
+.k2040-style-doom-eternal .tracker-panel{border-radius:0;border-width:2px}
+.k2040-style-fallout76 .tracker-panel{border-radius:3px}
+.k2040-style-fallout3-newvegas .tracker-panel{border-radius:0}

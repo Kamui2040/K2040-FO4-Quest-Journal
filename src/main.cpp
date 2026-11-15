@@ -48,6 +48,8 @@
 #include "JournalSettings.h"
 #include "K2040SettingsAdapterV2.h"
 #include "K2040ThemeClient.h"
+#include "K2040AppearanceClientV1.h"
+#include "UnifiedAppearance.h"
 #include "JsonPreferencesParser.h"
 #include <array>
 #include <cmath>
@@ -316,9 +318,13 @@ namespace {
     }
     void SyncSettings() {
         if (!apiReady || !interop.InteropCall) return;
-        // A removed/unavailable optional hub must restore the owner palette.
-        const auto sharedTheme=K2040::ThemeClient::Current("quest-journal");
-        gUnifiedAppearanceTheme=sharedTheme.value_or("");
+        // The hub owns presentation tokens; never update persisted Journal colors.
+        const auto snapshot=K2040::AppearanceClient::Current("quest-journal");
+        const auto appearance=snapshot
+            ?K2040::UnifiedAppearance::Validated(*snapshot):std::nullopt;
+        const auto legacy=appearance ? std::optional<std::string>{}
+            :K2040::ThemeClient::Current("quest-journal");
+        gUnifiedAppearanceTheme=legacy.value_or("");
         // Read the live engine colors like Quick Attach Menu does (OG + AE).
         const auto hud=RE::HUDMenuUtils::GetGameplayHUDColor();
         const auto background=RE::HUDMenuUtils::GetGameplayHUDBackgroundColor();
@@ -334,6 +340,13 @@ namespace {
             interop.InteropCall(journalView,"applyUnifiedTheme",effectiveTheme);
         if(TrackerMayShow()&&Valid(trackerView))
             interop.InteropCall(trackerView,"applyUnifiedTheme",effectiveTheme);
+        // New appearance snapshots include independent theme and palette roles.
+        // "native" clears transient tokens if a hub is removed/unavailable.
+        const char* appearanceJson=appearance?appearance->c_str():"native";
+        if(Valid(journalView))
+            interop.InteropCall(journalView,"applyUnifiedAppearance",appearanceJson);
+        if(TrackerMayShow()&&Valid(trackerView))
+            interop.InteropCall(trackerView,"applyUnifiedAppearance",appearanceJson);
         K2040::Hub::MigrateLegacyIfNeeded();
         if(Valid(journalView)) {
             const auto hub=K2040::Hub::SnapshotJson();
@@ -2391,13 +2404,10 @@ namespace {
         const std::string_view theme(id);
         if(theme!="default"&&theme!="midnight"&&
            theme!="high-contrast"&&theme!="pipboy")return false;
+        // This is only a change notification. Query the canonical VNext
+        // snapshot because legacy aliases do not encode palette selection.
         gUnifiedAppearanceTheme=theme;
-        if(apiReady&&interop.InteropCall) {
-            if(Valid(journalView))
-                interop.InteropCall(journalView,"applyUnifiedTheme",gUnifiedAppearanceTheme.c_str());
-            if(TrackerMayShow()&&Valid(trackerView))
-                interop.InteropCall(trackerView,"applyUnifiedTheme",gUnifiedAppearanceTheme.c_str());
-        }
+        if(apiReady&&interop.InteropCall)SyncSettings();
         return true;
     }
     bool K2040_SETTINGS_V2_CALL JournalReset(const char* field) noexcept {

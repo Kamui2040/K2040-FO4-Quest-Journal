@@ -1,0 +1,64 @@
+# Quest Journal + K2040 Unified Settings VNext — QA adoption
+
+**Target:** Fallout 4 OG 1.10.163 / matching F4SE, PrismaUI_F4 and MCM.
+
+**Source:** this repository branch feature/unified-editor-v2, paired with
+an authorized local checkout of the Unified Settings hub at
+feature/unified-settings-editor-v2. Read docs/VNEXT_MOD_ADOPTION.md and
+docs/EDITOR_V2_INTEGRATION.md in the hub checkout first.
+No private source checkout or internal build artifacts are bundled.
+
+## Implemented in Quest Journal
+
+- The existing V2 native settings adapter and manifest expose 26
+  persisted owner fields and owner-only reset. Stored settings and
+  independent Journal/tracker gameplay hotkeys remain owner-controlled;
+  no per-mod settings-only shortcut is registered.
+- providers/quest-journal.json is staged to
+  Data/K2040/Settings/Providers/quest-journal.json, declaring the already
+  loaded K2040_Quest_Journal.dll and V2 getter.
+- The VNext K2040_CopyAppearanceV1 snapshot is read from an already-loaded
+  hub DLL. C++ validates schema, theme IDs, palette IDs and seven #RRGGBB
+  semantic colors; JavaScript validates again before applying temporary
+  colors and frame classes to Journal/tracker. Without a hub, the native
+  appearance is restored and the saved owner INI is never overwritten.
+  The legacy theme callback remains for compatibility.
+- The optional official appearance-client header has one necessary owner-side
+  MSVC/clang-cl compile fix: construct std::string from a bounded length,
+  rather than mismatched char* and const char* iterator types. No ABI,
+  callback or hub-source code was changed.
+- Only the core hub provides the Ctrl+Shift+B settings shortcut and MCM
+  remapping. Theme and palette overrides, named custom palettes, and the
+  full-screen two-pane settings editor are rendered by the hub.
+- The optional HUD layout V2 adapter is NOT yet implemented by this owner.
+  Quest Journal therefore offers no live tracker drag/resize action.
+  Reversible owner geometry and viewport mapping require separate work.
+
+## Packaging and QA
+
+Run the regular source checks and scripts/build-normal-tracking.sh with
+pinned Windows x64 dependencies, then package the built Quest Journal
+together with the official, source-matched Unified Settings hub checkout:
+
+    python3 scripts/package-unified-vnext-qa.py \
+      --hub-root "/path/to/K2040-Unified-Settings-editor-v2" \
+      --output "$HOME/Downloads/K2040-FO4-Quest-Journal/Quest-Journal-Unified-VNext-OG163-QA.zip"
+
+The script checks clean correct source branches, identical V2 adapter ABI
+header, provider, Windows x64 F4SE and adapter exports, hub appearance
+exports, source/staging asset consistency and identical shared MCM parent.
+It rejects existing ZIP outputs, unexpected files and private MCM registry
+or user settings. No game deployment or installation takes place.
+
+## In-game acceptance — pending
+
+Verify Ctrl+Shift+B and remapped hub binding; module and category visibility,
+typed edits with saved values after reload and owner reset; all themes,
+built-in and named custom palettes including Hot Omni; per-mod appearance
+override; controller native Confirm/Back; Journal/tracker gameplay shortcuts;
+Phosphor HUD coexistence; corrupt/absent owner fail-closed behavior;
+save transitions, focus and cursor ownership; startup without hub;
+and tracking regression.
+
+Build/static tests do not imply gameplay verification. No release promotion
+is authorized until owner acceptance.

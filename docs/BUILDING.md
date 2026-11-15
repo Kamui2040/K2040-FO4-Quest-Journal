@@ -55,3 +55,13 @@ The compiled files are staged under `dist/Data`. The packaging script creates a 
 ## Dependencies and redistribution
 
 See [Third-party notices](../THIRD_PARTY_NOTICES.md). When sharing a compiled copy, provide the matching source code, build instructions, project license, and this notice. The PrismaUI framework, CommonLibF4 source, F4SE, and game files are separate requirements; this repository and installer do not include them.
+
+
+## Unified Settings VNext combined Amethyst QA
+
+For tagged-provider registration and independent palette integration,
+build the Journal OG163 DLL, then stage it with a validated core from
+the official Unified Settings development branch. See
+[Unified Settings VNext QA](UNIFIED_SETTINGS_VNEXT_QA.md) for the
+combined packaging command and runtime acceptance checklist.
+The archive does not contain user preferences or an MCM Settings registry.

@@ -88,6 +88,16 @@ def gather(dll, view):
     binary=dll.read_bytes()
     inspect_pe(binary)
     files={"Data/F4SE/Plugins/K2040_Quest_Journal.dll":binary}
+    provider=ROOT/"providers"/"quest-journal.json"
+    if not provider.is_file() or provider.is_symlink():
+        raise ValueError("missing registered Quest Journal provider")
+    descriptor=json.loads(provider.read_bytes())
+    expected={"tag":"k2040.settings","protocolVersion":2,
+              "modId":"quest-journal","displayName":"Quest Journal",
+              "plugin":"K2040_Quest_Journal.dll","adapter":"K2040_GetSettingsAdapterV2"}
+    if descriptor!=expected:
+        raise ValueError("provider descriptor does not match Quest Journal DLL")
+    files["Data/K2040/Settings/Providers/quest-journal.json"]=provider.read_bytes()
     for name in ASSETS:
         path=view/name
         if not path.is_file() or path.is_symlink():

@@ -403,5 +403,10 @@ target("K2040_Quest_Journal")
             os.mkdir(target)
             os.cp(path.join(source,"*"),target)
         end
-        print("Staged self-contained Quest Journal DLL, views and MCM parent/child under dist/Data")
+        -- Tagged VNext provider: only the already-loaded Quest Journal DLL
+        -- can expose this descriptor's validated settings adapter.
+        local providerdir=path.join(base,"Data","K2040","Settings","Providers")
+        os.mkdir(providerdir)
+        os.cp(path.join(os.scriptdir(),"providers","quest-journal.json"),providerdir)
+        print("Staged Quest Journal DLL, views, tagged provider and MCM under dist/Data")
     end)

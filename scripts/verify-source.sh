@@ -127,6 +127,9 @@ if command -v clang++ >/dev/null 2>&1; then
   # before any native preference mutation can be attempted.
   clang++ -std=c++23 -O1 -Wall -Wextra -Werror -Isrc tests/native_editor_v2_json.cpp -o "$tmp/editor-v2-json"
   "$tmp/editor-v2-json"
+  # VNext native tokens are owner-validated before reaching PrismaUI.
+  clang++ -std=c++23 -O1 -Wall -Wextra -Werror -Isrc tests/native_unified_appearance.cpp -o "$tmp/vnext-appearance"
+  "$tmp/vnext-appearance"
   # Check the complete native serializer output through the actual JS
   # normalizer; substring assertions alone failed to catch malformed JSON.
   clang++ -std=c++23 -O1 -Wall -Wextra -Itests/stubs -Isrc src/JournalSettings.cpp tests/native_settings_payload.cpp -o "$tmp/payload"

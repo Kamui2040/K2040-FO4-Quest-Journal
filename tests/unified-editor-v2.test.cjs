@@ -50,7 +50,7 @@ test('V2 metadata excludes obsolete settings-only shortcuts and retains gameplay
 
 test('global theme is inherited only as a transient overlay; native settings stay owner-owned',()=>{
   assert.match(native,/ThemeClient::Current\("quest-journal"\)/);
-  assert.match(native,/sharedTheme\.value_or\(""\)/);
+  assert.match(native,/legacy\.value_or\(""\)/);
   assert.match(native,/\?"native":gUnifiedAppearanceTheme\.c_str\(\)/);
   assert.match(ui,/state\.unifiedTheme=theme==='native'\?null:theme/);
   assert.match(ui,/const nativePalette=isTracker\?trackerPalette:S.journalPalette\(s\)/);
