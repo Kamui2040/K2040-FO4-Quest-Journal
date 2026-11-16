@@ -22,3 +22,5 @@
 
 - The Journal Settings button routes to its own registered page in the updated hub through a validated optional native export. When the hub is absent or older, no substitute editor is launched; an in-Journal status message explains what is needed.
 - No individual Journal MCM entry or hotkey is packaged; the shared hub remains a separate installation.
+
+- **Controller regression:** Journal Settings is in the header and is included in mapped controller navigation/Confirm; keyboard and mouse activate the identical native hub request. The Journal must close only on an accepted hub request. Missing/older hub keeps Journal visible and shows the update message. No game-controller remapping is hardcoded. Source-level tests cover the route; OG runtime remains the acceptance gate.

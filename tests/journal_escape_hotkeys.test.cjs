@@ -41,7 +41,8 @@ function start(){
   requestCloseJournal(){nativeCalls.push('close')},
   requestJournalEscape(){nativeCalls.push('escape')},
   acknowledgeCapturedEscape(){nativeCalls.push('ack')},
-  requestHubBindings(){nativeCalls.push('bindings')}};
+  requestHubBindings(){nativeCalls.push('bindings')},
+  requestOpenJournalHubSettings(){nativeCalls.push('hub')}};
  vm.runInNewContext(fs.readFileSync('view/app.js','utf8'),{
   window:win,document:doc,URLSearchParams,console,Event:class{constructor(type){this.type=type}},
   KeyboardEvent:class{constructor(type,init){this.type=type;Object.assign(this,init)}},setTimeout:()=>0,setInterval:()=>0
@@ -141,6 +142,32 @@ test('controller left and right adjust a focused range by one configured step',(
  assert.ok(slider.dispatched.includes('input'));
  v.win.receiveJournalControllerAction('left');
  assert.equal(slider.value,'5');
+});
+test('header Settings button is reachable with directional controller navigation and mapped Confirm',()=>{
+  const v=start();
+  const first=v.addControl('first',{left:120,top:120,width:80,height:24});
+  v.element('resetFilters').rect={left:15,top:15,width:80,height:24};
+  v.element('openSettings').rect={left:120,top:15,width:80,height:24};
+  v.element('closeJournal').rect={left:225,top:15,width:80,height:24};
+  v.setActive(first);
+  v.win.receiveJournalControllerAction('up');
+  assert.equal(v.activeElement(),v.element('openSettings'));
+  assert.equal(v.activeElement().scrolled,true);
+  v.win.receiveJournalControllerAction('activate');
+  assert.equal(v.nativeCalls.filter(x=>x==='hub').length,1,
+    'Fallout-mapped Confirm activates the existing Settings button');
+  assert.equal(v.nativeCalls.includes('close'),false,
+    'JavaScript never closes the Journal before hub accepts the request');
+});
+test('mouse or keyboard button activation shares the one native hub route',()=>{
+  const v=start();
+  v.click('openSettings');
+  assert.equal(v.nativeCalls.filter(x=>x==='hub').length,1);
+  assert.equal(v.nativeCalls.includes('close'),false);
+  v.win.receiveJournalHubOpenResult('unavailable');
+  const notice=v.element('settingsHubStatus');
+  assert.equal(notice.hidden,false);
+  assert.match(notice.textContent,/Install or update K2040 Unified Settings/);
 });
 test('controller Back closes Journal without the retired editor',()=>{
  const v=start();

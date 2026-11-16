@@ -269,8 +269,12 @@
   }
   function visibleControllerControls(){
     const panel=el('journalWorkspace');
-    return Array.from(panel.querySelectorAll('button,input:not([type="hidden"]),select,textarea,[tabindex]'))
-      .filter(node=>!node.disabled&&!node.hidden&&node.tabIndex>=0&&
+    // The Settings action lives in the header, outside journalWorkspace.
+    // Include header buttons in the same Fallout-mapped controller navigation;
+    // preserve the existing workspace-first default when nothing has focus.
+    const workspace=Array.from(panel.querySelectorAll('button,input:not([type="hidden"]),select,textarea,[tabindex]'));
+    const header=['resetFilters','openSettings','closeJournal'].map(el).filter(Boolean);
+    return [...workspace,...header].filter(node=>!node.disabled&&!node.hidden&&node.tabIndex>=0&&
         node.getAttribute?.('aria-hidden')!=='true'&&node.getAttribute?.('aria-disabled')!=='true'&&
         node.getClientRects().length>0);
   }
