@@ -71,7 +71,7 @@ test('native Escape immediately closes the Journal, not a retired settings panel
  const v=start();
  v.win.handleJournalEscape();
  assert.equal(v.nativeCalls.filter(x=>x==='close').length,1);
- assert.equal((v.element('openSettings')._listeners.get('click')||[]).length,0);
+ assert.equal((v.element('openSettings')._listeners.get('click')||[]).length,1, 'hub-only settings button');
 });
 test('browser Escape routes through native and never starts local shortcut capture',()=>{
  const v=start();
@@ -173,7 +173,8 @@ test('native controller actions use the focused UI task path and skip colliding 
 test('the Journal retains gamepad navigation, but no individual settings editor',()=>{
  const html=fs.readFileSync('view/journal.html','utf8');
  const code=fs.readFileSync('view/app.js','utf8');
- assert.doesNotMatch(html,/id="openSettings"|id="settingsWorkspace"/);
+ assert.match(html,/id="openSettings"/);
+ assert.doesNotMatch(html,/id="settingsWorkspace"/);
  assert.match(code,/function moveControllerFocus/);
  assert.match(code,/function visibleControllerControls/);
  assert.match(code,/window.receiveJournalControllerAction=function/);

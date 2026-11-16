@@ -954,3 +954,7 @@ body.k2040-style-fallout3-newvegas .tracker-panel {
   border-style:double;
   border-width:3px;
 }
+
+/* Shared hub opener feedback stays inside the Journal; never a second editor. */
+.settings-hub-status{padding:8px 28px;color:var(--text);background:var(--panel2);border-bottom:1px solid var(--edge);font-size:.85rem}
+.settings-hub-status[hidden]{display:none}

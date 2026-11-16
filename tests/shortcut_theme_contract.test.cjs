@@ -19,7 +19,12 @@ test('Journal and tracker gameplay shortcuts live in owner preferences and hub e
     assert.equal(fields.find(f=>f.id===id)?.type,'keybind',id);
   for(const id of ['journalPadPrimary','journalPadHeld','trackerPadPrimary','trackerPadHeld'])
     assert.equal(fields.find(f=>f.id===id)?.type,'select',id);
-  assert.doesNotMatch(read('view/journal.html'),/id="openSettings"|id="settingsWorkspace"/);
+  const html=read('view/journal.html');
+  assert.match(html,/id="openSettings"/);
+  assert.doesNotMatch(html,/id="settingsWorkspace"/);
+  const js=read('view/app.js');
+  assert.match(js,/emit\('requestOpenJournalHubSettings'\)/);
+  assert.match(js,/receiveJournalHubOpenResult/);
 });
 test('only the shared hub supplies MCM; Journal has no nested entries',()=>{
   assert.equal(fs.existsSync('mcm/Data/MCM/Config/K2040_Mods/config.json'),false);

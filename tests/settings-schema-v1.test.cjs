@@ -118,7 +118,8 @@ test('gameplay shortcuts belong to hub-managed owner settings and reset is modul
   assert.match(cpp,/bool ResetToDefaults\(\)/);
   assert.match(cpp,/kLegacyPath/);
   assert.match(cpp,/LOCALAPPDATA/);
-  assert.doesNotMatch(html,/id="openSettings"|id="settingsWorkspace"/);
+  assert.match(html,/id="openSettings"/);
+ assert.doesNotMatch(html,/id="settingsWorkspace"/);
   assert.match(html,/id="pipboySyncToggle"/);
   assert.doesNotMatch(html,/settings-v1-manifest\.json/);
 });

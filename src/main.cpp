@@ -47,6 +47,7 @@
 #endif
 #include "JournalSettings.h"
 #include "K2040SettingsAdapterV2.h"
+#include "K2040ModuleSettingsRequestV1.h"
 #include "K2040LayoutAdapterV2.h"
 #include "TrackerLayoutGeometry.h"
 #include "K2040ThemeClient.h"
@@ -1599,6 +1600,23 @@ namespace {
     }
 #endif
 
+    void OpenHubForJournal() {
+        if(!gameLoaded || !journalOpen || !journalFocused ||
+           !Valid(journalView) || CompetingGameMenuOpen())return;
+        const auto reportUnavailable=[](){
+            if(Valid(journalView) && interop.InteropCall)
+                interop.InteropCall(journalView,"receiveJournalHubOpenResult","unavailable");
+        };
+        const auto hub=GetModuleHandleW(L"K2040_Unified_Settings.dll");
+        if(!hub){reportUnavailable();return;}
+        const auto proc=GetProcAddress(hub,K2040_REQUEST_MODULE_SETTINGS_V1_EXPORT);
+        if(!proc){reportUnavailable();return;}
+        const auto request=reinterpret_cast<K2040RequestModuleSettingsV1>(proc);
+        // The hub validates the registered owner and queues opening on the
+        // next game-thread task. Closing now releases our Prisma focus first.
+        if(!request || !request("quest-journal")){reportUnavailable();return;}
+        CloseJournal();
+    }
     void QueueUIAction(std::function<void()> work) {
         // Captured before dispatch on the Prisma callback thread. A save-load
         // or panel close invalidates any pending request from the old view.
@@ -1660,6 +1678,9 @@ namespace {
                     ValidateJournalOwnership();
                     if(journalOpen && journalFocused)SyncSettings();
                 });
+            });
+            interop.BindUIEvent(view,"requestOpenJournalHubSettings",[](const char*){
+                QueueUIAction([](){OpenHubForJournal();});
             });
             interop.BindUIEvent(view, "requestPipboyTracking", [](const char* request) {
                 QueueUIString(UpdatePipboyTracking,request);

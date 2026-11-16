@@ -19,3 +19,6 @@
   Quest Journal ZIP must not contain `K2040_Unified_Settings.dll` or hub MCM.
 - Source checks and native compilation are not in-game acceptance.
   Nothing has been deployed or published.
+
+- The Journal Settings button routes to its own registered page in the updated hub through a validated optional native export. When the hub is absent or older, no substitute editor is launched; an in-Journal status message explains what is needed.
+- No individual Journal MCM entry or hotkey is packaged; the shared hub remains a separate installation.

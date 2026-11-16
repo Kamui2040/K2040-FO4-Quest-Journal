@@ -43,7 +43,8 @@ test('V2 metadata excludes obsolete settings-only shortcuts and retains gameplay
   assert.doesNotMatch(native,/RegisterHubMcm|SeedDefaultKeyboardBindings|RefreshNativeMcm/);
   assert.match(native,/QueueInputAction\(i\?K2040::Hub::Action::Tracker:K2040::Hub::Action::Journal,false\)/);
   assert.doesNotMatch(native,/BindUIEvent\(view, "(?:updateJournalSetting|resetJournalAppearance|saveHubKeyboard|saveHubController)"/);
-  assert.doesNotMatch(html,/id="openSettings"|id="settingsWorkspace"/);
+  assert.match(html,/id="openSettings"/);
+ assert.doesNotMatch(html,/id="settingsWorkspace"/);
   assert.doesNotMatch(ui,/function showSettings\(/);
 });
 

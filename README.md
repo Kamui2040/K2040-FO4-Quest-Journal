@@ -31,6 +31,7 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 4. Launch Fallout 4 through F4SE.
 
 **Development QA builds:** Install the Quest Journal ZIP and the compatible Unified Settings Hub separately. The Quest Journal ZIP contains only the mod DLL, provider and PrismaUI views; it does not bundle the hub DLL, hub UI or MCM.
+The **Settings** button in the Journal opens the **Quest Journal** page in the updated hub, not a standalone settings renderer. If the hub is unavailable or outdated, the Journal stays open and displays a message. The Pip-Boy sync checkbox remains directly in the Journal.
 
 ## Controls
 
