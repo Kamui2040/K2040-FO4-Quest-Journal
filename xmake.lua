@@ -397,16 +397,12 @@ target("K2040_Quest_Journal")
         end
         -- The unified hub is the ONLY MCM keybind owner.
         -- Journal gameplay shortcuts are native preferences edited by hub V2.
-        -- Stage the canonical parent only, with no Quest Journal MCM child.
-        local parent=path.join(os.scriptdir(),"mcm","Data","MCM","Config",
-            "K2040_Mods","config.json")
-        local parentdest=path.join(base,"Data","MCM","Config","K2040_Mods")
-        os.mkdir(parentdest)
-        os.cp(parent,parentdest)
+        -- No parent or child MCM menus from this owner. The hub is the
+        -- only installer of the top-level K2040 Settings keybind page.
         -- Tagged VNext provider: only the already-loaded Quest Journal DLL
         -- can expose this descriptor's validated settings adapter.
         local providerdir=path.join(base,"Data","K2040","Settings","Providers")
         os.mkdir(providerdir)
         os.cp(path.join(os.scriptdir(),"providers","quest-journal.json"),providerdir)
-        print("Staged Quest Journal DLL, views, tagged provider and MCM under dist/Data")
+        print("Staged Quest Journal DLL, views, tagged provider (no MCM) under dist/Data")
     end)

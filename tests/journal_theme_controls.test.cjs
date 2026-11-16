@@ -32,7 +32,8 @@ test('all independent theme controls exist in shared V1 manifest',()=>{
 test('Quest Journal retires the separate settings editor, keeps V2 theme bridge',()=>{
  const html=fs.readFileSync('view/journal.html','utf8');
  const js=fs.readFileSync('view/app.js','utf8');
- assert.doesNotMatch(html,/id="openSettings"|id="settingsWorkspace"|data-settings-page/);
+ assert.match(html,/id="openSettings"/);
+ assert.doesNotMatch(html,/id="settingsWorkspace"|data-settings-page/);
  assert.doesNotMatch(js,/changeSetting\(|showSettings\(|saveHubKeyboard|setHubNativeCapture/);
  assert.match(js,/window.applyUnifiedTheme=function/);
  assert.match(js,/state.unifiedTheme=theme==='native'\?null:theme/);

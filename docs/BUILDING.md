@@ -41,7 +41,7 @@ bash scripts/verify-source.sh
 bash scripts/build-normal-tracking.sh
 python3 scripts/stage-test-package.py \
   --output "$HOME/Downloads/K2040-FO4-Quest-Journal-OG163.zip" \
-  --mcm-mode grouped
+  --mcm-mode none
 ```
 
 The build checks the pinned CommonLibF4 revisions, the PrismaUI header checksum, and the Windows DLL's F4SE exports and tracking markers. `build-normal-tracking.sh` selects the standard tracking build. Running `build-linux.sh` without a build option creates a read-only fallback; it is not the gameplay build.
@@ -57,16 +57,19 @@ The compiled files are staged under `dist/Data`. The packaging script creates a 
 See [Third-party notices](../THIRD_PARTY_NOTICES.md). When sharing a compiled copy, provide the matching source code, build instructions, project license, and this notice. The PrismaUI framework, CommonLibF4 source, F4SE, and game files are separate requirements; this repository and installer do not include them.
 
 
-## Unified Settings VNext combined Amethyst QA
+## Unified Settings VNext — mod-only QA
 
-For tagged-provider registration and independent palette integration,
-build the Journal OG163 DLL, then stage it with a validated core from
-the official Unified Settings development branch. See
-[Unified Settings VNext QA](UNIFIED_SETTINGS_VNEXT_QA.md) for the
-combined packaging command and runtime acceptance checklist.
-The archive does not contain user preferences, a Quest Journal MCM child
-or a user MCM Settings registry. The single included MCM shortcut belongs
-to the shared Unified Settings core.
+The supported Quest Journal QA archive is built with
+`scripts/stage-test-package.py --mcm-mode none`. It includes the Journal
+DLL, tagged settings provider and PrismaUI views, but **not** the shared
+Unified Settings DLL, its MCM entry or its UI. Install a compatible hub
+separately. The Journal has no MCM child and does not package user preferences
+or a user MCM Settings registry.
+
+See [Unified Settings VNext QA](UNIFIED_SETTINGS_VNEXT_QA.md) for the
+independent install and in-game acceptance checklist. The historical
+combined-packaging helper is retained for reproducibility, but is not the
+current QA installation workflow.
 
 ## Live HUD layout V2
 
@@ -77,5 +80,5 @@ the user-local Journal INI. The browser asset applies those temporary
 coordinates to the tracker DOM, leaving quest saves and the Pip-Boy
 read-only mirror untouched. Static/native and Windows builds do not replace
 in-game confirmation of correct positioning, scaling, Abort/Retry and
-save/reload persistence. The combined QA packager verifies the layout
-ABI header matches the source hub and the DLL exports the adapter getter.
+save/reload persistence. The compiled Journal DLL exports the V2 layout
+adapter getter and is verified separately from the independently installed hub.

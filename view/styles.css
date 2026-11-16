@@ -879,3 +879,82 @@
 .tracker-page .tracker-panel.layout-edited #trackedQuests{
     min-height:0;flex:1 1 auto;overflow:hidden;
 }
+
+
+/* The shared visual theme owns geometry and typography, never saved palette
+   colors or journal/quest/tracker state. All accents derive from hub tokens
+   when a valid shared appearance has been applied. */
+body.k2040-style-fallout4 {
+  --k2040-frame-radius:6px;
+  --k2040-frame-font:"Segoe UI",Arial,sans-serif;
+  --k2040-frame-stroke:1px;
+}
+body.k2040-style-fallout76 {
+  --k2040-frame-radius:13px;
+  --k2040-frame-font:"Trebuchet MS","Segoe UI",Arial,sans-serif;
+  --k2040-frame-stroke:2px;
+}
+body.k2040-style-doom-eternal {
+  --k2040-frame-radius:0px;
+  --k2040-frame-font:"Arial Narrow","Segoe UI",Arial,sans-serif;
+  --k2040-frame-stroke:2px;
+}
+body.k2040-style-fallout3-newvegas {
+  --k2040-frame-radius:1px;
+  --k2040-frame-font:Consolas,"Lucida Console",monospace;
+  --k2040-frame-stroke:2px;
+}
+body[class*="k2040-style-"] .journal-shell,
+body[class*="k2040-style-"] .tracker-panel,
+body[class*="k2040-style-"] .settings-nav-item,
+body[class*="k2040-style-"] .setting-row,
+body[class*="k2040-style-"] .settings-choices button,
+body[class*="k2040-style-"] .quest-row,
+body[class*="k2040-style-"] .objective,
+body[class*="k2040-style-"] .k2040-select-trigger,
+body[class*="k2040-style-"] .appearance-sample,
+body[class*="k2040-style-"] .ghost-button {
+  border-radius:var(--k2040-frame-radius);
+}
+body[class*="k2040-style-"] .journal-shell,
+body[class*="k2040-style-"] .tracker-panel {
+  border-width:var(--k2040-frame-stroke);
+}
+body[class*="k2040-style-"] .journal-shell,
+body[class*="k2040-style-"] .tracker-panel,
+body[class*="k2040-style-"] .settings-workspace,
+body[class*="k2040-style-"] button,
+body[class*="k2040-style-"] .app-header {
+  font-family:var(--k2040-frame-font);
+}
+body.k2040-style-fallout76 .app-header {
+  border-bottom:2px solid var(--ui-accent,var(--blue));
+}
+body.k2040-style-fallout76 .quest-row.current {
+  border-radius:12px;
+  border-left:4px solid var(--ui-accent,var(--blue));
+}
+body.k2040-style-doom-eternal .app-header,
+body.k2040-style-doom-eternal .section-caption,
+body.k2040-style-doom-eternal .tracker-heading {
+  text-transform:uppercase;
+  font-weight:850;
+  letter-spacing:.055em;
+}
+body.k2040-style-doom-eternal .quest-row.current,
+body.k2040-style-doom-eternal .settings-nav-item.selected {
+  border-left:4px solid var(--ui-accent,var(--blue));
+}
+body.k2040-style-fallout3-newvegas .app-header,
+body.k2040-style-fallout3-newvegas .tracker-heading {
+  border-bottom:3px double var(--ui-accent,var(--blue));
+}
+body.k2040-style-fallout3-newvegas .journal-shell,
+body.k2040-style-fallout3-newvegas .tracker-panel {
+  border-style:double;
+  border-width:3px;
+}
+
+/* Shared hub opener feedback stays inside the Journal; never a second editor. */
+.settings-hub-status{padding:8px 28px;color:var(--text);background:var(--panel2);border-bottom:1px solid var(--edge);font-size:.85rem}
+.settings-hub-status[hidden]{display:none}

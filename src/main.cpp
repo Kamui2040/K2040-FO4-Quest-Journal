@@ -47,6 +47,7 @@
 #endif
 #include "JournalSettings.h"
 #include "K2040SettingsAdapterV2.h"
+#include "K2040ModuleSettingsRequestV1.h"
 #include "K2040LayoutAdapterV2.h"
 #include "TrackerLayoutGeometry.h"
 #include "K2040ThemeClient.h"
@@ -64,6 +65,7 @@
 #include <RE/H/HUDMenuUtils.h>
 #include "QuestViewState.h"
 #include "HubBindings.h"
+#include "JournalGameplayChord.h"
 #include "ControllerNavigation.h"
 #include <Scaleform/G/GFx_FunctionHandler.h>
 #include <Scaleform/G/GFx_Movie.h>
@@ -361,15 +363,7 @@ namespace {
     void PublishGameplayBindings(){
         const auto& settings=K2040::Settings::Current();
         const auto keyboard=[](const std::string& binding)->std::uint32_t {
-            if(binding=="Shift+G")return 'G'|(1u<<9);
-            if(binding=="G")return 'G';
-            if(binding=="F6")return VK_F6;
-            if(binding=="F7")return VK_F7;
-            if(binding=="F8")return VK_F8;
-            if(binding=="F10")return VK_F10;
-            if(binding=="F11")return VK_F11;
-            if(binding=="F12")return VK_F12;
-            return 0;
+            return K2040::JournalGameplayChord::Packed(binding);
         };
         gameplayKeyboard[0].store(keyboard(settings.journalHotkey),std::memory_order_release);
         gameplayKeyboard[1].store(keyboard(settings.trackerHotkey),std::memory_order_release);
@@ -1606,6 +1600,23 @@ namespace {
     }
 #endif
 
+    void OpenHubForJournal() {
+        if(!gameLoaded || !journalOpen || !journalFocused ||
+           !Valid(journalView) || CompetingGameMenuOpen())return;
+        const auto reportUnavailable=[](){
+            if(Valid(journalView) && interop.InteropCall)
+                interop.InteropCall(journalView,"receiveJournalHubOpenResult","unavailable");
+        };
+        const auto hub=GetModuleHandleW(L"K2040_Unified_Settings.dll");
+        if(!hub){reportUnavailable();return;}
+        const auto proc=GetProcAddress(hub,K2040_REQUEST_MODULE_SETTINGS_V1_EXPORT);
+        if(!proc){reportUnavailable();return;}
+        const auto request=reinterpret_cast<K2040RequestModuleSettingsV1>(proc);
+        // The hub validates the registered owner and queues opening on the
+        // next game-thread task. Closing now releases our Prisma focus first.
+        if(!request || !request("quest-journal")){reportUnavailable();return;}
+        CloseJournal();
+    }
     void QueueUIAction(std::function<void()> work) {
         // Captured before dispatch on the Prisma callback thread. A save-load
         // or panel close invalidates any pending request from the old view.
@@ -1667,6 +1678,9 @@ namespace {
                     ValidateJournalOwnership();
                     if(journalOpen && journalFocused)SyncSettings();
                 });
+            });
+            interop.BindUIEvent(view,"requestOpenJournalHubSettings",[](const char*){
+                QueueUIAction([](){OpenHubForJournal();});
             });
             interop.BindUIEvent(view, "requestPipboyTracking", [](const char* request) {
                 QueueUIString(UpdatePipboyTracking,request);

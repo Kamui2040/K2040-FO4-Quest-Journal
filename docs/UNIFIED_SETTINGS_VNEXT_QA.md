@@ -2,10 +2,10 @@
 
 **Target:** Fallout 4 OG 1.10.163 / matching F4SE, PrismaUI_F4 and MCM.
 
-**Source:** this repository branch feature/unified-editor-v2, paired with
-an authorized local checkout of the Unified Settings hub at
-feature/unified-settings-editor-v2. Read docs/VNEXT_MOD_ADOPTION.md and
-docs/EDITOR_V2_INTEGRATION.md in the hub checkout first.
+**Source:** Quest Journal development branch `fix/unified-visual-style-mcm-mouse`
+(descended from `feature/unified-editor-v2`), used with a separately installed
+compatible Unified Settings hub. Read `docs/VNEXT_MOD_ADOPTION.md` and
+`docs/EDITOR_V2_INTEGRATION.md` in the hub checkout first.
 No private source checkout or internal build artifacts are bundled.
 
 ## Implemented in Quest Journal
@@ -33,7 +33,7 @@ No private source checkout or internal build artifacts are bundled.
   MSVC/clang-cl compile fix: construct std::string from a bounded length,
   rather than mismatched char* and const char* iterator types. No ABI,
   callback or hub-source code was changed.
-- The only MCM keybind is the hub's configurable Ctrl+Shift+B.
+- The only MCM keybind is the hub's configurable F3 default.
   Quest Journal has no MCM child, registry actions, gamepad dropdowns or
   native MCM callback. Its independent gameplay keyboard and gamepad
   controls are native owner preferences shown on the hub Controls page.
@@ -58,24 +58,26 @@ No private source checkout or internal build artifacts are bundled.
 
 ## Packaging and QA
 
-Run the regular source checks and scripts/build-normal-tracking.sh with
-pinned Windows x64 dependencies, then package the built Quest Journal
-together with the official, source-matched Unified Settings hub checkout:
+Run the regular source checks and `scripts/build-normal-tracking.sh`
+with pinned Windows x64 dependencies, then package the Quest Journal alone:
 
-    python3 scripts/package-unified-vnext-qa.py \
-      --hub-root "/path/to/K2040-Unified-Settings-editor-v2" \
-      --output "$HOME/Downloads/K2040-FO4-Quest-Journal/Quest-Journal-Unified-VNext-OG163-QA.zip"
+    python3 scripts/stage-test-package.py \
+      --mcm-mode none \
+      --output "$HOME/Downloads/K2040-Quest-Journal-OG163-ModOnly-QA.zip"
 
-The script checks clean correct source branches, identical settings AND
-layout V2 ABI headers, provider, Windows x64 F4SE and adapter exports,
-hub appearance
-exports, source/staging asset consistency and identical shared MCM parent.
-It rejects existing ZIP outputs, unexpected files and private MCM registry
-or user settings. No game deployment or installation takes place.
+The resulting ZIP includes only the Journal DLL, provider, PrismaUI view assets
+and license/source notices. **It never includes `K2040_Unified_Settings.dll`,
+shared hub UI or MCM.** Install/update the compatible hub separately.
+The script rejects invalid Windows x64 binaries, incomplete owner assets
+and existing output paths. No game deployment or installation takes place.
+
+The historical `scripts/package-unified-vnext-qa.py` helper can reproduce a
+combined QA archive when explicitly requested; do not use it for the current
+mod-only installation workflow.
 
 ## In-game acceptance — pending
 
-Verify Ctrl+Shift+B and remapped hub binding; no Journal MCM child;
+Verify F3 and remapped hub binding; no Journal MCM child;
 Journal-only Pip-Boy sync toggle, persistence and immediate tracker
 refresh; module and category visibility; live tracker layout Edit button
 for a visible tracker, drag/nudge, proportional 1% wheel and 10% key

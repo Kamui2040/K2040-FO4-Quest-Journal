@@ -9,9 +9,6 @@ import sys
 from zipfile import ZipFile, ZIP_DEFLATED, ZipInfo
 
 ROOT=Path(__file__).resolve().parents[1]
-PARENT_PATH="Data/MCM/Config/K2040_Mods/config.json"
-CANONICAL_PARENT_SHA256="8eccc0c1313d1ec982e6094650835e7f83b42e03c56d8435a81ff55c3aba49eb"
-
 DLL=ROOT/"dist"/"Data"/"F4SE"/"Plugins"/"K2040_Quest_Journal.dll"
 OUTPUT=ROOT/"dist"/"K2040_Quest_Journal-test-package.zip"
 ASSETS=("journal.html","tracker.html","styles.css","app.js",
@@ -114,22 +111,12 @@ def gather(dll, view):
 
 
 def with_mcm(files, mode, base=ROOT/"mcm"):
-    """No Quest Journal MCM child; the hub alone owns settings hotkeys."""
+    """Compatibility with old CLI options; every owner QA ZIP excludes MCM."""
     if mode not in ("grouped","standalone","none"):
         raise ValueError("unknown MCM package variant")
-    if mode in ("standalone","none"):
-        return dict(files)
-    result=dict(files)
-    parent=base/PARENT_PATH
-    if not parent.is_file() or parent.is_symlink():
-        raise ValueError("missing canonical K2040 Mods parent MCM file")
-    raw=parent.read_bytes()
-    if hashlib.sha256(raw).hexdigest()!=CANONICAL_PARENT_SHA256:
-        raise ValueError("parent MCM content differs from canonical template")
-    if json.loads(raw).get("pages")!=[]:
-        raise ValueError("shared parent must contain no standalone hotkeys")
-    result[PARENT_PATH]=raw
-    return result
+    if any(name.startswith("Data/MCM/") for name in files):
+        raise ValueError("Quest Journal must not ship an MCM menu or user settings")
+    return dict(files)
 
 
 def build_zip(files, output):
@@ -150,7 +137,7 @@ def main():
     parser.add_argument("--dll",type=Path,default=DLL)
     parser.add_argument("--view",type=Path,default=ROOT/"view")
     parser.add_argument("--output",type=Path,default=OUTPUT)
-    parser.add_argument("--mcm-mode",choices=("grouped","standalone","none"),default="grouped")
+    parser.add_argument("--mcm-mode",choices=("grouped","standalone","none"),default="none")
     args=parser.parse_args()
     try:
         files=gather(args.dll,args.view)

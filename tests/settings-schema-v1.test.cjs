@@ -21,7 +21,7 @@ const problems=m=>validateManifest(m).join('; ');
 
 test('canonical V1 validator and schema are pinned to upstream byte hashes',()=>{
   assert.equal(hash('schemas/k2040-settings-manifest.v1.schema.json'),
-    'b9bdae5098790c9746d3b1792424d93f0dfd6286f6e1713f514d8e3e44606da0');
+    'd913a4da9d554af1f9b9feb4a84b229bc211267eb7d260964576ea2ca29287dc');
   assert.equal(hash('scripts/validate-settings-manifest.cjs'),
     '2373ed7966f025410716d88fd79770335f03d5a4955098f396f7225f7c33a9b5');
   assert.equal(schema.$id,'urn:k2040:settings:manifest:v1');
@@ -41,8 +41,8 @@ test('every native saved preference is visible once or explicitly internal',()=>
   assert.deepEqual(covered.slice().sort(),native.slice().sort());
   assert.deepEqual(covered.slice().sort(),Object.keys(S.defaults).sort());
   assert.equal(new Set(covered).size,covered.length);
-  assert.equal(byId.get('journalHotkey').type,'select');
-  assert.equal(byId.get('trackerHotkey').type,'select');
+  assert.equal(byId.get('journalHotkey').type,'keybind');
+  assert.equal(byId.get('trackerHotkey').type,'keybind');
   assert.equal(byId.has('trackerSyncPipboy'),false);
   assert.equal(byId.has('opacity'),false);
   assert.equal(byId.has('fontSize'),false);
@@ -106,8 +106,9 @@ test('hidden dependent fields do not clear native or standalone saved values',()
 
 test('gameplay shortcuts belong to hub-managed owner settings and reset is module-owned',()=>{
   assert.equal(fs.existsSync(path.join(root,'mcm/standalone/Data/MCM/Config/K2040_Quest_Journal')),false);
-  for(const id of ['journalHotkey','trackerHotkey','journalPadPrimary','journalPadHeld',
-                   'trackerPadPrimary','trackerPadHeld'])
+  for(const id of ['journalHotkey','trackerHotkey'])
+    assert.equal(byId.get(id).type,'keybind');
+  for(const id of ['journalPadPrimary','journalPadHeld','trackerPadPrimary','trackerPadHeld'])
     assert.equal(byId.get(id).type,'select');
   assert.equal(byId.has('trackerSyncPipboy'),false);
   assert.equal(manifest.internalKeys.includes('trackerSyncPipboy'),true);
@@ -117,7 +118,8 @@ test('gameplay shortcuts belong to hub-managed owner settings and reset is modul
   assert.match(cpp,/bool ResetToDefaults\(\)/);
   assert.match(cpp,/kLegacyPath/);
   assert.match(cpp,/LOCALAPPDATA/);
-  assert.doesNotMatch(html,/id="openSettings"|id="settingsWorkspace"/);
+  assert.match(html,/id="openSettings"/);
+ assert.doesNotMatch(html,/id="settingsWorkspace"/);
   assert.match(html,/id="pipboySyncToggle"/);
   assert.doesNotMatch(html,/settings-v1-manifest\.json/);
 });

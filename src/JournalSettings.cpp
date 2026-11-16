@@ -1,4 +1,5 @@
 #include "JournalSettings.h"
+#include "JournalGameplayChord.h"
 #include "TrackerLayoutGeometry.h"
 #include <algorithm>
 #include <array>
@@ -129,7 +130,7 @@ namespace {
         else if (key=="trackerPadPrimary")return Int(val,out.trackerPadPrimary,0,16);
         else if (key=="trackerPadHeld")return Int(val,out.trackerPadHeld,0,16);
         else if (key=="journalHotkey" || key=="trackerHotkey") {
-            if (!Choice(val,{"Shift+G","G","F6","F7","F8","F10","F11","F12"}))return false;
+            if (!K2040::JournalGameplayChord::Valid(val))return false;
             if(key=="journalHotkey")out.journalHotkey=val;
             else out.trackerHotkey=val;
         }

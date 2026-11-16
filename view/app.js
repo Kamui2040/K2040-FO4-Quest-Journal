@@ -247,6 +247,17 @@
       status==='storage'?'Unable to save; previous setting restored.':
       'Invalid request; previous setting restored.';
   };
+  // The only settings entry goes to the dedicated page in the shared hub.
+  // If the hub is absent/old, preserve the Journal and explain why.
+  window.receiveJournalHubOpenResult=function(reason){
+    if(isTracker)return;
+    const status=el('settingsHubStatus');
+    if(!status)return;
+    status.textContent=reason==='unavailable'
+      ?'Install or update K2040 Unified Settings to open Quest Journal settings.'
+      :'Unable to open the Unified Settings page.';
+    status.hidden=false;
+  };
   // Escape always closes the Journal; no separate settings panel exists.
   window.handleJournalEscape=function(){
     if(!isTracker)emit('requestCloseJournal');
@@ -258,8 +269,12 @@
   }
   function visibleControllerControls(){
     const panel=el('journalWorkspace');
-    return Array.from(panel.querySelectorAll('button,input:not([type="hidden"]),select,textarea,[tabindex]'))
-      .filter(node=>!node.disabled&&!node.hidden&&node.tabIndex>=0&&
+    // The Settings action lives in the header, outside journalWorkspace.
+    // Include header buttons in the same Fallout-mapped controller navigation;
+    // preserve the existing workspace-first default when nothing has focus.
+    const workspace=Array.from(panel.querySelectorAll('button,input:not([type="hidden"]),select,textarea,[tabindex]'));
+    const header=['resetFilters','openSettings','closeJournal'].map(el).filter(Boolean);
+    return [...workspace,...header].filter(node=>!node.disabled&&!node.hidden&&node.tabIndex>=0&&
         node.getAttribute?.('aria-hidden')!=='true'&&node.getAttribute?.('aria-disabled')!=='true'&&
         node.getClientRects().length>0);
   }
@@ -965,6 +980,11 @@
     });
     el('resetFilters').addEventListener('click',()=>{state.query='';state.status='active';state.category='all';state.favoritesOnly=false;state.includeHidden=false;state.sort='pinned';el('questSearch').value='';el('questSort').value='pinned';render();});
     el('closeJournal').addEventListener('click',()=>emit('requestCloseJournal'));
+    el('openSettings').addEventListener('click',()=>{
+      if(state.demo){window.receiveJournalHubOpenResult('unavailable');return;}
+      const status=el('settingsHubStatus');if(status)status.hidden=true;
+      emit('requestOpenJournalHubSettings');
+    });
     document.addEventListener('change',e=>{
       if(e.target.id==='pipboySyncToggle'){
         const enabled=Boolean(e.target.checked);
