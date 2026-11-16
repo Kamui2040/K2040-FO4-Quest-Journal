@@ -9,8 +9,8 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 - Browse your quests and objectives, including completed quests.
 - Find what you're looking for with search, sorting, categories and favorites.
 - Track supported quests from the Journal and keep them in sync with your Pip-Boy.
-- Pin quests to a compact HUD tracker. The upcoming V2 layout editor lets you drag and proportionally resize it inside Unified Settings, then Save, Abort or Retry without changing quest tracking.
-- Customize the Journal and tracker separately with five themes or your own colors.
+- Pin quests to a compact HUD tracker. In the development build, the Unified Settings V2 layout editor lets you drag and resize it, then Save, Abort or Retry without changing quest tracking.
+- Customize the Journal and tracker with four shared visual styles and separately saved colors.
 - Edit settings in the **K2040 Unified Settings V2** two-pane editor using **F3** by default (configurable through the single top-level Unified Settings MCM entry). Individual Journal settings controls are no longer maintained.
 - Optionally use Fallout 4's Quick Data action (usually J) to open Quest Journal, following your current key binding. This is off by default.
 - Keyboard and controller support.
@@ -29,6 +29,8 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 2. Download the latest Quest Journal ZIP from [Releases](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/releases/latest).
 3. Import the ZIP into your mod manager and enable it. If you're updating, replace the older Quest Journal version rather than installing two copies.
 4. Launch Fallout 4 through F4SE.
+
+**Development QA builds:** Install the Quest Journal ZIP and the compatible Unified Settings Hub separately. The Quest Journal ZIP contains only the mod DLL, provider and PrismaUI views; it does not bundle the hub DLL, hub UI or MCM.
 
 ## Controls
 

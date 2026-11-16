@@ -14,5 +14,8 @@
   separately installs the only top-level K2040 Settings MCM entry.
   Existing MCM user registries and old mod settings are neither deleted
   nor rewritten.
+- Package Quest Journal with `scripts/stage-test-package.py --mcm-mode none`;
+  install the independently supplied Unified Settings Hub separately. The
+  Quest Journal ZIP must not contain `K2040_Unified_Settings.dll` or hub MCM.
 - Source checks and native compilation are not in-game acceptance.
   Nothing has been deployed or published.
