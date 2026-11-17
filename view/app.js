@@ -233,6 +233,12 @@
         return;
       }
     }
+    // Native settings updates must be objects. Valid JSON primitives and
+    // arrays are still malformed deliveries, not a request for defaults.
+    if(!settings || typeof settings!=='object' || Array.isArray(settings)){
+      console.error('Invalid native Quest Journal settings shape');
+      return;
+    }
     state.settings=S.normalize(settings);
     if(!isTracker){
       const checkbox=el('pipboySyncToggle');
@@ -643,7 +649,17 @@
     // The native observer explicitly sends {ready:false,quests:[]} when a
     // save becomes unavailable, so that state still clears the old list.
     let next;
-    try{next=M.normalizeSnapshot(input);}
+    try{
+      const packet=typeof input==='string'?JSON.parse(raw):input;
+      // Only an explicit ready:false delivery may clear a previous save.
+      // JSON like {}, [], null or a broken quests field is not a valid
+      // read-side observation and must not erase the last good data.
+      if(!packet || typeof packet!=='object' || Array.isArray(packet) ||
+         typeof packet.ready!=='boolean' ||
+         (packet.quests!==undefined && !Array.isArray(packet.quests)) ||
+         (packet.ready && !Array.isArray(packet.quests)))return;
+      next=M.normalizeSnapshot(packet);
+    }
     catch(err){console.error('Invalid quest snapshot',err);return;}
     state.lastSnapshotRaw=raw;
     state.snapshot=next;

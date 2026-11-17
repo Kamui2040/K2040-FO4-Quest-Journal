@@ -425,12 +425,14 @@ std::string CaptureSnapshot(const std::unordered_set<std::uint32_t>& pinnedQuest
     for(auto& item:quests) {
         if(item.historyOnly)continue;
         const auto* form=RE::TESForm::GetFormByID<RE::TESQuest>(item.formId);
-        item.nativeInstanceStatus=K2040::GenericQuestInstance::Name(
-            form?native.Resolve(item.formId,form->currentInstanceID):
-                 K2040::GenericQuestInstance::State::kUnavailable);
+        // Resolve this quest instance once; status and verified instance
+        // identity must come from the same read-side observation.
+        const auto resolved=form
+            ? native.Resolve(item.formId,form->currentInstanceID)
+            : K2040::GenericQuestInstance::State::kUnavailable;
+        item.nativeInstanceStatus=K2040::GenericQuestInstance::Name(resolved);
         item.nativeDisplayedCount=native.DisplayedCount(item.formId);
-        if(form && native.Resolve(item.formId,form->currentInstanceID)==
-                       K2040::GenericQuestInstance::State::kConsistent)
+        if(form && resolved==K2040::GenericQuestInstance::State::kConsistent)
             item.nativeInstanceID=form->currentInstanceID;
     }
     return Serialize(quests, true);

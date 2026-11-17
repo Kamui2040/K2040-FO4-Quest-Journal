@@ -52,3 +52,15 @@ test('explicit valid not-ready snapshot still clears old save data',()=>{
  assert.doesNotMatch(t.node('trackedQuests').innerHTML,/Keep Me Visible/);
  assert.match(t.node('trackedQuests').innerHTML,/Waiting for quest data/);
 });
+
+test('well-formed but invalid quest envelopes cannot blank tracked quests',()=>{
+ const t=tracker();
+ t.window.receiveQuestSnapshot(initial);
+ for(const malformed of ['[]','{}','{"quests":[]}',
+    '{"ready":true,"quests":"not-an-array"}','null','42']){
+  t.window.receiveQuestSnapshot(malformed);
+  assert.match(t.node('trackedQuests').innerHTML,/Keep Me Visible/,malformed);
+ }
+ t.window.receiveQuestSnapshot(JSON.stringify({ready:false,quests:[]}));
+ assert.doesNotMatch(t.node('trackedQuests').innerHTML,/Keep Me Visible/);
+});

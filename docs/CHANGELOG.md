@@ -2,6 +2,10 @@
 
 ## Unreleased — v0.0.3
 
+- Preserve the previous valid quest list and tracker settings if a native payload has valid JSON but an invalid structure; save transitions still clear the list normally.
+- Reuse the same native quest-instance assessment for display status and instance identity instead of resolving it twice.
+
+
 - Improve responsiveness on large quest lists: search without temporary objective arrays, cache category ranks during sorting and index duplicate Misc rows instead of scanning all quests.
 
 - Optionally open Quest Journal with Fallout 4's Quick Data action (usually J). The redirect follows your current key binding and is off by default.
