@@ -1,11 +1,18 @@
 # Roadmap
 
-## Development — not included in public v0.0.2
+## Current work — not in the v0.0.2 release
 
-- Complete in-game testing of the four Journal/tracker Framework styles, palettes and optional shared Unified Settings editor.
-- Verify game-mapped controller Confirm/Back and stick input, direct Journal-to-hub navigation, focus and Escape handling, tracker layout Save/Abort/Retry and persistence, missing-hub fallback, and Pip-Boy synchronization.
-- Evaluate safer handling for unusual mod-added and repeatable quests without changing quest progression.
+The next step is a full in-game test of the current R11 development build:
 
-## Planned
+- Try all four Journal and tracker frame styles with different palettes.
+- Check the Switch Pro controller's actual Confirm/Back mapping, D-pad, left stick, focus, and Escape behavior.
+- Open the Journal's Settings button and confirm it reaches the correct page in the separate hub.
+- Move and resize the tracker, then test Save, Abort, Retry, and persistence after reopening or reloading.
+- Check that a missing or outdated hub does not break the Journal or overwrite saved settings.
+- Recheck Pip-Boy synchronization and ordinary quest tracking.
 
-- Investigate support for Fallout 4 Anniversary Edition, including its runtime dependencies and separate in-game validation. The current mod supports only the original PC version 1.10.163.
+Two mod-added quests already worked in earlier testing. Repeatable quests and selecting multiple objectives from one Misc quest remain untested; check these when a suitable example turns up, without changing quest progress to manufacture one.
+
+## Later
+
+Investigate a separate build for next-gen / Anniversary Edition Fallout 4, including its dependencies and game testing. **Only the original PC version 1.10.163 is supported now.**

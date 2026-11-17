@@ -1,19 +1,21 @@
-# PrismaUI_F4 build-only SDK input
+# PrismaUI build dependency
 
-The Quest Journal deliberately does **not** vendor the Prisma framework or its SDK header. The official unmodified modern API header is a separately obtained build prerequisite and is ignored by Git.
+Quest Journal needs PrismaUI's original API header to compile. The framework and header are **not included** in this source repository.
 
-Use the pinned official, unmodified API header from PrismaUI_F4:
+Use the official, unmodified `PrismaUI_F4_Modern_API.h`:
 
-- Official upstream: https://github.com/PRISMA-USER-INTERFACE-FRAMEWORK/Fallout-4-Prisma-UI-Framework
+- [Upstream repository](https://github.com/PRISMA-USER-INTERFACE-FRAMEWORK/Fallout-4-Prisma-UI-Framework)
 - Commit: `0daf5e38d3517772c8c28236c8857e5c037fa3bd`
 - Path: `src/PrismaUI_F4_Modern_API.h`
 - Git blob ID: `9784daab39bf66bb179e6ef12bba63c75e50d3b7`
-- License: upstream `LICENSE.md` (original version may be distributed with its unmodified license; modified framework distributions are restricted)
+- License: upstream `LICENSE.md` (the original unmodified header can be distributed with its license; modified framework distributions have restrictions)
 
-To stage an existing original header without downloading or modifying it:
+To stage an existing original header without downloading or changing it:
 
 ```sh
 python3 scripts/stage-prisma-header.py --source /path/to/upstream/PrismaUI_F4_Modern_API.h
 ```
 
-The script verifies the exact pinned upstream Git blob ID and refuses overwrites of a different file. `build-preflight.py` enforces the same pin. No framework source, binaries, or vendor SDK are committed to Quest Journal, and staging never deploys anything to Fallout 4.
+**Why the exact version matters:** The script checks the header's Git blob ID and refuses to overwrite a different file. `build-preflight.py` checks the same version before compilation. This prevents an unnoticed framework update from changing how the plugin is built.
+
+The header is ignored by Git and used **only for compilation**. The script does not commit vendor SDK files or install anything into Fallout 4.
