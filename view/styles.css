@@ -958,3 +958,51 @@ body.k2040-style-fallout3-newvegas .tracker-panel {
 /* Shared hub opener feedback stays inside the Journal; never a second editor. */
 .settings-hub-status{padding:8px 28px;color:var(--text);background:var(--panel2);border-bottom:1px solid var(--edge);font-size:.85rem}
 .settings-hub-status[hidden]{display:none}
+
+/* K2040 Framework structural language — real Journal + tracker.
+   Colors stay on the independently resolved semantic --ui-* tokens; do not
+   replace quest data, saved geometry, tracker opacity or gameplay settings. */
+body.k2040-style-fallout4 .journal-shell,
+body.k2040-style-fallout4 .tracker-panel{border:2px solid var(--ui-accent,var(--blue));border-radius:2px}
+body.k2040-style-fallout4 .app-header,
+body.k2040-style-fallout4 .tracker-heading{border-bottom:2px solid var(--ui-accent,var(--blue));text-transform:uppercase;letter-spacing:.12em}
+body.k2040-style-fallout4 .sidebar,
+body.k2040-style-fallout4 .quest-list-column{border-right:2px solid var(--edge)}
+body.k2040-style-fallout4 .filter-button.selected,
+body.k2040-style-fallout4 .quest-row.current{border-left:4px solid var(--ui-accent,var(--blue));border-radius:0}
+body.k2040-style-fallout4 .objective,
+body.k2040-style-fallout4 .tracked-entry{border-radius:0;border-bottom:1px solid var(--edge)}
+body.k2040-style-fallout76{--k2040-frame-radius:0px;--k2040-frame-font:"Arial Narrow","Segoe UI",Arial,sans-serif;--k2040-frame-stroke:1px}
+body.k2040-style-fallout76 .journal-shell,
+body.k2040-style-fallout76 .tracker-panel{border:1px solid var(--ui-accent,var(--blue));border-radius:0}
+body.k2040-style-fallout76 .app-header,
+body.k2040-style-fallout76 .tracker-heading{border-bottom:1px solid var(--ui-accent,var(--blue));font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+body.k2040-style-fallout76 .quest-row,
+body.k2040-style-fallout76 .filter-button,
+body.k2040-style-fallout76 .objective,
+body.k2040-style-fallout76 .tracked-entry{border-radius:0}
+body.k2040-style-fallout76 .quest-row.current,
+body.k2040-style-fallout76 .filter-button.selected{border-left:0;border-bottom:3px solid var(--ui-accent,var(--blue));box-shadow:none}
+body.k2040-style-fallout76 .tracker-heading{border-left:7px solid var(--ui-accent,var(--blue))}
+body.k2040-style-fallout76 .tracked-entry{border-bottom:1px solid var(--edge)}
+body.k2040-style-doom-eternal .journal-shell,
+body.k2040-style-doom-eternal .tracker-panel{border:3px solid var(--ui-accent,var(--blue));border-radius:0}
+body.k2040-style-doom-eternal .app-header,
+body.k2040-style-doom-eternal .tracker-heading{border-bottom:4px solid var(--ui-accent,var(--blue));font-weight:900;text-transform:uppercase;letter-spacing:.11em}
+body.k2040-style-doom-eternal .quest-row.current,
+body.k2040-style-doom-eternal .filter-button.selected{border-radius:0;border-left:6px solid var(--ui-accent,var(--blue));box-shadow:none;font-weight:850}
+body.k2040-style-doom-eternal .objective,
+body.k2040-style-doom-eternal .tracked-entry{border-radius:0;border-left:3px solid var(--edge)}
+body.k2040-style-doom-eternal .tracked-title{text-transform:uppercase;font-weight:850}
+body.k2040-style-fallout3-newvegas .journal-shell,
+body.k2040-style-fallout3-newvegas .tracker-panel{border:3px double var(--ui-accent,var(--blue));border-radius:0}
+body.k2040-style-fallout3-newvegas .app-header,
+body.k2040-style-fallout3-newvegas .tracker-heading{border-bottom:3px double var(--ui-accent,var(--blue));text-transform:uppercase;font-family:var(--k2040-frame-font);letter-spacing:.045em}
+body.k2040-style-fallout3-newvegas .quest-row,
+body.k2040-style-fallout3-newvegas .objective,
+body.k2040-style-fallout3-newvegas .tracked-entry{border-radius:0;border-bottom:1px dashed var(--edge)}
+body.k2040-style-fallout3-newvegas .quest-row.current,
+body.k2040-style-fallout3-newvegas .filter-button.selected{border-left:3px solid var(--ui-accent,var(--blue));box-shadow:none}
+body.k2040-style-fallout3-newvegas .tracked-title,
+body.k2040-style-fallout3-newvegas .tracked-objective,
+body.k2040-style-fallout3-newvegas .quest-row-title{font-family:var(--k2040-frame-font)}

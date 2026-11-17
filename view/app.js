@@ -53,8 +53,19 @@
   const styles=['fallout4','fallout76','doom-eternal','fallout3-newvegas'];
   function applyUnifiedStyleClass(){
     const current=state.unifiedAppearance?.theme;
-    for(const name of styles)
-      document.body.classList.toggle?.('k2040-style-'+name,current===name);
+    const list=document.body.classList;
+    for(const name of styles){
+      const label='k2040-style-'+name;
+      // Ultralight builds differ in DOMTokenList.toggle(force) support.
+      // Explicit add/remove keeps frame styling in sync with palette tokens.
+      if(current===name){
+        if(typeof list.add==='function')list.add(label);
+        else if(typeof list.toggle==='function')list.toggle(label,true);
+      }else{
+        if(typeof list.remove==='function')list.remove(label);
+        else if(typeof list.toggle==='function')list.toggle(label,false);
+      }
+    }
   }
   function readAppearance(input){
     const raw=typeof input==='string'?input:JSON.stringify(input);
