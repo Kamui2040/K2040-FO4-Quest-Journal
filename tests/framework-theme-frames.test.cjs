@@ -72,3 +72,15 @@ test('invalid appearance input cannot crash or replace the last valid snapshot',
   assert.equal(tokenMap['--ui-accent'],'#eecc11');
  }
 });
+
+
+test('Framework structure follows the visual authority without legacy CSS overrides',()=>{
+ assert.doesNotMatch(css,/The shared visual theme owns geometry and typography/);
+ const rules=css.split('/* K2040 Framework structural language — real Journal + tracker.')[1];
+ assert.ok(rules);
+ assert.match(rules,/body\.k2040-style-fallout76 \.quest-row\.current[\s\S]*?clip-path:polygon/);
+ assert.match(rules,/body\.k2040-style-doom-eternal \.quest-row\.current[\s\S]*?clip-path:polygon/);
+ assert.match(rules,/body\.k2040-style-fallout3-newvegas \.quest-row\.current::before\s*\{[^}]*content:\s*["']>["']/);
+ assert.match(rules,/body\.k2040-style-fallout3-newvegas \.tracker-heading::before\s*\{[^}]*content:/);
+ assert.doesNotMatch(rules,/#(?:[0-9a-fA-F]{3,8})\b/);
+});

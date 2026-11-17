@@ -5,9 +5,10 @@
 - `research/native_one_shot/`: native quest scope and guarded repeatable ticket state machine, plus synthetic/legacy research inputs. Research/QA variants are disabled in normal builds.
 - `view/`: original PrismaUI_F4 full-screen Journal and passive tracker, independent legacy appearance normalization and gamepad menu controls. The former per-mod settings editor UI has been retired; the shared K2040 hub owns the only editor surface.
 - `view/settings-v1-manifest.json`: validated K2040 Settings Schema V1 metadata used by the **shared V2 renderer** through this mod's `K2040_GetSettingsAdapterV2` native export. The hub does not directly own or overwrite native preference storage. V2 adapter and query ABI headers must match the hub's checked-in originals byte-for-byte.
-- MCM staging includes only the canonical K2040 Mods parent.
-  Quest Journal has no child MCM entry or gameplay keybind registry.
-  The Unified Settings hub owns the single configurable MCM shortcut.
+- Mod-only QA staging includes **no MCM entries**. Quest Journal has
+  no individual MCM page or independent settings shortcut. The separately
+  installed Framework/Unified Settings hub owns the only configurable MCM
+  shortcut. Journal/tracker gameplay hotkeys remain owner preferences.
   Owner-local Journal/tracker shortcuts are edited through the hub.
 - `tests/`: pure C++/Python/JavaScript regressions and synthetic game-state fixtures. Tests never constitute game runtime evidence.
 - `scripts/`: pinned dependency staging, cross-build, independent PE export checks, source verification and isolated installation package creation.
@@ -20,7 +21,7 @@ The legacy Papyrus `GameVM` dispatch path stays disabled. The normal unflagged `
 
 ## UI behavior
 
-The Journal and tracker save their themes separately. `Commonwealth Blue` keeps the tracker's `commonwealth` value and the Journal's older `dark` value working as before. The default keyboard shortcuts are Shift+G for the Journal and G for the tracker; updates preserve custom shortcuts. MCM keyboard settings stay separate from controller settings. In Journal menus, the D-pad or left stick moves the selection, A chooses, and B goes back. The right stick and mouse can still control the cursor. When a display setting changes, the tracker redraws its current quest list without waiting for a new game update.
+The Journal and tracker save their themes separately. `Commonwealth Blue` keeps the tracker's `commonwealth` value and the Journal's older `dark` value working as before. The default keyboard shortcuts are Shift+G for the Journal and G for the tracker; updates preserve custom shortcuts. The hub edits owner gameplay shortcuts without a Journal MCM page. In Journal menus, the D-pad or left stick navigates; Confirm and Back follow Fallout 4's current menu ControlMap (including Steam Input), not hardcoded Xbox A/B labels. The XInput left-stick Y axis is positive when pushed up. The right stick and mouse can still control the cursor. When a display setting changes, the tracker redraws its current quest list without waiting for a new game update.
 
 The optional K2040LayoutAdapterV2 export is an independent feature of the
 Quest Journal owner DLL. Only the existing compact tracker is a movable
