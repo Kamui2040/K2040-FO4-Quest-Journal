@@ -2,10 +2,8 @@
 
 ## Unreleased — v0.0.3
 
-- Preserve the previous valid quest list and tracker settings if a native payload has valid JSON but an invalid structure; save transitions still clear the list normally.
+- Preserve the last valid quest list and tracker preferences when a native JSON payload has an invalid structure; save transitions still clear the list normally.
 - Reuse the same native quest-instance assessment for display status and instance identity instead of resolving it twice.
-
-
 - Improve responsiveness on large quest lists: search without temporary objective arrays, cache category ranks during sorting and index duplicate Misc rows instead of scanning all quests.
 
 - Optionally open Quest Journal with Fallout 4's Quick Data action (usually J). The redirect follows your current key binding and is off by default.
@@ -13,7 +11,7 @@
 - Retire Quest Journal's separate settings editor and MCM entry. The Journal Settings button opens its registered page directly in the separately installed K2040 Framework / Unified Settings Hub.
 - Add four Framework structural themes for both the full Journal and mini tracker, independently of saved colors. The live tracker layout editor remains owned by the hub.
 - Use the D-pad or left stick to navigate. Confirm/Back use Fallout 4's mapped menu assignments, including Switch Pro / Steam Input, rather than fixed Xbox labels.
-- Defend against malformed quest snapshots without blanking the last valid quest list, and prevent controller-synthesized arrows from interfering with an open category menu.
+- Prevent controller-synthesized arrows from interfering with an open category menu.
 
 ## 0.0.2 — First release
 

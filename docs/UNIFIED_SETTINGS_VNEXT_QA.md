@@ -33,7 +33,12 @@ No private source checkout or internal build artifacts are bundled.
   MSVC/clang-cl compile fix: construct std::string from a bounded length,
   rather than mismatched char* and const char* iterator types. No ABI,
   callback or hub-source code was changed.
-- The only MCM keybind is the hub's configurable F3 default.
+- The generic shared-hub shortcut recorder supports Mouse 3-5, including
+  Mouse 4 and Mouse 5 through a native fallback when Proton/CEF does not
+  forward the browser event. This is hub-owned, not a Journal key recorder.
+- Old per-mod MCM registries and existing user shortcuts are not deleted
+  or rewritten during this migration.
+- The only settings-editor MCM keybind is configured by the shared hub, not by Quest Journal.
   Quest Journal has no MCM child, registry actions, gamepad dropdowns or
   native MCM callback. Its independent gameplay keyboard and gamepad
   controls are native owner preferences shown on the hub Controls page.
@@ -77,7 +82,7 @@ mod-only installation workflow.
 
 ## In-game acceptance — pending
 
-Verify F3 and remapped hub binding; no Journal MCM child;
+Verify the hub-configured shortcut and any remapping; no Journal MCM child;
 Journal-only Pip-Boy sync toggle, persistence and immediate tracker
 refresh; module and category visibility; live tracker layout Edit button
 for a visible tracker, drag/nudge, proportional 1% wheel and 10% key
