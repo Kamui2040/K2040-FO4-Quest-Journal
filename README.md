@@ -4,6 +4,15 @@ A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (
 
 **[Download on Nexus Mods](https://www.nexusmods.com/fallout4/mods/110911)** · **[Download from GitHub](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/releases/latest)**
 
+## Unreleased shared-settings adapter
+
+This development branch exposes a versioned adapter for the optional K2040
+Unified Settings hub. When selected there, Quest Journal opens directly to its
+existing Settings tab using the current game-thread, focus and persistence
+controls. Without the hub, Journal and Tracker retain their existing shortcuts
+and settings UI. In-game acceptance remains pending. The developing HUD
+replacement will be integrated separately when its settings are ready.
+
 ## Features
 
 - Browse your quests and objectives, including completed quests.

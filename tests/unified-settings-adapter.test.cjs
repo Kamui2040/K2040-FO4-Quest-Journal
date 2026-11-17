@@ -1,0 +1,16 @@
+"use strict";
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const cpp=fs.readFileSync(path.join(root,'src/main.cpp'),'utf8');
+const js=fs.readFileSync(path.join(root,'view/app.js'),'utf8');
+const head=fs.readFileSync(path.join(root,'src/K2040SettingsAdapter.h'),'utf8');
+assert.match(cpp,/K2040_GetSettingsAdapterV1/);
+assert.match(cpp,/"quest-journal", UnifiedSettingsAvailable, OpenUnifiedJournalSettings/);
+assert.match(cpp,/if \(!gameLoaded \|\| !apiReady \|\| journalOpen/);
+assert.match(cpp,/openSettingsFromUnifiedHub = true/);
+assert.match(cpp,/interop.InteropCall\(view, "k2040OpenJournalSettingsFromHub", ""\)/);
+assert.match(js,/window.k2040OpenJournalSettingsFromHub=function/);
+assert.match(js,/if\(!isTracker\)showSettings\(true\)/);
+assert.match(head,/K2040_SETTINGS_ADAPTER_ABI = 1/);
