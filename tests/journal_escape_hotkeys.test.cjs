@@ -206,3 +206,5 @@ test('the Journal retains gamepad navigation, but no individual settings editor'
  assert.match(code,/function visibleControllerControls/);
  assert.match(code,/window.receiveJournalControllerAction=function/);
 });
+
+test("controller-created ArrowDown with open custom select never crashes Journal",()=>{const v=start();v.setSelectPopup({});assert.doesNotThrow(()=>v.win.receiveJournalControllerAction("down"));assert.equal(v.dispatchedEvents.at(-1).key,"ArrowDown");});

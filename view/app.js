@@ -635,10 +635,18 @@
     restoreFocus(identity);
   }
   function receiveQuestSnapshot(input) {
-    const raw=typeof input==='string'?input:JSON.stringify(input);
-    if(raw===state.lastSnapshotRaw)return;
+    let raw;
+    try{raw=typeof input==='string'?input:JSON.stringify(input);}
+    catch(err){console.error('Invalid quest snapshot',err);return;}
+    if(typeof raw!=='string'||raw===state.lastSnapshotRaw)return;
+    // Treat an unparseable delivery as a failed update, not an empty save.
+    // The native observer explicitly sends {ready:false,quests:[]} when a
+    // save becomes unavailable, so that state still clears the old list.
+    let next;
+    try{next=M.normalizeSnapshot(input);}
+    catch(err){console.error('Invalid quest snapshot',err);return;}
     state.lastSnapshotRaw=raw;
-    try {state.snapshot=M.normalizeSnapshot(input);} catch(err){console.error('Invalid quest snapshot',err);state.snapshot={ready:false,quests:[]};}
+    state.snapshot=next;
     if(state.trackingRequest){
       const matched=state.snapshot.quests.find(q=>q.id===state.trackingRequest.id);
       if(matched && matched.vanillaTracked===state.trackingRequest.desired){
@@ -1310,6 +1318,9 @@
       else if(detail.action==='journal.status-next'){state.status=statuses[(statuses.indexOf(state.status)+1)%4];render();}
     });
     document.addEventListener('keydown',e=>{
+      // Controller-generated arrows target document; an open select owns them.
+      if((e.key==='ArrowDown'||e.key==='ArrowUp') &&
+         document.querySelector('.k2040-select-menu'))return;
       if(e.key==='Escape'){
         e.preventDefault();
         if(state.demo)window.handleJournalEscape();
@@ -1321,14 +1332,14 @@
           (state.settings.journalHotkey==='Shift+G' ? e.shiftKey :
            state.settings.journalHotkey==='G' && !e.shiftKey) ||
           e.key===state.settings.journalHotkey && !e.shiftKey)) &&
-        !e.target.closest('input,textarea,select,button,[contenteditable="true"]')) {
+        !e.target?.closest?.('input,textarea,select,button,[contenteditable="true"]')) {
         e.preventDefault();emit('requestCloseJournal');
       }
       // Preserve native arrow navigation in sorting and text/edit controls.
       else if(e.key==='ArrowDown' &&
-              !e.target.closest('input,textarea,select,[contenteditable="true"]')){moveSelection(1);e.preventDefault();}
+              !e.target?.closest?.('input,textarea,select,[contenteditable="true"]')){moveSelection(1);e.preventDefault();}
       else if(e.key==='ArrowUp' &&
-              !e.target.closest('input,textarea,select,[contenteditable="true"]')){moveSelection(-1);e.preventDefault();}
+              !e.target?.closest?.('input,textarea,select,[contenteditable="true"]')){moveSelection(-1);e.preventDefault();}
     });
   }
   if(state.demo){
