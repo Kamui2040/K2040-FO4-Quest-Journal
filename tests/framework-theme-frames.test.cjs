@@ -60,3 +60,15 @@ test('each theme visibly changes full quest frames and compact tracker frames in
  assert.match(chunk,/var\(--ui-accent/);
  assert.doesNotMatch(js,/classList\.toggle\?\.\('k2040-style-/);
 });
+
+test('invalid appearance input cannot crash or replace the last valid snapshot',()=>{
+ const {window,classes,tokenMap}=fixture(false);
+ window.applyUnifiedAppearance({schema:1,theme:'fallout4',palette:'hot-omni',colors});
+ assert.equal(classes.has('k2040-style-fallout4'),true);
+ const circular={};circular.self=circular;
+ for(const bad of [undefined,()=>{},circular,Symbol('invalid')]){
+  assert.doesNotThrow(()=>window.applyUnifiedAppearance(bad));
+  assert.equal(classes.has('k2040-style-fallout4'),true);
+  assert.equal(tokenMap['--ui-accent'],'#eecc11');
+ }
+});

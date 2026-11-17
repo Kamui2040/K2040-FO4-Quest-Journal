@@ -31,3 +31,8 @@ JavaScript and Python suites. In-game validation must verify each theme
 with at least Default, Radioactive Green and Hot Omni palettes, compare
 Journal and tracker simultaneously, and retest direct Settings navigation,
 Pip-Boy synchronization, focus, controller and load/reload.
+
+Safety QA: the optional shared appearance entry now rejects invalid,
+missing, circular and non-serializable inputs without crashing the Journal
+or replacing the last valid theme or palette. This change does not alter
+saved preferences, tracker data, direct Hub navigation or the native DLL.

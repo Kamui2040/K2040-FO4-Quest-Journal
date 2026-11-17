@@ -68,9 +68,11 @@
     }
   }
   function readAppearance(input){
-    const raw=typeof input==='string'?input:JSON.stringify(input);
+    let raw;
+    try { raw=typeof input==='string'?input:JSON.stringify(input); }
+    catch { return undefined; } // reject circular or otherwise unserializable data
     if(raw==='native')return null;
-    if(raw.length>4095)return undefined;
+    if(typeof raw!=='string'||raw.length>4095)return undefined;
     try{
       const data=JSON.parse(raw);
       if(!data||data.schema!==1||!visualThemes.has(data.theme)||
