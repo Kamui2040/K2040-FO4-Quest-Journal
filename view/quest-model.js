@@ -6,6 +6,8 @@
 })(typeof window !== 'undefined' ? window : undefined, function () {
   'use strict';
   const ORDER = ['Main', 'Minutemen', 'Brotherhood', 'Railroad', 'Institute', 'Side', 'Misc', 'Automatron', 'Far Harbor', 'Nuka-World', 'Wasteland Workshop', 'Modded', 'Other'];
+  // Category order is immutable; avoid rescanning ORDER in every sort comparison.
+  const CATEGORY_RANK = new Map(ORDER.map((name,index)=>[name,index]));
   const USER_CATEGORIES = ['Automatic','Main','Minutemen','Brotherhood','Railroad','Institute',
     'Side','Misc','Automatron','Far Harbor','Nuka-World','Wasteland Workshop','Modded','Other'];
   const STATES = ['active', 'completed', 'failed'];
@@ -94,17 +96,24 @@
       if (f.category && f.category !== 'all' && q.type !== f.category) return false;
       if (!f.includeHidden && f.hidden && f.hidden.has(q.id)) return false;
       if (f.favoritesOnly && (!f.favorites || !f.favorites.has(q.id))) return false;
-      return !query || [q.name, q.description, q.type, ...q.objectives.map(o => o.text)].some(s => s.toLocaleLowerCase().includes(query));
+      // Avoid an objective-text array allocation for every quest on each keystroke.
+      return !query || q.name.toLocaleLowerCase().includes(query) ||
+        q.description.toLocaleLowerCase().includes(query) ||
+        q.type.toLocaleLowerCase().includes(query) ||
+        q.objectives.some(o => o.text.toLocaleLowerCase().includes(query));
     }).sort((a,b) => {
-      const byName = a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
-      if(f.sort === 'name') return byName;
-      if(f.sort === 'name-desc') return -byName;
       if(f.sort === 'category') {
-        const rank = name => ORDER.includes(name) ? ORDER.indexOf(name) : ORDER.length;
-        return rank(a.type) - rank(b.type) || a.type.localeCompare(b.type) || byName;
+        const rankA = CATEGORY_RANK.get(a.type) ?? ORDER.length;
+        const rankB = CATEGORY_RANK.get(b.type) ?? ORDER.length;
+        const byCategory = rankA - rankB || a.type.localeCompare(b.type);
+        if(byCategory) return byCategory;
+      } else if(f.sort !== 'name' && f.sort !== 'name-desc') {
+        // In the common pinned sort, avoid costly name comparisons between groups.
+        const byPin = Number(b.pinned) - Number(a.pinned);
+        if(byPin) return byPin;
       }
-      // Default: pinned first, then alphabetical (preserves existing behavior).
-      return Number(b.pinned) - Number(a.pinned) || byName;
+      const byName = a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
+      return f.sort === 'name-desc' ? -byName : byName;
     });
   }
   function trackerQuests(quests,settings) {

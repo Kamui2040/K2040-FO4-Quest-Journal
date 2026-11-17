@@ -33,3 +33,20 @@ test('large categories, search and passive tracker do not mutate Pip-Boy bits',(
  assert.ok(tracker.length>0 && tracker.every(q=>q.pinned||q.vanillaTracked));
  assert.deepEqual(snapshot.quests.map(q=>q.vanillaTracked),before);
 });
+
+
+test('query matches objective text and category sort stays deterministic at scale',()=>{
+ const quests=model.normalizeSnapshot(many()).quests;
+ quests[90].objectives[0].text='Distinct test objective Marker-Zeta';
+ const before=quests.map(q=>q.id);
+ const found=model.filterQuests(quests,{query:'marker-zeta',sort:'name'});
+ assert.deepEqual(found.map(q=>q.id),[quests[90].id]);
+ const sorted=model.filterQuests(quests,{sort:'category'});
+ const rank=new Map(model.ORDER.map((category,i)=>[category,i]));
+ for(let i=1;i<sorted.length;i++){
+  const prev=rank.get(sorted[i-1].type)??model.ORDER.length;
+  const curr=rank.get(sorted[i].type)??model.ORDER.length;
+  assert.ok(prev<=curr);
+ }
+ assert.deepEqual(quests.map(q=>q.id),before,'filtering and sorting must not mutate the native snapshot order');
+});
