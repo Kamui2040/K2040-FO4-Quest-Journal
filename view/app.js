@@ -53,13 +53,26 @@
   const styles=['fallout4','fallout76','doom-eternal','fallout3-newvegas'];
   function applyUnifiedStyleClass(){
     const current=state.unifiedAppearance?.theme;
-    for(const name of styles)
-      document.body.classList.toggle?.('k2040-style-'+name,current===name);
+    const list=document.body.classList;
+    for(const name of styles){
+      const label='k2040-style-'+name;
+      // Ultralight builds differ in DOMTokenList.toggle(force) support.
+      // Explicit add/remove keeps frame styling in sync with palette tokens.
+      if(current===name){
+        if(typeof list.add==='function')list.add(label);
+        else if(typeof list.toggle==='function')list.toggle(label,true);
+      }else{
+        if(typeof list.remove==='function')list.remove(label);
+        else if(typeof list.toggle==='function')list.toggle(label,false);
+      }
+    }
   }
   function readAppearance(input){
-    const raw=typeof input==='string'?input:JSON.stringify(input);
+    let raw;
+    try { raw=typeof input==='string'?input:JSON.stringify(input); }
+    catch { return undefined; } // reject circular or otherwise unserializable data
     if(raw==='native')return null;
-    if(raw.length>4095)return undefined;
+    if(typeof raw!=='string'||raw.length>4095)return undefined;
     try{
       const data=JSON.parse(raw);
       if(!data||data.schema!==1||!visualThemes.has(data.theme)||
@@ -219,6 +232,12 @@
         console.error('Malformed native Quest Journal settings JSON',err);
         return;
       }
+    }
+    // Native settings updates must be objects. Valid JSON primitives and
+    // arrays are still malformed deliveries, not a request for defaults.
+    if(!settings || typeof settings!=='object' || Array.isArray(settings)){
+      console.error('Invalid native Quest Journal settings shape');
+      return;
     }
     state.settings=S.normalize(settings);
     if(!isTracker){
@@ -622,10 +641,28 @@
     restoreFocus(identity);
   }
   function receiveQuestSnapshot(input) {
-    const raw=typeof input==='string'?input:JSON.stringify(input);
-    if(raw===state.lastSnapshotRaw)return;
+    let raw;
+    try{raw=typeof input==='string'?input:JSON.stringify(input);}
+    catch(err){console.error('Invalid quest snapshot',err);return;}
+    if(typeof raw!=='string'||raw===state.lastSnapshotRaw)return;
+    // Treat an unparseable delivery as a failed update, not an empty save.
+    // The native observer explicitly sends {ready:false,quests:[]} when a
+    // save becomes unavailable, so that state still clears the old list.
+    let next;
+    try{
+      const packet=typeof input==='string'?JSON.parse(raw):input;
+      // Only an explicit ready:false delivery may clear a previous save.
+      // JSON like {}, [], null or a broken quests field is not a valid
+      // read-side observation and must not erase the last good data.
+      if(!packet || typeof packet!=='object' || Array.isArray(packet) ||
+         typeof packet.ready!=='boolean' ||
+         (packet.quests!==undefined && !Array.isArray(packet.quests)) ||
+         (packet.ready && !Array.isArray(packet.quests)))return;
+      next=M.normalizeSnapshot(packet);
+    }
+    catch(err){console.error('Invalid quest snapshot',err);return;}
     state.lastSnapshotRaw=raw;
-    try {state.snapshot=M.normalizeSnapshot(input);} catch(err){console.error('Invalid quest snapshot',err);state.snapshot={ready:false,quests:[]};}
+    state.snapshot=next;
     if(state.trackingRequest){
       const matched=state.snapshot.quests.find(q=>q.id===state.trackingRequest.id);
       if(matched && matched.vanillaTracked===state.trackingRequest.desired){
@@ -1297,6 +1334,9 @@
       else if(detail.action==='journal.status-next'){state.status=statuses[(statuses.indexOf(state.status)+1)%4];render();}
     });
     document.addEventListener('keydown',e=>{
+      // Controller-generated arrows target document; an open select owns them.
+      if((e.key==='ArrowDown'||e.key==='ArrowUp') &&
+         document.querySelector('.k2040-select-menu'))return;
       if(e.key==='Escape'){
         e.preventDefault();
         if(state.demo)window.handleJournalEscape();
@@ -1308,14 +1348,14 @@
           (state.settings.journalHotkey==='Shift+G' ? e.shiftKey :
            state.settings.journalHotkey==='G' && !e.shiftKey) ||
           e.key===state.settings.journalHotkey && !e.shiftKey)) &&
-        !e.target.closest('input,textarea,select,button,[contenteditable="true"]')) {
+        !e.target?.closest?.('input,textarea,select,button,[contenteditable="true"]')) {
         e.preventDefault();emit('requestCloseJournal');
       }
       // Preserve native arrow navigation in sorting and text/edit controls.
       else if(e.key==='ArrowDown' &&
-              !e.target.closest('input,textarea,select,[contenteditable="true"]')){moveSelection(1);e.preventDefault();}
+              !e.target?.closest?.('input,textarea,select,[contenteditable="true"]')){moveSelection(1);e.preventDefault();}
       else if(e.key==='ArrowUp' &&
-              !e.target.closest('input,textarea,select,[contenteditable="true"]')){moveSelection(-1);e.preventDefault();}
+              !e.target?.closest?.('input,textarea,select,[contenteditable="true"]')){moveSelection(-1);e.preventDefault();}
     });
   }
   if(state.demo){

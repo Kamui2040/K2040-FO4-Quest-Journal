@@ -72,9 +72,16 @@ int main() {
     Sampler stick;
     assert(stick.Update(sample(0,7000,0),true,t)==Action::None);
     assert(stick.Update(sample(0,12000,0),true,t+1ms)==Action::Right);
-    assert(stick.Update(sample(0,20000,21000),true,t+2ms)==Action::Down);
+    // XInput thumbstick LY is positive for physical Up, negative for Down.
+    assert(stick.Update(sample(0,20000,21000),true,t+2ms)==Action::Up);
     assert(stick.Update(sample(),true,t+2500us)==Action::None);
-    assert(stick.Update(sample(0,21000,21000),true,t+3ms)==Action::Down);
+    assert(stick.Update(sample(0,21000,21000),true,t+3ms)==Action::Up);
+    assert(stick.Update(sample(0,0,-21000),true,t+4ms)==Action::Down);
+    assert(stick.Update(sample(0,0,21000),true,t+5ms)==Action::Up);
+    // Full negative diagonal overflows 32-bit squared magnitude by 1.
+    Sampler extremes;
+    assert(extremes.Update(sample(),true,t)==Action::None);
+    assert(extremes.Update(sample(0,-32768,-32768),true,t+1ms)==Action::Down);
 
     Sampler buttons;
     assert(buttons.Update(sample(0x1000),true,t)==Action::Activate);

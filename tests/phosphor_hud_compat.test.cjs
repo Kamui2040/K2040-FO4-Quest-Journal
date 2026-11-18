@@ -21,8 +21,8 @@ test('Phosphor owns only our tracker surface, not Journal or settings', () => {
   assert.match(native, /void CreateViews\(\) \{[\s\S]*?if \(PhosphorHudActive\(\) && !K2040::Settings::Current\(\)\.trackerOverridePhosphor\) \{[\s\S]*?return;[\s\S]*?trackerView = views\.CreateView/);
   assert.match(native, /void CreateJournalView\(\) \{[\s\S]*?views\.CreateView\("K2040QuestJournal\/journal\.html"/);
   assert.match(native, /void OpenJournal\(\) \{[\s\S]*?CreateJournalView\(\)/);
-  assert.match(native, /if \(TrackerMayShow\(\)\) views\.Show\(view\)/);
-  assert.match(native, /if\(TrackerMayShow\(\)\)views\.Show\(trackerView\)/);
+  assert.match(native, /trackerDomReady=true;\s*UpdateTrackerVisibility\(\);/);
+  assert.match(native, /if\(TrackerMayShowInGameplay\(\) && trackerDomReady\)views\.Show\(trackerView\)/);
   assert.match(native, /if \(TrackerMayShow\(\) && trackerDomReady && Valid\(trackerView\)/);
 });
 
@@ -62,5 +62,5 @@ test('compatibility toggle is persisted and reaches the view and native policy',
   assert.match(adapter,/TrackerMayShow\(\)\&\&!trackerView\)CreateViews\(\)/);
   assert.doesNotMatch(ui,/settingTrackerOverridePhosphor/);
   assert.match(native, /trackerEnabled, PhosphorHudActive\(\),[\s\S]*?Current\(\)\.trackerOverridePhosphor/);
-  assert.match(native, /if\(TrackerMayShow\(\)\)views\.Show\(trackerView\)/);
+  assert.match(native, /if\(TrackerMayShowInGameplay\(\) && trackerDomReady\)views\.Show\(trackerView\)/);
 });

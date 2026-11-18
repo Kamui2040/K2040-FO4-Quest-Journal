@@ -19,6 +19,7 @@
 #include <optional>
 #include <sstream>
 #include <string_view>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -231,6 +232,7 @@ namespace {
         }
     }
     void ReadQuest(RE::PipboyObject* entry, bool misc, std::unordered_set<std::uint32_t>& seen,
+                   std::unordered_map<std::uint32_t,std::size_t>& questIndex,
                    const std::unordered_set<std::uint32_t>& pinned,
                    const std::unordered_set<std::uint32_t>& favorite,
                    const std::unordered_set<std::uint32_t>& hidden, std::vector<Quest>& dest,
@@ -244,17 +246,19 @@ namespace {
             // row owns the quest metadata; subsequent rows add distinct
             // *visible* objective indexes only, without a second quest card.
             if (misc) {
-                const auto previous=std::find_if(dest.begin(),dest.end(),
-                    [id](const Quest& item){return item.formId==id;});
-                if(previous!=dest.end()) {
-                    ++previous->miscRowCount;
+                // Misc rows often share the owning quest. Resolve its first
+                // card in O(1) rather than scanning the growing quest vector.
+                const auto previous=questIndex.find(id);
+                if(previous!=questIndex.end()) {
+                    auto& quest=dest[previous->second];
+                    ++quest.miscRowCount;
                     auto* tracked=Member(entry,"active");
                     const bool typed=tracked && tracked->GetType()==RE::PipboyValue::kBool;
                     const bool native=(static_cast<std::uint32_t>(form->data.flags)&0x800u)!=0;
-                    if(!typed) previous->pipboyFeedAgreement="missing";
+                    if(!typed) quest.pipboyFeedAgreement="missing";
                     else if(Boolean(entry,"active")!=native)
-                        previous->pipboyFeedAgreement="mismatch";
-                    ReadObjectives(form,*previous,true,entry);
+                        quest.pipboyFeedAgreement="mismatch";
+                    ReadObjectives(form,quest,true,entry);
                 }
             }
             return;
@@ -302,6 +306,7 @@ namespace {
         item.hidden = hidden.contains(id);
         ReadObjectives(form, item, misc, entry);
         dest.push_back(std::move(item));
+        questIndex.emplace(id,dest.size()-1);
     }
     std::string Serialize(const std::vector<Quest>& quests, bool ready) {
         std::string out = ready ? "{\"ready\":true,\"quests\":[" : "{\"ready\":false,\"quests\":[";
@@ -359,16 +364,17 @@ std::string CaptureSnapshot(const std::unordered_set<std::uint32_t>& pinnedQuest
     if (!source || !source->questData.questArray) return Serialize({}, false);
     auto* array = source->questData.questArray;
     std::unordered_set<std::uint32_t> seen;
+    std::unordered_map<std::uint32_t,std::size_t> questIndex;
     std::vector<Quest> quests;
     for (auto* value : array->elements) {
         if (!value || value->GetType() != RE::PipboyValue::kObject) continue;
         auto* entry = reinterpret_cast<RE::PipboyObject*>(value);
         if (Uint(entry, "formID")) {
-            ReadQuest(entry, false, seen, pinnedQuestIds, favoriteQuestIds, hiddenQuestIds, quests,autoPinNew);
+            ReadQuest(entry, false, seen, questIndex, pinnedQuestIds, favoriteQuestIds, hiddenQuestIds, quests,autoPinNew);
         } else if (auto* misc = Array(entry, "objectives")) {
             for (auto* nested : misc->elements) {
                 if (nested && nested->GetType() == RE::PipboyValue::kObject)
-                    ReadQuest(reinterpret_cast<RE::PipboyObject*>(nested), true, seen, pinnedQuestIds, favoriteQuestIds, hiddenQuestIds, quests,autoPinNew);
+                    ReadQuest(reinterpret_cast<RE::PipboyObject*>(nested), true, seen, questIndex, pinnedQuestIds, favoriteQuestIds, hiddenQuestIds, quests,autoPinNew);
             }
         }
     }
@@ -419,12 +425,14 @@ std::string CaptureSnapshot(const std::unordered_set<std::uint32_t>& pinnedQuest
     for(auto& item:quests) {
         if(item.historyOnly)continue;
         const auto* form=RE::TESForm::GetFormByID<RE::TESQuest>(item.formId);
-        item.nativeInstanceStatus=K2040::GenericQuestInstance::Name(
-            form?native.Resolve(item.formId,form->currentInstanceID):
-                 K2040::GenericQuestInstance::State::kUnavailable);
+        // Resolve this quest instance once; status and verified instance
+        // identity must come from the same read-side observation.
+        const auto resolved=form
+            ? native.Resolve(item.formId,form->currentInstanceID)
+            : K2040::GenericQuestInstance::State::kUnavailable;
+        item.nativeInstanceStatus=K2040::GenericQuestInstance::Name(resolved);
         item.nativeDisplayedCount=native.DisplayedCount(item.formId);
-        if(form && native.Resolve(item.formId,form->currentInstanceID)==
-                       K2040::GenericQuestInstance::State::kConsistent)
+        if(form && resolved==K2040::GenericQuestInstance::State::kConsistent)
             item.nativeInstanceID=form->currentInstanceID;
     }
     return Serialize(quests, true);

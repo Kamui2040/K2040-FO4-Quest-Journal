@@ -850,19 +850,6 @@
   box-shadow:0 0 0 2px rgba(102,196,255,.22);
 }
 
-/* Optional VNext visual-frame identity; palette RGB values are supplied by the hub. */
-.k2040-style-fallout4 .journal-shell{border-radius:7px;border-color:var(--edge)}
-.k2040-style-fallout76 .journal-shell{border-radius:3px;border-width:2px}
-.k2040-style-fallout76 .app-header{border-bottom:2px solid var(--gold)}
-.k2040-style-doom-eternal .journal-shell{border-radius:0;border-width:2px}
-.k2040-style-doom-eternal .app-header{text-transform:uppercase;letter-spacing:.055em}
-.k2040-style-fallout3-newvegas .journal-shell{border-radius:0}
-.k2040-style-fallout3-newvegas .app-header{border-bottom:2px double var(--gold)}
-.k2040-style-fallout3-newvegas .mark{border-radius:0}
-.k2040-style-doom-eternal .tracker-panel{border-radius:0;border-width:2px}
-.k2040-style-fallout76 .tracker-panel{border-radius:3px}
-.k2040-style-fallout3-newvegas .tracker-panel{border-radius:0}
-
 /* One journal-owned gameplay control; not another settings renderer. */
 .pipboy-mirror{margin:22px 8px 12px;padding:13px 11px;border:1px solid var(--edge);border-radius:6px;background:rgba(255,255,255,.035)}
 .pipboy-mirror label{display:flex;gap:10px;align-items:center;color:var(--ui-text,var(--text));font-size:.88rem;font-weight:650;cursor:pointer;line-height:1.35}
@@ -881,38 +868,41 @@
 }
 
 
-/* The shared visual theme owns geometry and typography, never saved palette
-   colors or journal/quest/tracker state. All accents derive from hub tokens
-   when a valid shared appearance has been applied. */
+/* Shared hub opener feedback stays inside the Journal; never a second editor. */
+.settings-hub-status{padding:8px 28px;color:var(--text);background:var(--panel2);border-bottom:1px solid var(--edge);font-size:.85rem}
+.settings-hub-status[hidden]{display:none}
+
+/* K2040 Framework structural language — real Journal + tracker.
+   One source of truth per theme; existing quest data, owner palette, saved
+   layout and live status are never rewritten by presentation rules.
+   Shared semantic roles come from Framework V1, never hard-coded colors. */
 body.k2040-style-fallout4 {
-  --k2040-frame-radius:6px;
+  --k2040-frame-radius:2px;
   --k2040-frame-font:"Segoe UI",Arial,sans-serif;
-  --k2040-frame-stroke:1px;
+  --k2040-frame-stroke:2px;
 }
 body.k2040-style-fallout76 {
-  --k2040-frame-radius:13px;
-  --k2040-frame-font:"Trebuchet MS","Segoe UI",Arial,sans-serif;
-  --k2040-frame-stroke:2px;
+  --k2040-frame-radius:0px;
+  --k2040-frame-font:"Arial Narrow","Liberation Sans Narrow","Segoe UI",Arial,sans-serif;
+  --k2040-frame-stroke:1px;
 }
 body.k2040-style-doom-eternal {
   --k2040-frame-radius:0px;
-  --k2040-frame-font:"Arial Narrow","Segoe UI",Arial,sans-serif;
-  --k2040-frame-stroke:2px;
+  --k2040-frame-font:"Arial Narrow","Liberation Sans Narrow",Arial,sans-serif;
+  --k2040-frame-stroke:3px;
 }
 body.k2040-style-fallout3-newvegas {
-  --k2040-frame-radius:1px;
-  --k2040-frame-font:Consolas,"Lucida Console",monospace;
-  --k2040-frame-stroke:2px;
+  --k2040-frame-radius:0px;
+  --k2040-frame-font:"Lucida Console",Consolas,monospace;
+  --k2040-frame-stroke:1px;
 }
 body[class*="k2040-style-"] .journal-shell,
 body[class*="k2040-style-"] .tracker-panel,
-body[class*="k2040-style-"] .settings-nav-item,
-body[class*="k2040-style-"] .setting-row,
-body[class*="k2040-style-"] .settings-choices button,
 body[class*="k2040-style-"] .quest-row,
+body[class*="k2040-style-"] .filter-button,
 body[class*="k2040-style-"] .objective,
+body[class*="k2040-style-"] .tracked-entry,
 body[class*="k2040-style-"] .k2040-select-trigger,
-body[class*="k2040-style-"] .appearance-sample,
 body[class*="k2040-style-"] .ghost-button {
   border-radius:var(--k2040-frame-radius);
 }
@@ -922,39 +912,258 @@ body[class*="k2040-style-"] .tracker-panel {
 }
 body[class*="k2040-style-"] .journal-shell,
 body[class*="k2040-style-"] .tracker-panel,
-body[class*="k2040-style-"] .settings-workspace,
+body[class*="k2040-style-"] .app-header,
+body[class*="k2040-style-"] .tracker-heading,
 body[class*="k2040-style-"] button,
-body[class*="k2040-style-"] .app-header {
+body[class*="k2040-style-"] .quest-row-title,
+body[class*="k2040-style-"] .tracked-title {
   font-family:var(--k2040-frame-font);
 }
-body.k2040-style-fallout76 .app-header {
-  border-bottom:2px solid var(--ui-accent,var(--blue));
+
+/* Commonwealth: etched instrumentation, square tabs and left selection rail. */
+body.k2040-style-fallout4 .journal-shell,
+body.k2040-style-fallout4 .tracker-panel {
+  border:2px solid var(--ui-accent,var(--blue));
 }
-body.k2040-style-fallout76 .quest-row.current {
-  border-radius:12px;
-  border-left:4px solid var(--ui-accent,var(--blue));
+body.k2040-style-fallout4 .app-header,
+body.k2040-style-fallout4 .tracker-heading {
+  border-bottom:2px solid var(--ui-accent,var(--blue));
+  text-transform:uppercase;letter-spacing:.12em;
+}
+body.k2040-style-fallout4 .sidebar,
+body.k2040-style-fallout4 .quest-list-column {
+  border-right:2px solid var(--edge);
+}
+body.k2040-style-fallout4 .quest-row {
+  border-radius:0;border-bottom:1px solid var(--edge);
+}
+body.k2040-style-fallout4 .filter-button.selected,
+body.k2040-style-fallout4 .quest-row.current {
+  border-left:4px solid var(--ui-accent,var(--blue));border-radius:0;
+}
+body.k2040-style-fallout4 .objective,
+body.k2040-style-fallout4 .tracked-entry {
+  border-radius:0;border-bottom:1px solid var(--edge);
+}
+
+/* Fallout 76: flat panels with an angled ribbon on selected log/menu rows. */
+body.k2040-style-fallout76 .journal-shell,
+body.k2040-style-fallout76 .tracker-panel {
+  border:1px solid var(--edge);border-radius:0;
+}
+body.k2040-style-fallout76 .app-header,
+body.k2040-style-fallout76 .tracker-heading {
+  border-bottom:1px solid var(--ui-accent,var(--blue));
+  font-weight:850;letter-spacing:.08em;text-transform:uppercase;
+}
+body.k2040-style-fallout76 .quest-row,
+body.k2040-style-fallout76 .filter-button,
+body.k2040-style-fallout76 .objective,
+body.k2040-style-fallout76 .tracked-entry {
+  border-radius:0;border-bottom:1px solid var(--edge);
+}
+body.k2040-style-fallout76 .quest-row.current,
+body.k2040-style-fallout76 .filter-button.selected {
+  border-left:0;border-bottom:3px solid var(--ui-accent,var(--blue));
+  box-shadow:inset 7px 0 0 var(--ui-accent,var(--blue));
+  clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%);
+}
+body.k2040-style-fallout76 .tracker-heading {
+  border-left:7px solid var(--ui-accent,var(--blue));
+}
+
+/* DOOM Eternal: faceted selection, heavy combat rails and dense technical type. */
+body.k2040-style-doom-eternal .journal-shell,
+body.k2040-style-doom-eternal .tracker-panel {
+  border:3px solid var(--ui-accent,var(--blue));border-radius:0;
 }
 body.k2040-style-doom-eternal .app-header,
-body.k2040-style-doom-eternal .section-caption,
 body.k2040-style-doom-eternal .tracker-heading {
-  text-transform:uppercase;
-  font-weight:850;
-  letter-spacing:.055em;
+  border-bottom:4px solid var(--ui-accent,var(--blue));
+  font-weight:900;text-transform:uppercase;letter-spacing:.11em;
+}
+body.k2040-style-doom-eternal .quest-row,
+body.k2040-style-doom-eternal .tracked-entry {
+  border-radius:0;border-bottom:2px solid var(--edge);
 }
 body.k2040-style-doom-eternal .quest-row.current,
-body.k2040-style-doom-eternal .settings-nav-item.selected {
-  border-left:4px solid var(--ui-accent,var(--blue));
+body.k2040-style-doom-eternal .filter-button.selected {
+  border-left:6px solid var(--ui-accent,var(--blue));
+  box-shadow:inset 3px 0 0 var(--ui-accent,var(--blue));
+  font-weight:850;
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+}
+body.k2040-style-doom-eternal .objective,
+body.k2040-style-doom-eternal .tracked-entry {
+  border-left:3px solid var(--edge);
+}
+body.k2040-style-doom-eternal .tracked-title {
+  text-transform:uppercase;font-weight:850;
+}
+
+/* Fallout 3/New Vegas: terminal grid, bracketed titles and chevron focus. */
+body.k2040-style-fallout3-newvegas .journal-shell,
+body.k2040-style-fallout3-newvegas .tracker-panel {
+  border:1px dashed var(--ui-accent,var(--blue));border-radius:0;
 }
 body.k2040-style-fallout3-newvegas .app-header,
 body.k2040-style-fallout3-newvegas .tracker-heading {
-  border-bottom:3px double var(--ui-accent,var(--blue));
+  border-bottom:2px dashed var(--ui-accent,var(--blue));
+  text-transform:uppercase;letter-spacing:.045em;
 }
-body.k2040-style-fallout3-newvegas .journal-shell,
-body.k2040-style-fallout3-newvegas .tracker-panel {
-  border-style:double;
-  border-width:3px;
+body.k2040-style-fallout3-newvegas .tracker-heading::before {
+  content:"[ ";color:var(--ui-accent,var(--blue));
+}
+body.k2040-style-fallout3-newvegas .tracker-heading::after {
+  content:" ]";color:var(--ui-accent,var(--blue));
+}
+body.k2040-style-fallout3-newvegas .quest-row,
+body.k2040-style-fallout3-newvegas .objective,
+body.k2040-style-fallout3-newvegas .tracked-entry {
+  border-radius:0;border-bottom:1px dashed var(--edge);
+}
+body.k2040-style-fallout3-newvegas .quest-row.current,
+body.k2040-style-fallout3-newvegas .filter-button.selected {
+  border-left:3px solid var(--ui-accent,var(--blue));
+  box-shadow:none;
+}
+body.k2040-style-fallout3-newvegas .quest-row.current::before {
+  content:">";color:var(--ui-accent,var(--blue));margin-right:8px;
+}
+body.k2040-style-fallout3-newvegas .tracked-title,
+body.k2040-style-fallout3-newvegas .tracked-objective,
+body.k2040-style-fallout3-newvegas .quest-row-title {
+  font-family:var(--k2040-frame-font);
 }
 
-/* Shared hub opener feedback stays inside the Journal; never a second editor. */
-.settings-hub-status{padding:8px 28px;color:var(--text);background:var(--panel2);border-bottom:1px solid var(--edge);font-size:.85rem}
-.settings-hub-status[hidden]{display:none}
+
+/* Framework Pip-Boy mirror panels: styling only, never native quest control.
+   All colors follow the active palette. The checkbox stays Journal-owned. */
+body[class*="k2040-style-"] .pipboy-mirror {
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--k2040-frame-radius);
+  background:rgba(var(--ui-panel-rgb,11,18,24),.24);
+  color:var(--ui-text,var(--text));
+}
+body[class*="k2040-style-"] .pipboy-mirror-heading {
+  display:block;
+  margin-bottom:11px;
+  color:var(--ui-accent,var(--blue));
+  font-family:var(--k2040-frame-font);
+  font-size:.69rem;
+  font-weight:800;
+  letter-spacing:.12em;
+  line-height:1.4;
+}
+body[class*="k2040-style-"] .pipboy-mirror label {
+  font-family:var(--k2040-frame-font);
+  color:var(--ui-text,var(--text));
+}
+body[class*="k2040-style-"] .pipboy-mirror p {
+  color:var(--muted);
+}
+body[class*="k2040-style-"] .pipboy-mirror-status:not(:empty) {
+  border-top:1px solid var(--edge);
+  padding-top:7px;
+  margin-top:10px;
+  color:var(--ui-accent,var(--blue));
+}
+body[class*="k2040-style-"] .pipboy-mirror input:focus-visible {
+  outline:2px solid var(--ui-accent,var(--blue));
+  outline-offset:3px;
+}
+
+/* Fallout 4: an equipment-panel rail, squared corners, etched top edge. */
+body.k2040-style-fallout4 .pipboy-mirror {
+  border:2px solid var(--edge);
+  border-left:4px solid var(--ui-accent,var(--blue));
+  border-radius:2px;
+}
+body.k2040-style-fallout4 .pipboy-mirror::before {
+  content:"";
+  display:block;
+  width:62%;
+  height:2px;
+  margin:-13px 0 11px;
+  background:var(--ui-accent,var(--blue));
+}
+body.k2040-style-fallout4 .pipboy-mirror-heading {
+  text-transform:uppercase;
+  font-weight:800;
+}
+
+/* Fallout 76: flat card with an angled selection ribbon, not a rounded box. */
+body.k2040-style-fallout76 .pipboy-mirror {
+  border:1px solid var(--edge);
+  border-bottom:2px solid var(--ui-accent,var(--blue));
+  border-radius:0;
+}
+body.k2040-style-fallout76 .pipboy-mirror::before {
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  width:36px;
+  height:7px;
+  background:var(--ui-accent,var(--blue));
+  clip-path:polygon(7px 0,100% 0,100% 100%,0 100%);
+  pointer-events:none;
+}
+body.k2040-style-fallout76 .pipboy-mirror-heading {
+  text-transform:uppercase;
+  letter-spacing:.16em;
+}
+
+/* DOOM Eternal: combat-interface bracket and strong technical header. */
+body.k2040-style-doom-eternal .pipboy-mirror {
+  border:2px solid var(--ui-accent,var(--blue));
+  border-left-width:5px;
+  border-radius:0;
+}
+body.k2040-style-doom-eternal .pipboy-mirror::before {
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  width:14px;
+  height:14px;
+  background:var(--ui-accent,var(--blue));
+  clip-path:polygon(0 0,100% 0,100% 100%);
+  pointer-events:none;
+}
+body.k2040-style-doom-eternal .pipboy-mirror-heading {
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.18em;
+}
+body.k2040-style-doom-eternal .pipboy-mirror label {
+  font-weight:850;
+}
+
+/* Fallout 3/New Vegas: dashed terminal frame and bracketed feed caption. */
+body.k2040-style-fallout3-newvegas .pipboy-mirror {
+  border:1px dashed var(--ui-accent,var(--blue));
+  border-radius:0;
+  background:repeating-linear-gradient(
+    0deg,
+    rgba(var(--ui-accent-rgb,102,196,255),.045) 0px,
+    rgba(var(--ui-accent-rgb,102,196,255),.045) 1px,
+    transparent 1px,
+    transparent 8px
+  ),rgba(var(--ui-panel-rgb,11,18,24),.24);
+}
+body.k2040-style-fallout3-newvegas .pipboy-mirror-heading {
+  font-family:var(--k2040-frame-font);
+  font-weight:700;
+  letter-spacing:.055em;
+}
+body.k2040-style-fallout3-newvegas .pipboy-mirror-heading::before {
+  content:"[ ";
+}
+body.k2040-style-fallout3-newvegas .pipboy-mirror-heading::after {
+  content:" ]";
+}
+body.k2040-style-fallout3-newvegas .pipboy-mirror label {
+  font-family:var(--k2040-frame-font);
+}

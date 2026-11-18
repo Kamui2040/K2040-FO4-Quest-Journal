@@ -145,11 +145,13 @@ private:
         if(Pressed(input.buttons,mapped.left))return Action::Left;
         if(Pressed(input.buttons,mapped.right))return Action::Right;
 
-        const auto x=static_cast<std::int32_t>(input.leftX);
-        const auto y=static_cast<std::int32_t>(input.leftY);
-        constexpr std::int32_t deadZone=7849;
+        // XInput left-stick Y increases towards Up (screen coordinates differ).
+        // Use 64-bit magnitude: (-32768)^2+(-32768)^2 exceeds signed int32.
+        const auto x=static_cast<std::int64_t>(input.leftX);
+        const auto y=static_cast<std::int64_t>(input.leftY);
+        constexpr std::int64_t deadZone=7849;
         if(x*x+y*y<=deadZone*deadZone)return Action::None;
-        if(std::abs(y)>=std::abs(x))return y>0?Action::Down:Action::Up;
+        if(std::abs(y)>=std::abs(x))return y>0?Action::Up:Action::Down;
         return x>0?Action::Right:Action::Left;
     }
 

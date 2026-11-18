@@ -1,55 +1,59 @@
 # K2040 FO4 Quest Journal
 
-A full-screen quest journal and customizable on-screen tracker for **Fallout 4 (1.10.163)**. Browse your quests, keep track of objectives, and choose what appears on your HUD.
+A full-screen quest journal and a small, customizable HUD tracker for **Fallout 4 (original PC version 1.10.163)**.
 
-**[Download on Nexus Mods](https://www.nexusmods.com/fallout4/mods/110911)** · **[Download from GitHub](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/releases/latest)**
+[Get the released mod on Nexus Mods](https://www.nexusmods.com/fallout4/mods/110911) · [GitHub releases](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/releases/latest)
 
-## Features
+## What it does
 
-- Browse your quests and objectives, including completed quests.
-- Find what you're looking for with search, sorting, categories and favorites.
-- Track supported quests from the Journal and keep them in sync with your Pip-Boy.
-- Pin quests to a compact HUD tracker. In the development build, the Unified Settings V2 layout editor lets you drag and resize it, then Save, Abort or Retry without changing quest tracking.
-- Customize the Journal and tracker with four shared visual styles and separately saved colors.
-- Edit settings in the **K2040 Unified Settings V2** two-pane editor using **F3** by default (configurable through the single top-level Unified Settings MCM entry). Individual Journal settings controls are no longer maintained.
-- Optionally use Fallout 4's Quick Data action (usually J) to open Quest Journal, following your current key binding. This is off by default.
-- Keyboard and controller support.
+- Browse active and completed quests, search objectives, and sort by category.
+- Mark favorites and track supported quests alongside the Pip-Boy.
+- Pin quests to a mini tracker, with adjustable position, size, and quest count.
+- Change the Journal and tracker appearance separately, including custom colors.
+- Optionally open the Journal with Fallout 4's Quick Data key (normally J). This is off by default.
+
+**Released version: v0.0.2.** The newer controller changes, shared settings editor, four Framework styles, and draggable tracker layout are still being tested. They are **not** included in the public release.
 
 ## Requirements
 
-- **Fallout 4 (original version 1.10.163)** — not the next-gen or Anniversary Edition version.
-- [F4SE](https://f4se.silverlock.org/) for Fallout 4 1.10.163.
+- Fallout 4 **1.10.163** (the original PC version, not next-gen or Anniversary Edition).
+- [F4SE](https://f4se.silverlock.org/) for that game version.
 - [Address Library for F4SE Plugins](https://www.nexusmods.com/fallout4/mods/47327), original-game version.
 - [PrismaUI for Fallout 4](https://www.nexusmods.com/fallout4/mods/105454).
-- **Mod Configuration Menu (MCM)** is optional.
+- MCM is optional for the released version.
 
-## Installation
+## Install
 
-1. Install the requirements listed above.
-2. Download the latest Quest Journal ZIP from [Releases](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/releases/latest).
-3. Import the ZIP into your mod manager and enable it. If you're updating, replace the older Quest Journal version rather than installing two copies.
-4. Launch Fallout 4 through F4SE.
-
-**Development QA builds:** Install the Quest Journal ZIP and the compatible Unified Settings Hub separately. The Quest Journal ZIP contains only the mod DLL, provider and PrismaUI views; it does not bundle the hub DLL, hub UI or MCM.
-The **Settings** button in the Journal opens the **Quest Journal** page in the updated hub, not a standalone settings renderer. If the hub is unavailable or outdated, the Journal stays open and displays a message. The Pip-Boy sync checkbox remains directly in the Journal.
+1. Install the requirements above.
+2. Download the Quest Journal ZIP from the [release page](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/releases/latest).
+3. Import it into your mod manager and enable it. Replace older Quest Journal copies rather than running two at once.
+4. Start the game through F4SE.
 
 ## Controls
 
-| Action | Default shortcut |
+| Action | Default key |
 | --- | --- |
-| Open or close the Quest Journal | **Shift + G** |
+| Open or close the Journal | **Shift + G** |
 | Show or hide the mini tracker | **G** |
 
-These are **gameplay shortcuts**, not settings-only shortcuts. The VNext development build configures Journal/tracker keyboard and controller shortcuts in the shared Unified Settings **Controls** category, not in Quest Journal's MCM. F3 opens the Unified Settings hub by default; the hub alone installs an MCM settings shortcut. This owner package contains no separate MCM entries. The published v0.0.2 package is unchanged.
+The released version lets you change these keys through Journal settings or MCM. Existing custom bindings are kept when you update.
 
-The upcoming v0.0.3 development build adds D-pad and left-stick menu navigation and follows Fallout 4's effective Confirm/Back assignments rather than assuming Xbox button labels. The right stick remains available for cursor navigation.
+### Development builds (not released)
 
-## Compatibility
+The current development build uses **K2040 Unified Settings V2** for its settings. Install the compatible hub separately: the Quest Journal test ZIP does not contain the hub, its MCM entry, or its settings screen.
 
-Quest Journal is made for the original Fallout 4 (1.10.163). Some unusual or repeatable quests may have tracking limitations. See [Compatibility](docs/COMPATIBILITY.md) for more information.
+The Journal's **Settings** button opens its page inside that hub. The hub owns the one settings shortcut; the Journal and tracker keep their separate *gameplay* shortcuts. Pip-Boy synchronization remains a checkbox in the Journal.
 
-## Source code and feedback
+Development controller navigation uses the D-pad or left stick. Confirm and Back follow Fallout 4's actual mapped buttons, including Steam Input mappings where available, instead of assuming Xbox A/B. The right stick can move the cursor. The compact tracker also has an editor for dragging and resizing it, with Save, Abort, and Retry.
 
-The source code is available under the [GPL-3.0 license](LICENSE). See [Building from source](docs/BUILDING.md) and [Third-party notices](THIRD_PARTY_NOTICES.md) for more information.
+These changes have passed source/build checks, **not full in-game testing**. The Journal should stay open with a message if the separate hub is missing or incompatible.
 
-Found a bug or have a suggestion? [Open an issue](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/issues).
+## Compatibility and help
+
+Quest Journal is built for Fallout 4 1.10.163. Some repeatable quests and mod-added objectives may behave differently. The next-gen, Anniversary Edition, and VR versions are not supported. See [Compatibility](docs/COMPATIBILITY.md) and the [Roadmap](docs/ROADMAP.md).
+
+Found a bug? [Open a GitHub issue](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/issues) with your game version and what happened.
+
+## Source
+
+Licensed under [GPL-3.0](LICENSE). See [Building from source](docs/BUILDING.md) and [Third-party notices](THIRD_PARTY_NOTICES.md).

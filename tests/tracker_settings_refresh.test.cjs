@@ -60,3 +60,16 @@ test('tracker limit, Pip-Boy mirror and completed objective filters redraw immed
   assert.doesNotMatch(t.node('trackedQuests').innerHTML,/Done 1/);
   assert.equal(t.nativeActions(),0);
 });
+
+test('invalid native settings shapes keep the last valid tracker preferences',()=>{
+ const t=tracker();
+ t.window.receiveQuestSnapshot(fixture());
+ t.window.receiveJournalSettings({trackerMaxQuests:2,trackerSyncPipboy:true,trackerShowCompleted:true});
+ assert.equal(count(t.node('trackedQuests')),2);
+ assert.match(t.node('trackedQuests').innerHTML,/Done 1/);
+ for(const invalid of ['null','[]','false','23','"bad-shape"']){
+  t.window.receiveJournalSettings(invalid);
+  assert.equal(count(t.node('trackedQuests')),2,invalid);
+  assert.match(t.node('trackedQuests').innerHTML,/Done 1/,invalid);
+ }
+});

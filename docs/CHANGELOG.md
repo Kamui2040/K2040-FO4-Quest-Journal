@@ -1,20 +1,40 @@
 # Changelog
 
-## Unreleased — v0.0.3
+## v0.0.3 — in development, not released
 
-- Optionally open Quest Journal with Fallout 4's Quick Data action (usually J). The redirect follows your current key binding and is off by default.
-- When Phosphor HUD is active, hide the Quest Journal mini tracker by default. Turn on **Show Quest Journal tracker with Phosphor HUD** in Compact tracker settings to show it anyway. This setting is off by default and saved between sessions. The full Journal stays available, and Quest Journal does not change Phosphor's settings.
-- Make Settings easier to use with a controller: show clear controller names and the current category, and return focus when the panel opens or closes.
-- Use the D-pad or left stick to move through menus. Press A to select and B to go back. Right-stick cursor and mouse input still work.
+- Give the Journal-only Pip-Boy tracker sync panel its own frame in each Framework theme, without changing quest tracking or saved settings.
+- Hide only Quest Journal’s mini tracker during blocking Pip-Boy, Pause, Console and Dialogue menus; restore its previous visibility when gameplay resumes.
 
-## 0.0.2 — First release
+### Quest list and tracking
 
-- Full-screen quest journal with search, categories, favorites and quest objectives.
-- Compact HUD tracker with adjustable position, size and visible quest count.
-- Quest tracking with Pip-Boy synchronization.
-- Separate appearance settings for the Journal and mini tracker, including custom colors.
-- Keyboard and controller support, with **Shift + G** and **G** as the default shortcuts.
-- Journal settings and optional MCM support.
-- Darker, more consistent dropdown menus and instant tracker updates when settings change.
+- Keep the last usable quest list when incoming data has the wrong structure. A normal save change still clears and reloads the list.
+- Keep existing tracker settings if an incoming settings message is malformed.
+- Check a quest instance once per update instead of repeating the lookup.
+- Make large lists faster to search and sort, especially when a Misc quest has several entries.
+- Optionally use Fallout 4's Quick Data action (usually J) to open the Journal. This follows your current key mapping and starts off.
 
-Requires Fallout 4 (1.10.163), F4SE, Address Library and PrismaUI for Fallout 4.
+### Other mods and settings
+
+- Hide the mini tracker by default when Phosphor HUD's live HUD is active. **Show Quest Journal tracker with Phosphor HUD** lets you display it anyway; it remembers your choice. The full Journal is unchanged.
+- Move Journal settings into the separately installed K2040 Unified Settings hub. The Journal's **Settings** button opens its page in the hub; it no longer ships its own MCM settings entry.
+- Add four shared Framework frame styles to the full Journal and tracker, without overwriting saved colors.
+- Add the hub's layout editor for the compact tracker. Preview position and size changes, then Save, Abort, or Retry.
+
+### Controls
+
+- Use the D-pad or left stick to move through Journal controls.
+- Follow Fallout 4's mapped Confirm and Back buttons, including Switch Pro/Steam Input where supported, rather than fixed Xbox labels.
+- Stop controller-generated arrow keys from accidentally changing an open category menu.
+
+These changes have source and build checks; **full in-game acceptance is still pending**.
+
+## v0.0.2 — first public release
+
+- Full-screen journal with search, categories, favorites, and quest objectives.
+- Compact tracker with adjustable position, size, and visible quest count.
+- Quest tracking alongside the Pip-Boy.
+- Separate themes and custom colors for Journal and tracker.
+- Default keys: **Shift + G** for the Journal, **G** for the tracker.
+- Journal settings, optional MCM, clearer dropdowns, and immediate tracker updates.
+
+Requires original Fallout 4 **1.10.163**, F4SE, Address Library, and PrismaUI for Fallout 4.

@@ -26,6 +26,10 @@ test('native reader uses the real player quest lock, bounded evidence, no flag w
  assert.match(native,/RE::BSAutoLock guard\{player->questTargetLock\}/);
  assert.match(native,/GenericQuestInstance::kMaxObservations/);
  assert.match(native,/native\.Resolve\(item\.formId,form->currentInstanceID\)/);
+ // The status and the accepted instance identity must use one resolution.
+ const postCapture=native.slice(native.indexOf('for(auto& item:quests) {'),
+                                native.indexOf('return Serialize(quests, true);'));
+ assert.equal((postCapture.match(/native\.Resolve\(/g)||[]).length,1);
  assert.match(native,/nativeInstanceStatus/);
  assert.doesNotMatch(native,/SetActive\(/);
 });

@@ -1,25 +1,41 @@
 # Compatibility
 
-## Game version
+## Fallout 4 versions
 
-Quest Journal supports **Fallout 4 (1.10.163)**, the original PC version. It requires the matching F4SE and Address Library, along with PrismaUI for Fallout 4.
+Quest Journal supports the **original PC version 1.10.163**, with matching F4SE, Address Library, and PrismaUI for Fallout 4.
 
-The next-gen/Anniversary Edition versions and Fallout 4 VR are not supported.
+**Not supported:** next-gen Fallout 4, Anniversary Edition, and Fallout 4 VR.
 
-## Controller menus
+## Tracking quests
 
-The upcoming v0.0.3 development build adds D-pad and left-stick menu navigation. Confirm/Back follow Fallout 4's effective menu bindings rather than Xbox-specific letters, including Switch Pro/Steam Input mappings where provided by the game. The right stick can still move the cursor. An earlier controller flow was confirmed in-game on 5 November 2026; the newly mapped input and live HUD layout V2 integration still require independent game testing. The published v0.0.2 package does not include them.
+The Journal can track supported quests and display quests you have tracked through the Pip-Boy. You can also pin quests to the mini tracker.
 
-## Quest tracking
+Some mod-added or repeatable quests handle objectives differently. Not every tracking action will be available for every quest. The mod does **not** change quest stages or completion. If a particular quest behaves unexpectedly, include the quest and mod name in a bug report.
 
-You can track supported quests in the Journal, just as you would in the Pip-Boy. The mini tracker can also show quests tracked through the Pip-Boy or quests you've pinned yourself.
+Two separate mod-added quests have been confirmed in-game; that does not mean every mod-added or repeatable quest has been tested.
 
-Some repeatable quests and quests from other mods handle objectives differently. In those cases, not every tracking option may be available. Quest Journal does not change quest progress or completion.
+## Controllers
 
-## Other mods
+The unreleased v0.0.3 development build adds D-pad and left-stick menu navigation. Confirm and Back follow Fallout 4's current mappings, including Steam Input mappings where the game provides them, rather than assuming Xbox A and B. The right stick can still move the cursor.
 
-When [Phosphor HUD](https://www.nexusmods.com/fallout4/mods/109983) is running with its live HUD on, Quest Journal hides only its own mini tracker. The full Journal remains available. To show the mini tracker too, turn on **Show Quest Journal tracker with Phosphor HUD** in K2040 Unified Settings V2 under Quest Journal's tracker options. This option is off by default, saves between sessions, and takes effect right away. Quest Journal does not change Phosphor's settings. If both mods show a tracker, you may see two. These changes are in v0.0.3 development and are not part of the published v0.0.2 release.
+An earlier controller flow worked in-game on **5 November 2026**. The newest mapping, Switch Pro behavior, and live layout editor **still need game testing**. They are not in public v0.0.2.
 
-In the VNext QA build, only the shared Unified Settings hub installs a top-level MCM entry, with F3 as its provisional default. Journal/tracker gameplay shortcuts are edited through the hub Controls page and saved by Quest Journal itself. The hub's live layout action is available for a visible mini tracker; it can be moved, resized, saved, aborted or reset to the start-of-session layout without modifying any quest state.
+## Phosphor HUD
 
-If you run into a problem with another mod, [report it on GitHub](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/issues) and include your game and mod versions and a short description of what happened.
+When [Phosphor HUD](https://www.nexusmods.com/fallout4/mods/109983) has its live HUD enabled, Quest Journal can hide its **mini tracker** to avoid showing two quest trackers. The full Journal stays available.
+
+In the development build, enable **Show Quest Journal tracker with Phosphor HUD** under Quest Journal's tracker settings in the shared hub if you want both. This choice is saved and takes effect right away. It does not change Phosphor's own settings.
+
+**Release note:** This compatibility behavior is in unreleased v0.0.3 work, **not** the published v0.0.2 package.
+
+## Unified Settings (development only)
+
+The separate hub provides the one settings shortcut and MCM entry. Quest Journal's gameplay shortcuts are changed on the hub's Controls page but are saved by Quest Journal itself.
+
+If the tracker is visible and initialized, the hub can open a layout editor to move or resize it. Save keeps the new position, Abort returns to the saved one, and Retry returns to the layout from the start of editing. These actions should not affect quests.
+
+The latest combined setup still needs testing with a real controller, save/reload, and missing-hub scenarios. The Journal should not silently replace your settings if the hub cannot be found.
+
+## Report a problem
+
+[Open a GitHub issue](https://github.com/Kamui2040/K2040-FO4-Quest-Journal/issues) with your Fallout 4 version, mod versions, and a short description of what you tried and what happened.
