@@ -79,6 +79,7 @@
 #include <mutex>
 #include "UILifecycleEpoch.h"
 #include <RE/M/MenuCursor.h>
+#include <RE/M/MenuOpenCloseEvent.h>
 #include <RE/B/BSInputEnableManager.h>
 #include <RE/B/BSInputEnableLayer.h>
 #include <RE/O/OtherInputEvents.h>
@@ -142,6 +143,7 @@ namespace {
     bool apiReady = false;
     bool gameLoaded = false;
     bool hotkeysRegistered = false;
+    bool trackerMenuSinkRegistered = false;
     std::atomic_bool padPolling{false};
     // Owner-owned gameplay shortcuts, synchronized from the game thread.
     // No independent MCM registration, MCM UI tasks or global registry IO.
@@ -644,6 +646,16 @@ namespace {
         }
         return false;
     }
+    // These are game menus, not Framework's separate Prisma settings view.
+    // The tracker stays visible for HUD layout editing in the shared hub.
+    bool TrackerMayShowInGameplay() {
+        return gameLoaded && TrackerMayShow() && !CompetingGameMenuOpen();
+    }
+    void UpdateTrackerVisibility() {
+        if(!apiReady || !Valid(trackerView))return;
+        if(TrackerMayShowInGameplay() && trackerDomReady)views.Show(trackerView);
+        else views.Hide(trackerView);
+    }
     bool AnotherPrismaViewFocused() {
         if(!controller.GetFocusedView)return false;
         const auto focused=controller.GetFocusedView();
@@ -809,8 +821,8 @@ namespace {
         // override was enabled while our own tracker remained switched off.
         if(TrackerMayShow() && !trackerView)CreateViews();
         if (!Valid(trackerView)) return;
-        if (TrackerMayShow()) { views.Show(trackerView); SyncSnapshots(); }
-        else views.Hide(trackerView);
+        UpdateTrackerVisibility();
+        if(TrackerMayShow())SyncSnapshots();
         SyncSettings();
     }
     void UpdateQuestFlag(const char* formString, K2040::QuestViewState::Kind kind) {
@@ -1871,8 +1883,7 @@ namespace {
             });
             if (controller.SetViewRole) controller.SetViewRole(view, UI::ViewRole::kWidget);
             trackerDomReady=true;
-            if (TrackerMayShow()) views.Show(view);
-            else views.Hide(view);
+            UpdateTrackerVisibility();
         } else return; // Ignore stale callbacks from destroyed views.
         ShowJournalIfReady();
         SyncSettings();
@@ -2283,6 +2294,38 @@ namespace {
             hotkeysRegistered = true;
         }
     }
+    // Only this mod's passive tracker is hidden during vanilla menu
+    // transitions. HUD suppression and other owners' views are untouched.
+    class TrackerMenuWatch final : public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
+    public:
+        RE::BSEventNotifyControl ProcessEvent(
+            const RE::MenuOpenCloseEvent& event,
+            RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override {
+            const std::string_view menu{event.menuName.c_str()};
+            if(menu!="PipboyMenu" && menu!="PauseMenu" &&
+               menu!="Console" && menu!="DialogueMenu")
+                return RE::BSEventNotifyControl::kContinue;
+            if(event.opening) {
+                // Hide at the event edge; the game may stop regular updates
+                // while this menu is open.
+                if(apiReady && Valid(trackerView))views.Hide(trackerView);
+                if(journalOpen)CloseJournal();
+            } else if(const auto* tasks=F4SE::GetTaskInterface()) {
+                // Query the *post-close* menu stack, including overlapping
+                // menus. A stale callback cannot show a destroyed view.
+                tasks->AddTask([](){UpdateTrackerVisibility();});
+            }
+            return RE::BSEventNotifyControl::kContinue;
+        }
+    };
+    TrackerMenuWatch trackerMenuWatch;
+    void RegisterTrackerMenuWatchOnce() {
+        if(trackerMenuSinkRegistered)return;
+        if(auto* ui=RE::UI::GetSingleton()) {
+            ui->RegisterSink<RE::MenuOpenCloseEvent>(&trackerMenuWatch);
+            trackerMenuSinkRegistered=true;
+        }
+    }
     bool InitializePrismaIfAvailable() {
         // kGameDataReady can precede Prisma provider readiness on some loads.
         // Keep retrying after a new game or completed save load, as the
@@ -2299,6 +2342,7 @@ namespace {
             UI::Discover<UI::ApiFeature::Controller>(UI::ControllerApiVersion, controller);
         }
         RegisterHotkeysOnce();
+        RegisterTrackerMenuWatchOnce();
         RegisterPadPollingOnce();
         return true;
     }
@@ -2562,8 +2606,7 @@ namespace {
         trackerEnabled=K2040::Settings::Current().trackerEnabled;
         if(TrackerMayShow()&&!trackerView)CreateViews();
         if(Valid(trackerView)){
-            if(TrackerMayShow())views.Show(trackerView);
-            else views.Hide(trackerView);
+            UpdateTrackerVisibility();
         }
         SyncSettings();
         return true;
@@ -2585,8 +2628,7 @@ namespace {
         trackerEnabled=K2040::Settings::Current().trackerEnabled;
         if(TrackerMayShow()&&!trackerView)CreateViews();
         if(Valid(trackerView)){
-            if(TrackerMayShow())views.Show(trackerView);
-            else views.Hide(trackerView);
+            UpdateTrackerVisibility();
         }
         SyncSettings();
         return true;

@@ -850,19 +850,6 @@
   box-shadow:0 0 0 2px rgba(102,196,255,.22);
 }
 
-/* Optional VNext visual-frame identity; palette RGB values are supplied by the hub. */
-.k2040-style-fallout4 .journal-shell{border-radius:7px;border-color:var(--edge)}
-.k2040-style-fallout76 .journal-shell{border-radius:3px;border-width:2px}
-.k2040-style-fallout76 .app-header{border-bottom:2px solid var(--gold)}
-.k2040-style-doom-eternal .journal-shell{border-radius:0;border-width:2px}
-.k2040-style-doom-eternal .app-header{text-transform:uppercase;letter-spacing:.055em}
-.k2040-style-fallout3-newvegas .journal-shell{border-radius:0}
-.k2040-style-fallout3-newvegas .app-header{border-bottom:2px double var(--gold)}
-.k2040-style-fallout3-newvegas .mark{border-radius:0}
-.k2040-style-doom-eternal .tracker-panel{border-radius:0;border-width:2px}
-.k2040-style-fallout76 .tracker-panel{border-radius:3px}
-.k2040-style-fallout3-newvegas .tracker-panel{border-radius:0}
-
 /* One journal-owned gameplay control; not another settings renderer. */
 .pipboy-mirror{margin:22px 8px 12px;padding:13px 11px;border:1px solid var(--edge);border-radius:6px;background:rgba(255,255,255,.035)}
 .pipboy-mirror label{display:flex;gap:10px;align-items:center;color:var(--ui-text,var(--text));font-size:.88rem;font-weight:650;cursor:pointer;line-height:1.35}
@@ -1046,5 +1033,137 @@ body.k2040-style-fallout3-newvegas .quest-row.current::before {
 body.k2040-style-fallout3-newvegas .tracked-title,
 body.k2040-style-fallout3-newvegas .tracked-objective,
 body.k2040-style-fallout3-newvegas .quest-row-title {
+  font-family:var(--k2040-frame-font);
+}
+
+
+/* Framework Pip-Boy mirror panels: styling only, never native quest control.
+   All colors follow the active palette. The checkbox stays Journal-owned. */
+body[class*="k2040-style-"] .pipboy-mirror {
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--k2040-frame-radius);
+  background:rgba(var(--ui-panel-rgb,11,18,24),.24);
+  color:var(--ui-text,var(--text));
+}
+body[class*="k2040-style-"] .pipboy-mirror-heading {
+  display:block;
+  margin-bottom:11px;
+  color:var(--ui-accent,var(--blue));
+  font-family:var(--k2040-frame-font);
+  font-size:.69rem;
+  font-weight:800;
+  letter-spacing:.12em;
+  line-height:1.4;
+}
+body[class*="k2040-style-"] .pipboy-mirror label {
+  font-family:var(--k2040-frame-font);
+  color:var(--ui-text,var(--text));
+}
+body[class*="k2040-style-"] .pipboy-mirror p {
+  color:var(--muted);
+}
+body[class*="k2040-style-"] .pipboy-mirror-status:not(:empty) {
+  border-top:1px solid var(--edge);
+  padding-top:7px;
+  margin-top:10px;
+  color:var(--ui-accent,var(--blue));
+}
+body[class*="k2040-style-"] .pipboy-mirror input:focus-visible {
+  outline:2px solid var(--ui-accent,var(--blue));
+  outline-offset:3px;
+}
+
+/* Fallout 4: an equipment-panel rail, squared corners, etched top edge. */
+body.k2040-style-fallout4 .pipboy-mirror {
+  border:2px solid var(--edge);
+  border-left:4px solid var(--ui-accent,var(--blue));
+  border-radius:2px;
+}
+body.k2040-style-fallout4 .pipboy-mirror::before {
+  content:"";
+  display:block;
+  width:62%;
+  height:2px;
+  margin:-13px 0 11px;
+  background:var(--ui-accent,var(--blue));
+}
+body.k2040-style-fallout4 .pipboy-mirror-heading {
+  text-transform:uppercase;
+  font-weight:800;
+}
+
+/* Fallout 76: flat card with an angled selection ribbon, not a rounded box. */
+body.k2040-style-fallout76 .pipboy-mirror {
+  border:1px solid var(--edge);
+  border-bottom:2px solid var(--ui-accent,var(--blue));
+  border-radius:0;
+}
+body.k2040-style-fallout76 .pipboy-mirror::before {
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  width:36px;
+  height:7px;
+  background:var(--ui-accent,var(--blue));
+  clip-path:polygon(7px 0,100% 0,100% 100%,0 100%);
+  pointer-events:none;
+}
+body.k2040-style-fallout76 .pipboy-mirror-heading {
+  text-transform:uppercase;
+  letter-spacing:.16em;
+}
+
+/* DOOM Eternal: combat-interface bracket and strong technical header. */
+body.k2040-style-doom-eternal .pipboy-mirror {
+  border:2px solid var(--ui-accent,var(--blue));
+  border-left-width:5px;
+  border-radius:0;
+}
+body.k2040-style-doom-eternal .pipboy-mirror::before {
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  width:14px;
+  height:14px;
+  background:var(--ui-accent,var(--blue));
+  clip-path:polygon(0 0,100% 0,100% 100%);
+  pointer-events:none;
+}
+body.k2040-style-doom-eternal .pipboy-mirror-heading {
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.18em;
+}
+body.k2040-style-doom-eternal .pipboy-mirror label {
+  font-weight:850;
+}
+
+/* Fallout 3/New Vegas: dashed terminal frame and bracketed feed caption. */
+body.k2040-style-fallout3-newvegas .pipboy-mirror {
+  border:1px dashed var(--ui-accent,var(--blue));
+  border-radius:0;
+  background:repeating-linear-gradient(
+    0deg,
+    rgba(var(--ui-accent-rgb,102,196,255),.045) 0px,
+    rgba(var(--ui-accent-rgb,102,196,255),.045) 1px,
+    transparent 1px,
+    transparent 8px
+  ),rgba(var(--ui-panel-rgb,11,18,24),.24);
+}
+body.k2040-style-fallout3-newvegas .pipboy-mirror-heading {
+  font-family:var(--k2040-frame-font);
+  font-weight:700;
+  letter-spacing:.055em;
+}
+body.k2040-style-fallout3-newvegas .pipboy-mirror-heading::before {
+  content:"[ ";
+}
+body.k2040-style-fallout3-newvegas .pipboy-mirror-heading::after {
+  content:" ]";
+}
+body.k2040-style-fallout3-newvegas .pipboy-mirror label {
   font-family:var(--k2040-frame-font);
 }

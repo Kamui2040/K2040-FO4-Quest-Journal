@@ -33,7 +33,7 @@ function fixture(tracker){
   K2040JournalSettings:Settings,addEventListener(){}};
  vm.runInNewContext(js,{window,document,URLSearchParams,console,
   setTimeout:()=>0,setInterval:()=>0});
- return {window,classes,tokenMap};
+ return {window,classes,tokenMap,node};
 }
 for(const tracker of [false,true]){
  test((tracker?'tracker':'full journal')+' applies one structural theme class after palette snapshots',()=>{
@@ -83,4 +83,40 @@ test('Framework structure follows the visual authority without legacy CSS overri
  assert.match(rules,/body\.k2040-style-fallout3-newvegas \.quest-row\.current::before\s*\{[^}]*content:\s*["']>["']/);
  assert.match(rules,/body\.k2040-style-fallout3-newvegas \.tracker-heading::before\s*\{[^}]*content:/);
  assert.doesNotMatch(rules,/#(?:[0-9a-fA-F]{3,8})\b/);
+});
+
+
+test('Pip-Boy mirror has separate structural framing in all four Framework themes',()=>{
+  const html=fs.readFileSync('view/journal.html','utf8');
+  const mirror=css.split('/* Framework Pip-Boy mirror panels: styling only')[1];
+  assert.ok(mirror,'theme-specific mirror rules must exist');
+  assert.match(html,/<div class="pipboy-mirror" role="group" aria-label="Pip-Boy tracker feed">/);
+  assert.match(html,/<div class="pipboy-mirror-heading" aria-hidden="true">PIP-BOY FEED<\/div>/);
+  assert.match(html,/<input id="pipboySyncToggle" type="checkbox">/);
+  for(const theme of themes){
+    const selector='body.k2040-style-'+theme+' .pipboy-mirror';
+    const start=mirror.indexOf(selector+' {');
+    assert.ok(start>=0,theme+' must frame the Pip-Boy sync area');
+    assert.match(mirror.slice(start,mirror.indexOf('}',start)),/border:/);
+    assert.ok(mirror.includes(selector+'-heading {'),theme+' must style mirror heading');
+  }
+  assert.match(mirror,/body\.k2040-style-fallout76 \.pipboy-mirror::before\s*\{[^}]*clip-path:polygon/);
+  assert.match(mirror,/body\.k2040-style-doom-eternal \.pipboy-mirror::before\s*\{[^}]*clip-path:polygon/);
+  assert.match(mirror,/body\.k2040-style-fallout3-newvegas \.pipboy-mirror-heading::before\s*\{[^}]*content:/);
+  assert.match(mirror,/pipboy-mirror input:focus-visible/);
+  assert.doesNotMatch(mirror, /#[0-9a-fA-F]{3,8}\b/,'frames must use palette variables');
+});
+
+test('changing Framework theme never changes the Journal-only Pip-Boy mirror checkbox',()=>{
+  const {window,classes,node}=fixture(false);
+  const box=node('pipboySyncToggle');
+  window.receiveJournalSettings({trackerSyncPipboy:true});
+  assert.equal(box.checked,true);
+  for(const theme of themes){
+    window.applyUnifiedAppearance({schema:1,theme,palette:'hot-omni',colors});
+    assert.equal(classes.has('k2040-style-'+theme),true);
+    assert.equal(box.checked,true,theme+' must leave Pip-Boy sync enabled');
+  }
+  window.applyUnifiedAppearance('native');
+  assert.equal(box.checked,true,'missing hub must not reset Pip-Boy mirror setting');
 });

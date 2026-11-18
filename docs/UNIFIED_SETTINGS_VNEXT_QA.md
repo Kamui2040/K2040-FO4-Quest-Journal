@@ -26,10 +26,10 @@ The hub supports dragging, keyboard/controller nudging, wheel changes of 1%, and
 Build with `scripts/build-normal-tracking.sh` after passing `scripts/verify-source.sh`, then stage Quest Journal **without** the hub:
 
 ```bash
-python3 scripts/stage-test-package.py   --mcm-mode none   --output "$HOME/Downloads/testing/K2040-Quest-Journal-OG163-ModOnly-QA.zip"
+python3 scripts/stage-test-package.py   --mcm-mode none   --output "$HOME/Downloads/testing/K2040-Quest-Journal-v0.0.4.zip"
 ```
 
-Keep **only the latest validated Quest Journal QA package** directly in `~/Downloads/testing/`. No nested directories. The packaging script refuses an existing output path; remove or relocate a superseded package only after checking the replacement.
+Keep **only the latest validated Quest Journal QA package** directly in `~/Downloads/testing/`. No nested directories. Name each package `K2040-Quest-Journal-vX.Y.Z.zip` and increment its version whenever the contents change. Record the development revision and test status in private QA notes, not the filename. The current `v0.0.4` is not a public release. The packaging script refuses an existing output path; remove or relocate a superseded package only after checking the replacement.
 
 The ZIP contains the Journal DLL, its provider at `Data/K2040/Settings/Providers/quest-journal.json`, PrismaUI views, and licensing files. It does **not** include `K2040_Unified_Settings.dll`, hub UI, hub MCM, or user settings. Install the compatible hub separately. The script does not deploy into the game.
 

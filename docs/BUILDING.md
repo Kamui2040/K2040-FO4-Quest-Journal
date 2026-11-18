@@ -44,12 +44,12 @@ export K2040_LLVM_TOOL_DIR="/path/to/your/native-llvm-tools"
 
 bash scripts/verify-source.sh
 bash scripts/build-normal-tracking.sh
-python3 scripts/stage-test-package.py   --output "$HOME/Downloads/testing/K2040-Quest-Journal-OG163-ModOnly-QA.zip"   --mcm-mode none
+python3 scripts/stage-test-package.py   --output "$HOME/Downloads/testing/K2040-Quest-Journal-v0.0.4.zip"   --mcm-mode none
 ```
 
 `build-normal-tracking.sh` makes the gameplay tracking build. An unflagged `build-linux.sh` makes a read-only fallback; do not confuse the two.
 
-The build verifies pinned revisions, the PrismaUI header checksum, Windows DLL/F4SE exports, and tracking markers. Compiled files go to `dist/Data`. The packaging script puts the mod, license, credits, and installation instructions in a ZIP. **It does not install the mod.** Keep only the newest validated Quest Journal package directly under `~/Downloads/testing/`, without nested folders.
+The build verifies pinned revisions, the PrismaUI header checksum, Windows DLL/F4SE exports, and tracking markers. Compiled files go to `dist/Data`. The packaging script puts the mod, license, credits, and installation instructions in a ZIP. **It does not install the mod.** Keep only the newest validated Quest Journal package directly under `~/Downloads/testing/`, without nested folders. Use `K2040-Quest-Journal-vX.Y.Z.zip` for each package. Increase the version when contents change. The current `v0.0.4` is **development QA**, not a public release; the published version is still `v0.0.2`.
 
 For development testing, keep the Journal ZIP separate from the compatible **Unified Settings Hub** package. The Journal ZIP contains its DLL, provider, and PrismaUI files, but **not** `K2040_Unified_Settings.dll`, hub UI, hub MCM, or user preferences. The Journal has no separate MCM settings page in this branch.
 

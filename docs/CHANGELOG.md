@@ -2,6 +2,9 @@
 
 ## v0.0.3 — in development, not released
 
+- Give the Journal-only Pip-Boy tracker sync panel its own frame in each Framework theme, without changing quest tracking or saved settings.
+- Hide only Quest Journal’s mini tracker during blocking Pip-Boy, Pause, Console and Dialogue menus; restore its previous visibility when gameplay resumes.
+
 ### Quest list and tracking
 
 - Keep the last usable quest list when incoming data has the wrong structure. A normal save change still clears and reloads the list.

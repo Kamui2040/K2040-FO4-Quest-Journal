@@ -36,3 +36,36 @@ No new user INI, graphics archive, Quest Journal MCM entry, or Framework DLL is 
 - Change saves and reload to make sure the tracker and selected appearance recover correctly.
 
 JavaScript/Python tests and source review alone do **not** complete this checklist.
+
+
+## Pip-Boy sync panel (18 November 2026)
+
+The Journal's **Pip-Boy feed** control now has a separate frame style for
+each of the four Framework themes. It uses the same palette variables as
+the rest of the Journal. Fallout 4 uses an equipment rail, Fallout 76 a
+flat card with a clipped ribbon, DOOM Eternal a heavier bracket, and
+Fallout 3/New Vegas a dashed terminal frame.
+
+The title and border are presentation only. The checkbox still reads and
+writes the Journal's existing `trackerSyncPipboy` preference. Styling
+must not change actual Pip-Boy quest tracking, saved pins, or the tracker's
+data. Keyboard focus remains visible inside every frame.
+
+The separate Framework hub owns grid controls, dragging, keyboard sizing,
+and its confirmation dialogs. Quest Journal keeps the existing V2 layout
+adapter for its compact tracker. **Retry** restores the saved geometry,
+**Abort** cancels a draft, and **Save** writes only Journal geometry.
+HUD-only factory reset and named-profile exports are **not** reused here.
+
+The native tracker now listens for the four blocking vanilla menus:
+Pip-Boy, Pause, Console, and Dialogue. It immediately hides only its own
+tracker on opening and checks the current menu state before restoring it
+after closing. Settings changes and view readiness also use this guard.
+The Journal releases its own focus on those transitions. This does not
+change vanilla HUD suppression, Framework editing, saved tracker visibility,
+Phosphor coexistence, or another mod's view.
+
+Source checks cover all four panel treatments, palette-independent styling,
+the checkbox across theme changes, menu guards and owner-only visibility.
+Actual appearance, visibility alongside the new HUD, Pip-Boy transitions,
+layout controls, and focus still require a Fallout 4 OG163 in-game check.
